@@ -159,5 +159,37 @@ export const getCurrentUser = (): User => ({
   rating: 4.8,
   reviews: 152,
   interests: ['Administração', 'Networking', 'Esportes', 'Estudos'],
-  badges: BADGES
+  badges: [
+    { name: 'Organizadora de Primeira', icon: 'Award', color: 'text-amber-500' },
+    { name: 'Exploradora', icon: 'Target', color: 'text-emerald-500' },
+    { name: 'Popular', icon: 'Users', color: 'text-sky-500' },
+    { name: 'Super Ativa', icon: 'Zap', color: 'text-purple-500' }
+  ],
+  eventsRegistered: [EVENTS[0], EVENTS[2], EVENTS[5]],
+  eventsAttended: [EVENTS[1], EVENTS[3]],
+  posts: [
+    {
+      id: '1',
+      content: 'Que evento incrível foi o Festival de Música! Conheci pessoas maravilhosas e me diverti muito. Já estou ansiosa pelo próximo! 🎵',
+      imageUrl: 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+      createdAt: '2025-06-10',
+      likes: 24,
+      comments: 8
+    },
+    {
+      id: '2',
+      content: 'Começando minha jornada no empreendedorismo! A aula de hoje foi muito inspiradora. Quem mais está no mundo dos negócios aqui? 💼',
+      createdAt: '2025-06-08',
+      likes: 18,
+      comments: 12
+    }
+  ],
+  stories: [
+    {
+      id: '1',
+      imageUrl: 'https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg',
+      createdAt: '2025-06-15T10:00:00Z',
+      expiresAt: '2025-06-16T10:00:00Z'
+    }
+  ]
 });

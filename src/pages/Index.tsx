@@ -4,13 +4,15 @@ import { Header } from '@/components/Header';
 import { Navigation } from '@/components/Navigation';
 import { HomePage } from '@/components/HomePage';
 import { EventDetails } from '@/components/EventDetails';
-import { EVENTS, USERS } from '@/data/mockData';
-import { Event } from '@/types';
+import { ProfilePage } from '@/components/ProfilePage';
+import { EVENTS, USERS, getCurrentUser } from '@/data/mockData';
+import { Event, User } from '@/types';
 
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [currentUser, setCurrentUser] = useState<User>(getCurrentUser());
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
@@ -58,10 +60,10 @@ const Index = () => {
                 </div>
               )}
               {activeTab === 'profile' && (
-                <div className="p-4 text-center text-gray-500">
-                  <h2 className="text-xl font-semibold mb-2">Perfil</h2>
-                  <p>Funcionalidade em desenvolvimento</p>
-                </div>
+                <ProfilePage 
+                  user={currentUser} 
+                  onUserUpdate={setCurrentUser}
+                />
               )}
               {activeTab === 'create' && (
                 <div className="p-4 text-center text-gray-500">

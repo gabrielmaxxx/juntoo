@@ -27,6 +27,26 @@ export interface User {
   location?: string;
   interests?: string[];
   badges?: Badge[];
+  eventsAttended?: Event[];
+  eventsRegistered?: Event[];
+  posts?: UserPost[];
+  stories?: Story[];
+}
+
+export interface UserPost {
+  id: string;
+  content: string;
+  imageUrl?: string;
+  createdAt: string;
+  likes: number;
+  comments: number;
+}
+
+export interface Story {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
+  expiresAt: string;
 }
 
 export interface Badge {
