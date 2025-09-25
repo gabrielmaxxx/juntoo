@@ -5,6 +5,7 @@ import { Navigation } from '@/components/Navigation';
 import { HomePage } from '@/components/HomePage';
 import { EventDetails } from '@/components/EventDetails';
 import { ProfilePage } from '@/components/ProfilePage';
+import { ActivitiesPage } from '@/components/ActivitiesPage';
 import { EVENTS, USERS, getCurrentUser } from '@/data/mockData';
 import { Event, User } from '@/types';
 
@@ -54,10 +55,11 @@ const Index = () => {
                 </div>
               )}
               {activeTab === 'activities' && (
-                <div className="p-4 text-center text-gray-500">
-                  <h2 className="text-xl font-semibold mb-2">Minhas Atividades</h2>
-                  <p>Funcionalidade em desenvolvimento</p>
-                </div>
+                <ActivitiesPage 
+                  events={EVENTS} 
+                  currentUser={currentUser}
+                  onEventClick={handleEventClick}
+                />
               )}
               {activeTab === 'profile' && (
                 <ProfilePage 
