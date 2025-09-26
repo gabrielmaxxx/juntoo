@@ -14,13 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_participants: {
+        Row: {
+          event_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          date: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_private: boolean | null
+          location: string
+          max_participants: number | null
+          price: number | null
+          private_code: string | null
+          time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          date: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_private?: boolean | null
+          location: string
+          max_participants?: number | null
+          price?: number | null
+          private_code?: string | null
+          time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_private?: boolean | null
+          location?: string
+          max_participants?: number | null
+          price?: number | null
+          private_code?: string | null
+          time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_private_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
