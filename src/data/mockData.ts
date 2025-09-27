@@ -88,6 +88,7 @@ export const USERS: User[] = [
   {
     id: '1',
     name: 'Lucas',
+    email: 'lucas@example.com',
     avatarUrl: 'https://images.pexels.com/photos/3772510/pexels-photo-3772510.jpeg',
     bio: 'Apaixonado por esportes e sempre disposto a conhecer pessoas novas!',
     rating: 4.9,
@@ -96,6 +97,7 @@ export const USERS: User[] = [
   {
     id: '2',
     name: 'Juliana',
+    email: 'juliana@example.com',
     avatarUrl: 'https://images.pexels.com/photos/3775164/pexels-photo-3775164.jpeg',
     bio: 'Bookworm e coffee lover ☕📚',
     rating: 4.8,
@@ -104,6 +106,7 @@ export const USERS: User[] = [
   {
     id: '3',
     name: 'Rafael',
+    email: 'rafael@example.com',
     avatarUrl: 'https://images.pexels.com/photos/5378700/pexels-photo-5378700.jpeg',
     bio: 'Música, arte e boas conversas são minhas paixões',
     rating: 4.7,
@@ -112,6 +115,7 @@ export const USERS: User[] = [
   {
     id: '4',
     name: 'Mariana',
+    email: 'mariana@example.com',
     avatarUrl: 'https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg',
     bio: 'Desenvolvedora front-end e eterna estudante',
     rating: 4.9,
@@ -120,6 +124,7 @@ export const USERS: User[] = [
   {
     id: '5',
     name: 'Gabriel',
+    email: 'gabriel@example.com',
     avatarUrl: 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg',
     bio: 'Empreendedor em formação, sempre em busca de networking',
     rating: 4.6,
@@ -128,6 +133,7 @@ export const USERS: User[] = [
   {
     id: '6',
     name: 'Beatriz',
+    email: 'beatriz@example.com',
     avatarUrl: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
     bio: 'Arte e cultura são minha vida!',
     rating: 4.8,
@@ -153,6 +159,7 @@ export const BADGES: Badge[] = [
 export const getCurrentUser = (): User => ({
   id: 'current',
   name: 'Anne Silva',
+  email: 'anne@example.com',
   avatarUrl: '/src/assets/avatar-anne.jpg',
   location: 'Rio de Janeiro, RJ',
   bio: 'Estudante de administração, apaixonada por networking e novos desafios!',

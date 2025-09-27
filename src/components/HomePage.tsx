@@ -9,10 +9,13 @@ interface HomePageProps {
   events: Event[];
   users: User[];
   onEventClick: (event: Event) => void;
+  currentUser?: {
+    name: string;
+  };
 }
 
-export const HomePage = ({ events, users, onEventClick }: HomePageProps) => {
-  const currentUser = getCurrentUser();
+export const HomePage = ({ events, users, onEventClick, currentUser }: HomePageProps) => {
+  const userName = currentUser?.name || 'Usuário';
   const trendingEvents = events.filter(event => event.isTrending);
   const featuredEvents = events.filter(event => event.isFeatured);
   const friendsEvents = events.filter(event => event.friendsGoing && event.friendsGoing.length > 0);
@@ -24,7 +27,7 @@ export const HomePage = ({ events, users, onEventClick }: HomePageProps) => {
       <div className="px-4 pt-6">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-800 font-poppins">
-            Olá, {currentUser.name.split(' ')[0]}
+            Olá, {userName.split(' ')[0]}
           </h2>
           <p className="text-gray-600 leading-relaxed -mt-1">
             O que vamos fazer hoje?

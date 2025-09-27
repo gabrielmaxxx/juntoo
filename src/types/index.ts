@@ -20,6 +20,7 @@ export interface Event {
 export interface User {
   id: string;
   name: string;
+  email: string;
   avatarUrl: string;
   bio?: string;
   rating?: number;
@@ -31,6 +32,8 @@ export interface User {
   eventsRegistered?: Event[];
   posts?: UserPost[];
   stories?: Story[];
+  registeredEvents?: Event[];
+  attendedEvents?: Event[];
 }
 
 export interface UserPost {

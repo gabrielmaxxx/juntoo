@@ -25,12 +25,22 @@ export const ActivityDetails = ({ event, onBack, currentUser }: ActivityDetailsP
     return `${eventDate.toLocaleDateString('pt-BR', options)} às ${time}`;
   };
 
-  const getAttendeeUsers = () => {
+  const getAttendeeUsers = (): User[] => {
     return event.attendees.map(name => 
       USERS.find(user => user.name === name) || {
         id: name,
         name,
-        avatarUrl: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg'
+        email: `${name.toLowerCase()}@example.com`,
+        avatarUrl: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg',
+        bio: `Usuário ${name}`,
+        rating: 4.5,
+        reviews: 0,
+        location: 'Local não informado',
+        interests: [],
+        badges: [],
+        posts: [],
+        registeredEvents: [],
+        attendedEvents: []
       }
     );
   };
