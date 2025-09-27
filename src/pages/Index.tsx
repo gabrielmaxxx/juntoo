@@ -7,6 +7,7 @@ import { EventDetails } from '@/components/EventDetails';
 import { ProfilePage } from '@/components/ProfilePage';
 import { ActivitiesPage } from '@/components/ActivitiesPage';
 import { CreateEventPage } from '@/components/CreateEventPage';
+import { SearchPage } from '@/components/SearchPage';
 import { EVENTS, USERS, getCurrentUser } from '@/data/mockData';
 import { Event, User } from '@/types';
 
@@ -50,10 +51,7 @@ const Index = () => {
                 />
               )}
               {activeTab === 'search' && (
-                <div className="p-4 text-center text-gray-500">
-                  <h2 className="text-xl font-semibold mb-2">Busca</h2>
-                  <p>Funcionalidade em desenvolvimento</p>
-                </div>
+                <SearchPage onEventClick={handleEventClick} />
               )}
               {activeTab === 'activities' && (
                 <ActivitiesPage 
