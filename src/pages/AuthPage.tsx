@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 
 const INTEREST_OPTIONS = [
   'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Viagem',
@@ -20,6 +22,7 @@ export const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [selectedState, setSelectedState] = useState('');
   const [city, setCity] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -75,7 +78,7 @@ export const AuthPage = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !city || selectedInterests.length === 0) {
+    if (!fullName || !selectedState || !city || selectedInterests.length === 0) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -86,15 +89,16 @@ export const AuthPage = () => {
 
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
+      // Sign up without email confirmation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
-            full_name: fullName
+            full_name: fullName,
+            city: `${city}, ${selectedState}`,
+            interests: selectedInterests
           }
         }
       });
@@ -105,28 +109,47 @@ export const AuthPage = () => {
         let avatarUrl = null;
         
         if (avatarFile) {
-          avatarUrl = await uploadAvatar(data.user.id, avatarFile);
+          try {
+            avatarUrl = await uploadAvatar(data.user.id, avatarFile);
+          } catch (avatarError) {
+            console.error('Avatar upload error:', avatarError);
+          }
         }
 
+        // Use insert instead of update since the profile might not exist yet
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({
+          .insert({
+            user_id: data.user.id,
             full_name: fullName,
-            city,
+            city: `${city}, ${selectedState}`,
             interests: selectedInterests,
             avatar_url: avatarUrl
-          })
-          .eq('user_id', data.user.id);
+          });
 
         if (profileError) {
-          console.error('Profile update error:', profileError);
+          console.error('Profile creation error:', profileError);
+          // If insert fails, try update
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              full_name: fullName,
+              city: `${city}, ${selectedState}`,
+              interests: selectedInterests,
+              avatar_url: avatarUrl
+            })
+            .eq('user_id', data.user.id);
+            
+          if (updateError) {
+            console.error('Profile update error:', updateError);
+          }
         }
-      }
 
-      toast({
-        title: "Conta criada!",
-        description: "Verifique seu email para confirmar a conta.",
-      });
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Você já pode usar o aplicativo.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -272,13 +295,38 @@ export const AuthPage = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="state">Estado *</Label>
+                  <Select value={selectedState} onValueChange={(value) => {
+                    setSelectedState(value);
+                    setCity(''); // Reset city when state changes
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione seu estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BRAZIL_STATES.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="city">Cidade *</Label>
-                  <Input
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    required
-                  />
+                  <Select value={city} onValueChange={setCity} disabled={!selectedState}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedState ? "Selecione sua cidade" : "Primeiro selecione o estado"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedState && BRAZIL_STATES_AND_CITIES[selectedState as keyof typeof BRAZIL_STATES_AND_CITIES]?.map((cityName) => (
+                        <SelectItem key={cityName} value={cityName}>
+                          {cityName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
