@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Event } from '@/types';
-import { Calendar, MapPin, Tag, Users, Share2, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Tag, Users, Share2, ArrowLeft, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { USERS } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { UserAvatar } from './UserAvatar';
 
 interface EventDetailsProps {
@@ -10,6 +13,104 @@ interface EventDetailsProps {
 }
 
 export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isParticipating, setIsParticipating] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [participants, setParticipants] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      checkParticipation();
+      fetchParticipants();
+    }
+  }, [user, event.id]);
+
+  const checkParticipation = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('event_participants')
+        .select('*')
+        .eq('event_id', event.id)
+        .eq('user_id', user.id)
+        .single();
+
+      setIsParticipating(!!data);
+    } catch (error) {
+      // Error expected if not participating
+      setIsParticipating(false);
+    }
+  };
+
+  const fetchParticipants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('event_participants')
+        .select(`
+          user_id,
+          profiles:user_id(full_name, avatar_url)
+        `)
+        .eq('event_id', event.id);
+
+      if (error) throw error;
+      setParticipants(data || []);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+    }
+  };
+
+  const handleParticipate = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      if (isParticipating) {
+        // Leave event
+        const { error } = await supabase
+          .from('event_participants')
+          .delete()
+          .eq('event_id', event.id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        setIsParticipating(false);
+        toast({
+          title: "Você saiu do evento",
+          description: "Sua participação foi cancelada.",
+        });
+      } else {
+        // Join event
+        const { error } = await supabase
+          .from('event_participants')
+          .insert({
+            event_id: event.id,
+            user_id: user.id
+          });
+
+        if (error) throw error;
+
+        setIsParticipating(true);
+        toast({
+          title: "Parabéns!",
+          description: "Você confirmou sua participação no evento.",
+        });
+      }
+      
+      fetchParticipants();
+    } catch (error) {
+      console.error('Error with participation:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível processar sua solicitação. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const formatDateTime = (date: string, time: string) => {
     const eventDate = new Date(`${date}T${time}`);
     return eventDate.toLocaleDateString('pt-BR', { 
@@ -21,13 +122,6 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
     });
   };
 
-  const getAttendeeUsers = () => {
-    return event.attendees
-      .map(name => USERS.find(user => user.name === name))
-      .filter(Boolean) as any[];
-  };
-
-  const attendeeUsers = getAttendeeUsers();
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -99,49 +193,64 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           <p className="text-gray-700 leading-relaxed">{event.description}</p>
         </div>
 
-        {/* Attendees */}
-        {attendeeUsers.length > 0 && (
+        {/* Participants */}
+        {participants.length > 0 && (
           <div>
             <h3 className="font-semibold text-gray-800 mb-3">
-              Quem vai? ({attendeeUsers.length})
+              Participantes ({participants.length})
             </h3>
             <div className="flex items-center -space-x-2">
-              {attendeeUsers.slice(0, 5).map((user, index) => (
-                <div key={user.id} className="relative" style={{ zIndex: 5 - index }}>
-                  <UserAvatar user={user} size="md" />
+              {participants.slice(0, 5).map((participant, index) => (
+                <div key={participant.user_id} className="relative" style={{ zIndex: 5 - index }}>
+                  <div className="w-12 h-12 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
+                    {participant.profiles?.avatar_url ? (
+                      <img 
+                        src={participant.profiles.avatar_url} 
+                        alt={participant.profiles.full_name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium text-gray-600">
+                        {participant.profiles?.full_name?.charAt(0) || 'U'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
-              {attendeeUsers.length > 5 && (
-                <div className="w-16 h-16 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-sm font-medium text-gray-600">
-                  +{attendeeUsers.length - 5}
+              {participants.length > 5 && (
+                <div className="w-12 h-12 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-sm font-medium text-gray-600">
+                  +{participants.length - 5}
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Comments Preview */}
-        <div>
-          <h3 className="font-semibold text-gray-800 mb-3">Comentários</h3>
-          <div className="space-y-3">
-            <div className="flex items-start space-x-3">
-              <UserAvatar user={USERS[0]} size="sm" />
-              <div className="flex-1">
-                <div className="bg-gray-100 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium">{USERS[0].name}:</span> Alguma sugestão de onde estacionar?
-                  </p>
-                </div>
+        {/* Chat Section */}
+        {isParticipating && (
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-3">Chat do Evento</h3>
+            <div className="space-y-3">
+              <div className="bg-gray-50 p-4 rounded-lg text-center">
+                <MessageCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm text-gray-600">
+                  O chat ficará disponível quando mais participantes se juntarem
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Action Button */}
       <div className="p-4 bg-white border-t border-gray-200">
-        <Button variant="hero" className="w-full">
-          Participar
+        <Button 
+          variant={isParticipating ? "outline" : "hero"} 
+          className="w-full" 
+          onClick={handleParticipate}
+          disabled={loading}
+        >
+          {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
         </Button>
       </div>
     </div>

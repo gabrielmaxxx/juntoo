@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Lock, Share2, Copy } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Lock, Share2, Copy, Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,6 +30,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     isPrivate: false,
     imageUrl: ''
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const categories = [
     'Esportes',
@@ -49,6 +51,67 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "Por favor, selecione uma imagem menor que 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setUploadingImage(true);
+
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `event-covers/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, imageUrl: data.publicUrl }));
+      
+      toast({
+        title: "Imagem carregada!",
+        description: "A foto de capa foi carregada com sucesso.",
+      });
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível carregar a imagem. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    setSelectedFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -304,14 +367,45 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">URL da Imagem</Label>
-                <Input
-                  id="imageUrl"
-                  type="url"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                />
+                <Label>Foto de Capa do Evento</Label>
+                
+                {formData.imageUrl ? (
+                  <div className="relative">
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Preview" 
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      className="absolute top-2 right-2 h-8 w-8"
+                      onClick={removeImage}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Adicione uma foto de capa para seu evento
+                    </p>
+                    <Label htmlFor="imageUpload" className="cursor-pointer">
+                      <Button type="button" variant="outline" disabled={uploadingImage}>
+                        {uploadingImage ? 'Carregando...' : 'Selecionar Foto'}
+                      </Button>
+                    </Label>
+                    <Input
+                      id="imageUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

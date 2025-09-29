@@ -1,25 +1,83 @@
+import { useState, useEffect } from 'react';
 import { Event, User } from '@/types';
 import { EventCard } from './EventCard';
 import { UserAvatar } from './UserAvatar';
-import { getCurrentUser } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, TrendingUp } from 'lucide-react';
 import heroImage from '@/assets/hero-image.jpg';
 
 interface HomePageProps {
-  events: Event[];
-  users: User[];
   onEventClick: (event: Event) => void;
   currentUser?: {
     name: string;
   };
 }
 
-export const HomePage = ({ events, users, onEventClick, currentUser }: HomePageProps) => {
+export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
+  const { profile } = useAuth();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const userName = currentUser?.name || 'Usuário';
-  const trendingEvents = events.filter(event => event.isTrending);
-  const featuredEvents = events.filter(event => event.isFeatured);
-  const friendsEvents = events.filter(event => event.friendsGoing && event.friendsGoing.length > 0);
-  const recommendedEvents = events.filter(event => !event.isTrending && !event.isFeatured);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          profiles:created_by(full_name, avatar_url)
+        `)
+        .eq('is_private', false)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Convert database events to our Event type
+      const formattedEvents: Event[] = data?.map(event => ({
+        id: event.id,
+        title: event.title,
+        category: event.category,
+        location: event.location,
+        date: event.date,
+        time: event.time,
+        price: event.price ? `R$ ${event.price}` : 'Gratuito',
+        description: event.description || '',
+        imageUrl: event.image_url || '/placeholder.svg',
+        createdBy: event.created_by,
+        attendees: [],
+        isTrending: false,
+        isFeatured: false
+      })) || [];
+
+      // Filter recommended events based on user interests
+      const recommendedEvents = formattedEvents.filter(event => {
+        if (!profile?.interests) return true;
+        return profile.interests.some(interest => 
+          event.category.toLowerCase().includes(interest.toLowerCase()) ||
+          event.title.toLowerCase().includes(interest.toLowerCase())
+        );
+      });
+
+      setEvents(recommendedEvents);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [profile]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-20">
@@ -54,93 +112,32 @@ export const HomePage = ({ events, users, onEventClick, currentUser }: HomePageP
         </div>
       </div>
 
-      {/* Stories Section */}
-      <div className="px-4">
-        <h3 className="text-md font-semibold text-gray-800 mb-3">Perfis em Destaque</h3>
-        <div className="flex space-x-4 overflow-x-auto hide-scrollbar">
-          {users.slice(0, 6).map((user) => (
-            <UserAvatar 
-              key={user.id} 
-              user={user} 
-              showStory 
-              size="md"
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Featured Events Banner */}
-      {featuredEvents.length > 0 && (
-        <div>
-          <div className="flex space-x-4 overflow-x-auto hide-scrollbar pl-4">
-            {featuredEvents.map((event) => (
-              <EventCard 
-                key={event.id} 
-                event={event} 
-                variant="featured"
-                onEventClick={onEventClick}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Trending Events */}
-      {trendingEvents.length > 0 && (
-        <div className="px-4">
-          <div className="flex items-center mb-3">
-            <TrendingUp className="w-5 h-5 text-red-500 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-800">Eventos em Alta</h3>
-          </div>
-          <div className="space-y-3">
-            {trendingEvents.map((event) => (
-              <EventCard 
-                key={event.id} 
-                event={event} 
-                variant="compact"
-                onEventClick={onEventClick}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Friends Going */}
-      {friendsEvents.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 my-3 px-4">Seus amigos vão</h3>
-          <div className="flex space-x-4 overflow-x-auto hide-scrollbar px-4">
-            {friendsEvents.map((event) => (
-              <div key={event.id} className="flex-shrink-0 w-72">
-                <EventCard 
-                  event={event} 
-                  variant="compact"
-                  onEventClick={onEventClick}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Recommended Events */}
       <div className="px-4">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-semibold text-gray-800">Recomendado para si</h3>
+          <h3 className="text-lg font-semibold text-gray-800">Eventos para você</h3>
           <div className="flex items-center">
             <Sparkles className="w-4 h-4 text-primary mr-1" />
             <p className="text-xs text-gray-500">Com base nos seus interesses</p>
           </div>
         </div>
-        <div className="space-y-4">
-          {recommendedEvents.slice(0, 3).map((event) => (
-            <EventCard 
-              key={event.id} 
-              event={event}
-              onEventClick={onEventClick}
-            />
-          ))}
-        </div>
+        {events.length > 0 ? (
+          <div className="space-y-4">
+            {events.map((event) => (
+              <EventCard 
+                key={event.id} 
+                event={event}
+                onEventClick={onEventClick}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Sparkles className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-lg font-medium mb-2">Nenhum evento ainda</p>
+            <p className="text-sm">Seja o primeiro a criar um evento incrível!</p>
+          </div>
+        )}
       </div>
     </div>
   );

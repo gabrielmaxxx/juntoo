@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Star, 
   Calendar, 
@@ -22,7 +25,8 @@ import {
   Trophy,
   Target,
   Users,
-  Zap
+  Zap,
+  Upload
 } from 'lucide-react';
 
 interface ProfilePageProps {
@@ -31,9 +35,12 @@ interface ProfilePageProps {
 }
 
 export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
+  const { updateProfile } = useAuth();
+  const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
   const [activeTab, setActiveTab] = useState('posts');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -46,9 +53,88 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     ));
   };
 
-  const handleSaveProfile = () => {
-    onUserUpdate?.(editedUser);
-    setIsEditingProfile(false);
+  const handleSaveProfile = async () => {
+    try {
+      await updateProfile({
+        full_name: editedUser.name,
+        city: editedUser.location || null,
+        interests: editedUser.interests || null,
+        avatar_url: editedUser.avatarUrl || null
+      });
+      
+      onUserUpdate?.(editedUser);
+      setIsEditingProfile(false);
+      
+      toast({
+        title: "Perfil atualizado!",
+        description: "Suas informações foram salvas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível atualizar seu perfil. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "Por favor, selecione uma imagem menor que 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !authUser) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${authUser.id}-avatar.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      await updateProfile({ avatar_url: data.publicUrl });
+      
+      setEditedUser(prev => ({ ...prev, avatarUrl: data.publicUrl }));
+      
+      toast({
+        title: "Avatar atualizado!",
+        description: "Sua foto de perfil foi atualizada com sucesso.",
+      });
+      
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível carregar a imagem. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const badgeIcons = {
@@ -64,9 +150,31 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
       {/* Stories Section */}
       <div className="bg-white p-4 border-b border-gray-100">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" className="h-16 w-16 rounded-full p-0">
-            <Camera className="w-6 h-6 text-gray-500" />
-          </Button>
+          <div className="relative">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={user.avatarUrl} alt={user.name} />
+              <AvatarFallback className="bg-primary/10 text-primary font-medium text-lg">
+                {user.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <Label htmlFor="avatarUpload" className="absolute -bottom-1 -right-1 cursor-pointer">
+              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors">
+                {uploadingAvatar ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </div>
+            </Label>
+            <Input
+              id="avatarUpload"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+              disabled={uploadingAvatar}
+            />
+          </div>
           {user.stories?.filter(story => new Date(story.expiresAt) > new Date()).map((story) => (
             <div key={story.id} className="story-ring rounded-full">
               <img

@@ -64,8 +64,6 @@ const Index = () => {
             <main className="overflow-y-auto">
               {activeTab === 'home' && (
                 <HomePage 
-                  events={EVENTS} 
-                  users={USERS} 
                   onEventClick={handleEventClick}
                   currentUser={{ name: profile?.full_name || 'Usuário' }}
                 />
@@ -80,7 +78,7 @@ const Index = () => {
                     id: user.id,
                     name: profile?.full_name || 'Usuário',
                     email: user.email || '',
-                    avatarUrl: profile?.avatar_url || '/src/assets/avatar-anne.jpg',
+                    avatarUrl: profile?.avatar_url || '',
                     bio: '',
                     location: profile?.city || '',
                     rating: 4.8,
@@ -99,7 +97,7 @@ const Index = () => {
                     id: user.id,
                     name: profile?.full_name || 'Usuário',
                     email: user.email || '',
-                    avatarUrl: profile?.avatar_url || '/src/assets/avatar-anne.jpg',
+                    avatarUrl: profile?.avatar_url || '',
                     bio: '',
                     location: profile?.city || '',
                     rating: 4.8,
