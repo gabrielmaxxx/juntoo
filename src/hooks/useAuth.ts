@@ -32,7 +32,31 @@ export const useAuth = () => {
         return;
       }
 
-      setProfile(data);
+      if (data) {
+        setProfile(data);
+      } else {
+        // Se não há perfil, criar um básico
+        const { data: user } = await supabase.auth.getUser();
+        if (user.user) {
+          const basicProfile = {
+            user_id: userId,
+            full_name: user.user.email?.split('@')[0] || 'Usuário',
+            city: null,
+            interests: null,
+            avatar_url: null
+          };
+          
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert(basicProfile)
+            .select()
+            .single();
+
+          if (!insertError && newProfile) {
+            setProfile(newProfile);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }

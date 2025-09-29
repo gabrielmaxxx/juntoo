@@ -89,7 +89,7 @@ export const AuthPage = () => {
 
     setLoading(true);
     try {
-      // Sign up without email confirmation
+      // Sign up with email confirmation redirect
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -105,7 +105,8 @@ export const AuthPage = () => {
 
       if (error) throw error;
 
-      if (data.user) {
+      // If user is immediately confirmed (email confirmation disabled)
+      if (data.user && data.session) {
         let avatarUrl = null;
         
         if (avatarFile) {
@@ -116,10 +117,10 @@ export const AuthPage = () => {
           }
         }
 
-        // Use insert instead of update since the profile might not exist yet
+        // Create or update profile
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
+          .upsert({
             user_id: data.user.id,
             full_name: fullName,
             city: `${city}, ${selectedState}`,
@@ -129,25 +130,19 @@ export const AuthPage = () => {
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          // If insert fails, try update
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-              full_name: fullName,
-              city: `${city}, ${selectedState}`,
-              interests: selectedInterests,
-              avatar_url: avatarUrl
-            })
-            .eq('user_id', data.user.id);
-            
-          if (updateError) {
-            console.error('Profile update error:', updateError);
-          }
         }
 
         toast({
           title: "Conta criada com sucesso!",
           description: "Você já pode usar o aplicativo.",
+        });
+
+        // User will be automatically redirected by the auth state change
+      } else {
+        // Email confirmation required
+        toast({
+          title: "Cadastro realizado!",
+          description: "Verifique seu email para confirmar a conta e poder fazer login.",
         });
       }
     } catch (error: any) {

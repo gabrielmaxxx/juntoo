@@ -40,7 +40,7 @@ const Index = () => {
   }
 
   // Show auth page if user is not authenticated
-  if (!user || !profile) {
+  if (!user) {
     return <AuthPage />;
   }
 
@@ -67,7 +67,7 @@ const Index = () => {
                   events={EVENTS} 
                   users={USERS} 
                   onEventClick={handleEventClick}
-                  currentUser={{ name: profile.full_name }}
+                  currentUser={{ name: profile?.full_name || 'Usuário' }}
                 />
               )}
               {activeTab === 'search' && (
@@ -78,13 +78,13 @@ const Index = () => {
                   events={EVENTS} 
                   currentUser={{
                     id: user.id,
-                    name: profile.full_name,
+                    name: profile?.full_name || 'Usuário',
                     email: user.email || '',
-                    avatarUrl: profile.avatar_url || '/src/assets/avatar-anne.jpg',
+                    avatarUrl: profile?.avatar_url || '/src/assets/avatar-anne.jpg',
                     bio: '',
-                    location: profile.city || '',
+                    location: profile?.city || '',
                     rating: 4.8,
-                    interests: profile.interests || [],
+                    interests: profile?.interests || [],
                     badges: [],
                     posts: [],
                     registeredEvents: [],
@@ -97,13 +97,13 @@ const Index = () => {
                 <ProfilePage 
                   user={{
                     id: user.id,
-                    name: profile.full_name,
+                    name: profile?.full_name || 'Usuário',
                     email: user.email || '',
-                    avatarUrl: profile.avatar_url || '/src/assets/avatar-anne.jpg',
+                    avatarUrl: profile?.avatar_url || '/src/assets/avatar-anne.jpg',
                     bio: '',
-                    location: profile.city || '',
+                    location: profile?.city || '',
                     rating: 4.8,
-                    interests: profile.interests || [],
+                    interests: profile?.interests || [],
                     badges: [],
                     posts: [],
                     registeredEvents: [],
