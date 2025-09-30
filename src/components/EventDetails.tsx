@@ -46,35 +46,19 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
   const fetchParticipants = async () => {
     try {
-      // Buscar participantes
-      const { data: participantsData, error: participantsError } = await supabase
+      const { data, error } = await supabase
         .from('event_participants')
-        .select('user_id')
+        .select(`
+          user_id,
+          profiles!event_participants_user_id_fkey (
+            full_name,
+            avatar_url
+          )
+        `)
         .eq('event_id', event.id);
 
-      if (participantsError) throw participantsError;
-
-      if (!participantsData || participantsData.length === 0) {
-        setParticipants([]);
-        return;
-      }
-
-      // Buscar perfis dos participantes
-      const userIds = participantsData.map(p => p.user_id);
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', userIds);
-
-      if (profilesError) throw profilesError;
-
-      // Combinar dados
-      const participantsWithProfiles = participantsData.map(participant => ({
-        user_id: participant.user_id,
-        profiles: profilesData?.find(p => p.user_id === participant.user_id)
-      }));
-
-      setParticipants(participantsWithProfiles);
+      if (error) throw error;
+      setParticipants(data || []);
     } catch (error) {
       console.error('Error fetching participants:', error);
     }
