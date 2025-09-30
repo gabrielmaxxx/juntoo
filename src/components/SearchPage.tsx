@@ -44,6 +44,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
         const { data, error } = await supabase
           .from('events')
           .select('*')
+          .eq('is_private', false)
           .order('date', { ascending: true });
 
         if (error) throw error;

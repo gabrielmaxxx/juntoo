@@ -24,12 +24,10 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select(`
-          *,
-          profiles:created_by(full_name, avatar_url)
-        `)
+        .select('*')
         .eq('is_private', false)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20);
 
       if (error) throw error;
 

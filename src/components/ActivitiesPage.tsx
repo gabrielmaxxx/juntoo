@@ -1,23 +1,96 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Event, User } from '@/types';
 import { EventCard } from '@/components/EventCard';
 import { ActivityDetails } from '@/components/ActivityDetails';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ActivitiesPageProps {
-  events: Event[];
   currentUser: User;
   onEventClick: (event: Event) => void;
 }
 
-export const ActivitiesPage = ({ events, currentUser, onEventClick }: ActivitiesPageProps) => {
+export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
+  const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
+  const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter events for registered and created by user
-  const registeredEvents = currentUser.eventsRegistered || [];
-  const createdEvents = events.filter(event => event.createdBy === currentUser.name);
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch events where user is participant
+        const { data: participantData, error: participantError } = await supabase
+          .from('event_participants')
+          .select('event_id')
+          .eq('user_id', user.id);
+
+        if (participantError) throw participantError;
+
+        const eventIds = participantData?.map(p => p.event_id) || [];
+
+        if (eventIds.length > 0) {
+          const { data: eventsData, error: eventsError } = await supabase
+            .from('events')
+            .select('*')
+            .in('id', eventIds);
+
+          if (eventsError) throw eventsError;
+
+          const transformedEvents: Event[] = eventsData?.map(event => ({
+            id: event.id,
+            title: event.title,
+            category: event.category,
+            location: event.location,
+            date: event.date,
+            time: event.time,
+            price: event.price?.toString() || 'Gratuito',
+            description: event.description || '',
+            imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+            attendees: [],
+            createdBy: event.created_by
+          })) || [];
+
+          setRegisteredEvents(transformedEvents);
+        }
+
+        // Fetch events created by user
+        const { data: createdData, error: createdError } = await supabase
+          .from('events')
+          .select('*')
+          .eq('created_by', user.id);
+
+        if (createdError) throw createdError;
+
+        const transformedCreated: Event[] = createdData?.map(event => ({
+          id: event.id,
+          title: event.title,
+          category: event.category,
+          location: event.location,
+          date: event.date,
+          time: event.time,
+          price: event.price?.toString() || 'Gratuito',
+          description: event.description || '',
+          imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+          attendees: [],
+          createdBy: event.created_by
+        })) || [];
+
+        setCreatedEvents(transformedCreated);
+      } catch (error) {
+        console.error('Erro ao carregar eventos do usuário:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserEvents();
+  }, []);
 
   const handleActivityClick = (event: Event) => {
     setSelectedActivity(event);
@@ -34,6 +107,21 @@ export const ActivitiesPage = ({ events, currentUser, onEventClick }: Activities
         onBack={handleBackToList}
         currentUser={currentUser}
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-12 bg-gray-200 rounded-lg"></div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 

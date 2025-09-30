@@ -154,6 +154,18 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         throw error;
       }
 
+      // Automatically add creator as participant
+      const { error: participantError } = await supabase
+        .from('event_participants')
+        .insert({
+          event_id: data.id,
+          user_id: user.id
+        });
+
+      if (participantError) {
+        console.error('Erro ao adicionar criador como participante:', participantError);
+      }
+
       if (data?.is_private && data?.private_code) {
         const link = `${window.location.origin}/events/join/${data.private_code}`;
         setPrivateLink(link);

@@ -73,7 +73,6 @@ const Index = () => {
               )}
               {activeTab === 'activities' && (
                 <ActivitiesPage 
-                  events={EVENTS} 
                   currentUser={{
                     id: user.id,
                     name: profile?.full_name || 'Usuário',
