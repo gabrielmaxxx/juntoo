@@ -386,7 +386,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                     <img 
                       src={formData.imageUrl} 
                       alt="Preview" 
-                      className="w-full h-32 object-cover rounded-lg"
+                      className="w-full h-48 object-cover rounded-lg"
                     />
                     <Button
                       type="button"
@@ -399,23 +399,24 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      Adicione uma foto de capa para seu evento
-                    </p>
-                    <Label htmlFor="imageUpload" className="cursor-pointer">
-                      <Button type="button" variant="outline" disabled={uploadingImage}>
-                        {uploadingImage ? 'Carregando...' : 'Selecionar Foto'}
-                      </Button>
-                    </Label>
-                    <Input
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <input
                       id="imageUpload"
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
+                      disabled={uploadingImage}
                     />
+                    <label htmlFor="imageUpload" className="cursor-pointer block">
+                      <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-sm text-foreground font-medium mb-1">
+                        {uploadingImage ? 'Carregando imagem...' : 'Clique para adicionar foto de capa'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG até 5MB
+                      </p>
+                    </label>
                   </div>
                 )}
               </div>
