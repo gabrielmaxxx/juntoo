@@ -107,6 +107,7 @@ export type Database = {
           interests: string[] | null
           updated_at: string
           user_id: string
+          user_number: number
         }
         Insert: {
           avatar_url?: string | null
@@ -117,6 +118,7 @@ export type Database = {
           interests?: string[] | null
           updated_at?: string
           user_id: string
+          user_number?: number
         }
         Update: {
           avatar_url?: string | null
@@ -127,6 +129,7 @@ export type Database = {
           interests?: string[] | null
           updated_at?: string
           user_id?: string
+          user_number?: number
         }
         Relationships: []
       }

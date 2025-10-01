@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Event } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { 
   Star, 
   Calendar, 
@@ -29,18 +31,57 @@ import {
   Upload
 } from 'lucide-react';
 
+const INTEREST_OPTIONS = [
+  'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Viagem',
+  'Fotografia', 'Leitura', 'Cinema', 'Dança', 'Natureza', 'Fitness'
+];
+
 interface ProfilePageProps {
   user: User;
   onUserUpdate?: (user: User) => void;
 }
 
 export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
-  const { updateProfile } = useAuth();
+  const { updateProfile, profile } = useAuth();
   const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
   const [activeTab, setActiveTab] = useState('posts');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(user.interests || []);
+  const [userNumber, setUserNumber] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserNumber = async () => {
+      if (profile?.user_id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('user_number')
+          .eq('user_id', profile.user_id)
+          .single();
+        
+        if (data && !error) {
+          setUserNumber(data.user_number.toString().padStart(6, '0'));
+        }
+      }
+    };
+    
+    fetchUserNumber();
+  }, [profile]);
+
+  useEffect(() => {
+    // Parse location to set state and city
+    if (user.location) {
+      const parts = user.location.split(', ');
+      if (parts.length === 2) {
+        setSelectedCity(parts[0]);
+        setSelectedState(parts[1]);
+      }
+    }
+    setSelectedInterests(user.interests || []);
+  }, [user]);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -53,16 +94,34 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     ));
   };
 
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
   const handleSaveProfile = async () => {
     try {
+      const location = selectedCity && selectedState 
+        ? `${selectedCity}, ${selectedState}` 
+        : editedUser.location;
+
       await updateProfile({
         full_name: editedUser.name,
-        city: editedUser.location || null,
-        interests: editedUser.interests || null,
+        city: location || null,
+        interests: selectedInterests.length > 0 ? selectedInterests : null,
         avatar_url: editedUser.avatarUrl || null
       });
       
-      onUserUpdate?.(editedUser);
+      const updatedUser = {
+        ...editedUser,
+        location: location || '',
+        interests: selectedInterests
+      };
+      
+      onUserUpdate?.(updatedUser);
       setIsEditingProfile(false);
       
       toast({
@@ -147,56 +206,40 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
 
   return (
     <div className="pb-20">
-      {/* Stories Section */}
-      <div className="bg-white p-4 border-b border-gray-100">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium text-lg">
-                {user.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <Label htmlFor="avatarUpload" className="absolute -bottom-1 -right-1 cursor-pointer">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors">
-                {uploadingAvatar ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Camera className="w-4 h-4" />
-                )}
-              </div>
-            </Label>
-            <Input
-              id="avatarUpload"
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              className="hidden"
-              disabled={uploadingAvatar}
-            />
-          </div>
-          {user.stories?.filter(story => new Date(story.expiresAt) > new Date()).map((story) => (
-            <div key={story.id} className="story-ring rounded-full">
-              <img
-                src={story.imageUrl}
-                alt="Story"
-                className="w-16 h-16 rounded-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Profile Header */}
       <div className="bg-white p-6 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <Avatar className="w-20 h-20">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="w-20 h-20 cursor-pointer" onClick={() => document.getElementById('avatarUpload')?.click()}>
+                <AvatarImage src={user.avatarUrl} alt={user.name} />
+                <AvatarFallback className="bg-primary/10 text-primary font-medium text-3xl">
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <Label htmlFor="avatarUpload" className="absolute -bottom-1 -right-1 cursor-pointer">
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors">
+                  {uploadingAvatar ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <Camera className="w-4 h-4" />
+                  )}
+                </div>
+              </Label>
+              <Input
+                id="avatarUpload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                disabled={uploadingAvatar}
+              />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+              {userNumber && (
+                <p className="text-sm text-gray-500">ID: {userNumber}</p>
+              )}
               <p className="text-gray-600 flex items-center">
                 <MapPin className="w-4 h-4 mr-1" />
                 {user.location}
@@ -230,14 +273,42 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                     onChange={(e) => setEditedUser({...editedUser, name: e.target.value})}
                   />
                 </div>
+                
                 <div>
-                  <Label htmlFor="location">Cidade</Label>
-                  <Input
-                    id="location"
-                    value={editedUser.location || ''}
-                    onChange={(e) => setEditedUser({...editedUser, location: e.target.value})}
-                  />
+                  <Label htmlFor="state">Estado</Label>
+                  <Select value={selectedState} onValueChange={(value) => {
+                    setSelectedState(value);
+                    setSelectedCity('');
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione seu estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BRAZIL_STATES.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                <div>
+                  <Label htmlFor="city">Cidade</Label>
+                  <Select value={selectedCity} onValueChange={setSelectedCity} disabled={!selectedState}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={selectedState ? "Selecione sua cidade" : "Primeiro selecione o estado"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedState && BRAZIL_STATES_AND_CITIES[selectedState as keyof typeof BRAZIL_STATES_AND_CITIES]?.map((cityName) => (
+                        <SelectItem key={cityName} value={cityName}>
+                          {cityName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
@@ -246,14 +317,23 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                     onChange={(e) => setEditedUser({...editedUser, bio: e.target.value})}
                   />
                 </div>
+                
                 <div>
-                  <Label htmlFor="interests">Interesses (separados por vírgula)</Label>
-                  <Input
-                    id="interests"
-                    value={editedUser.interests?.join(', ') || ''}
-                    onChange={(e) => setEditedUser({...editedUser, interests: e.target.value.split(', ')})}
-                  />
+                  <Label>Interesses</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {INTEREST_OPTIONS.map((interest) => (
+                      <Badge
+                        key={interest}
+                        variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => toggleInterest(interest)}
+                      >
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
+                
                 <Button onClick={handleSaveProfile} className="w-full">
                   Salvar
                 </Button>
