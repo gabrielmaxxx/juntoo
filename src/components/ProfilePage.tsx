@@ -80,7 +80,22 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         setSelectedState(parts[1]);
       }
     }
-    setSelectedInterests(user.interests || []);
+    
+    // Clean up interests - filter out any malformed data
+    if (user.interests && Array.isArray(user.interests)) {
+      const cleanInterests = user.interests.filter((interest: string) => {
+        // Only keep valid interest strings that don't contain JSON artifacts
+        return interest && 
+               typeof interest === 'string' && 
+               !interest.includes('[') && 
+               !interest.includes('"') && 
+               !interest.includes('\\') &&
+               INTEREST_OPTIONS.includes(interest);
+      });
+      setSelectedInterests(cleanInterests);
+    } else {
+      setSelectedInterests([]);
+    }
   }, [user]);
 
   const renderStars = (rating: number) => {
@@ -347,11 +362,11 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         )}
 
         {/* Interests */}
-        {user.interests && user.interests.length > 0 && (
+        {selectedInterests && selectedInterests.length > 0 && (
           <div className="mb-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Interesses</h3>
             <div className="flex flex-wrap gap-2">
-              {user.interests.map((interest, index) => (
+              {selectedInterests.map((interest, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {interest}
                 </Badge>
