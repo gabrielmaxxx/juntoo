@@ -23,7 +23,7 @@ interface SearchFilters {
   priceRange: 'all' | 'free' | 'paid';
 }
 
-const CATEGORIES = ['Todos', 'Esportes', 'Estudos', 'Eventos', 'Encontros', 'Jogos', 'Outro'];
+const CATEGORIES = ['Todos', 'Esportes', 'Estudos', 'Eventos', 'Encontros', 'Jogos', 'Música', 'Outro'];
 const LOCATIONS = ['Todos', 'Parque Central', 'Parque das Águas', 'Café Literário', 'Arena UNIFAA', 'Biblioteca Central', 'UNIFAA - Auditório B'];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
@@ -49,22 +49,39 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
 
         if (error) throw error;
 
-        // Transform Supabase data to match Event interface
-        const transformedEvents: Event[] = data.map(event => ({
-          id: event.id,
-          title: event.title,
-          category: event.category,
-          location: event.location,
-          date: event.date,
-          time: event.time,
-          price: event.price?.toString() || 'Gratuito',
-          description: event.description || '',
-          imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-          attendees: [],
-          createdBy: event.created_by
+        // Get all participant counts and creator info
+        const eventsWithData = await Promise.all(data.map(async (event) => {
+          // Get participants
+          const { data: participants } = await supabase
+            .from('event_participants')
+            .select('user_id')
+            .eq('event_id', event.id);
+
+          // Get creator profile
+          const { data: creatorProfile } = await supabase
+            .from('profiles')
+            .select('avatar_url, full_name')
+            .eq('user_id', event.created_by)
+            .single();
+
+          return {
+            id: event.id,
+            title: event.title,
+            category: event.category,
+            location: event.location,
+            date: event.date,
+            time: event.time,
+            price: event.price?.toString() || 'Gratuito',
+            description: event.description || '',
+            imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+            attendees: participants?.map(p => p.user_id) || [],
+            createdBy: event.created_by,
+            creatorAvatar: creatorProfile?.avatar_url,
+            creatorName: creatorProfile?.full_name
+          };
         }));
 
-        setEvents(transformedEvents);
+        setEvents(eventsWithData);
       } catch (error) {
         console.error('Erro ao carregar eventos:', error);
       } finally {

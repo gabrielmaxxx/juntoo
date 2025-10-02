@@ -13,6 +13,8 @@ export interface Event {
   isFeatured?: boolean;
   attendees: string[];
   createdBy?: string;
+  creatorAvatar?: string;
+  creatorName?: string;
   friendsGoing?: string[];
   distance?: string;
 }

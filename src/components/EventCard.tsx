@@ -73,12 +73,20 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
             </div>
           </div>
         </div>
-        {event.attendees.length > 0 && (
-          <div className="flex items-center mt-3 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+          <div className="flex items-center">
             <Users className="w-4 h-4 text-primary mr-1" />
-            <span className="text-sm text-gray-600">{event.attendees.length} pessoas vão</span>
+            <span className="text-sm text-gray-600">{event.attendees.length} participante{event.attendees.length !== 1 ? 's' : ''}</span>
           </div>
-        )}
+          {event.creatorAvatar && (
+            <img 
+              src={event.creatorAvatar} 
+              alt={event.creatorName || 'Criador'}
+              className="w-6 h-6 rounded-full object-cover"
+              title={event.creatorName}
+            />
+          )}
+        </div>
       </div>
     );
   }

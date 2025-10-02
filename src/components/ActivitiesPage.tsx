@@ -42,19 +42,38 @@ export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProp
 
           if (eventsError) throw eventsError;
 
-          const transformedEvents: Event[] = eventsData?.map(event => ({
-            id: event.id,
-            title: event.title,
-            category: event.category,
-            location: event.location,
-            date: event.date,
-            time: event.time,
-            price: event.price?.toString() || 'Gratuito',
-            description: event.description || '',
-            imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-            attendees: [],
-            createdBy: event.created_by
-          })) || [];
+          const transformedEvents: Event[] = await Promise.all(
+            (eventsData || []).map(async (event) => {
+              // Get participants for each event
+              const { data: participants } = await supabase
+                .from('event_participants')
+                .select('user_id')
+                .eq('event_id', event.id);
+
+              // Get creator profile
+              const { data: creatorProfile } = await supabase
+                .from('profiles')
+                .select('avatar_url, full_name')
+                .eq('user_id', event.created_by)
+                .single();
+
+              return {
+                id: event.id,
+                title: event.title,
+                category: event.category,
+                location: event.location,
+                date: event.date,
+                time: event.time,
+                price: event.price?.toString() || 'Gratuito',
+                description: event.description || '',
+                imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+                attendees: participants?.map(p => p.user_id) || [],
+                createdBy: event.created_by,
+                creatorAvatar: creatorProfile?.avatar_url,
+                creatorName: creatorProfile?.full_name
+              };
+            })
+          );
 
           setRegisteredEvents(transformedEvents);
         }
@@ -67,19 +86,38 @@ export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProp
 
         if (createdError) throw createdError;
 
-        const transformedCreated: Event[] = createdData?.map(event => ({
-          id: event.id,
-          title: event.title,
-          category: event.category,
-          location: event.location,
-          date: event.date,
-          time: event.time,
-          price: event.price?.toString() || 'Gratuito',
-          description: event.description || '',
-          imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-          attendees: [],
-          createdBy: event.created_by
-        })) || [];
+        const transformedCreated: Event[] = await Promise.all(
+          (createdData || []).map(async (event) => {
+            // Get participants for each event
+            const { data: participants } = await supabase
+              .from('event_participants')
+              .select('user_id')
+              .eq('event_id', event.id);
+
+            // Get creator profile
+            const { data: creatorProfile } = await supabase
+              .from('profiles')
+              .select('avatar_url, full_name')
+              .eq('user_id', event.created_by)
+              .single();
+
+            return {
+              id: event.id,
+              title: event.title,
+              category: event.category,
+              location: event.location,
+              date: event.date,
+              time: event.time,
+              price: event.price?.toString() || 'Gratuito',
+              description: event.description || '',
+              imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+              attendees: participants?.map(p => p.user_id) || [],
+              createdBy: event.created_by,
+              creatorAvatar: creatorProfile?.avatar_url,
+              creatorName: creatorProfile?.full_name
+            };
+          })
+        );
 
         setCreatedEvents(transformedCreated);
       } catch (error) {
