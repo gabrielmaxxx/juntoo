@@ -189,15 +189,30 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         .from('avatars')
         .getPublicUrl(filePath);
 
+      // Add timestamp to force reload
+      const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
+
       // Update profile with new avatar URL
-      await updateProfile({ avatar_url: data.publicUrl });
+      await updateProfile({ avatar_url: avatarUrl });
       
-      setEditedUser(prev => ({ ...prev, avatarUrl: data.publicUrl }));
+      // Update local state
+      setEditedUser(prev => ({ ...prev, avatarUrl }));
+      
+      // Update parent component
+      if (onUserUpdate) {
+        onUserUpdate({
+          ...user,
+          avatarUrl
+        });
+      }
       
       toast({
         title: "Avatar atualizado!",
         description: "Sua foto de perfil foi atualizada com sucesso.",
       });
+      
+      // Force page reload to update all avatar instances
+      window.location.reload();
       
     } catch (error) {
       console.error('Error uploading avatar:', error);
