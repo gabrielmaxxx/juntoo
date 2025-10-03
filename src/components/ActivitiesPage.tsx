@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Event, User } from '@/types';
 import { EventCard } from '@/components/EventCard';
-import { ActivityDetails } from '@/components/ActivityDetails';
+import { EventDetails } from '@/components/EventDetails';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, Plus } from 'lucide-react';
@@ -140,10 +140,9 @@ export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProp
 
   if (selectedActivity) {
     return (
-      <ActivityDetails 
+      <EventDetails 
         event={selectedActivity} 
         onBack={handleBackToList}
-        currentUser={currentUser}
       />
     );
   }
