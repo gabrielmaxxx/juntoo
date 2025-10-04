@@ -10,6 +10,7 @@ import { CreateEventPage } from '@/components/CreateEventPage';
 import { SearchPage } from '@/components/SearchPage';
 import { AuthPage } from '@/pages/AuthPage';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { EVENTS, USERS } from '@/data/mockData';
 import { Event } from '@/types';
 
@@ -21,6 +22,32 @@ const Index = () => {
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
+  };
+
+  const handleEventClickById = async (eventId: string) => {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
+
+    if (!error && data) {
+      // Convert database event to Event type
+      const event: Event = {
+        id: data.id,
+        title: data.title,
+        category: data.category,
+        location: data.location,
+        date: data.date,
+        time: data.time,
+        price: data.price?.toString() || '0',
+        description: data.description || '',
+        imageUrl: data.image_url || '',
+        attendees: [],
+        createdBy: data.created_by
+      };
+      setSelectedEvent(event);
+    }
   };
 
   const handleBack = () => {
@@ -58,7 +85,7 @@ const Index = () => {
         ) : (
           <div className="grid grid-rows-[auto_1fr_auto] h-full">
             {/* Header */}
-            <AppHeader />
+            <AppHeader onEventClick={handleEventClickById} />
             
             {/* Main Content */}
             <main className="overflow-y-auto">
