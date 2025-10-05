@@ -253,8 +253,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="max-w-md mx-auto p-4 pb-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 pb-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Informações Básicas</CardTitle>
