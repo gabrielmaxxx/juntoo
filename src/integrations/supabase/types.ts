@@ -85,6 +85,7 @@ export type Database = {
       events: {
         Row: {
           category: string
+          city: string | null
           created_at: string
           created_by: string
           date: string
@@ -96,12 +97,14 @@ export type Database = {
           max_participants: number | null
           price: number | null
           private_code: string | null
+          state: string | null
           time: string
           title: string
           updated_at: string
         }
         Insert: {
           category: string
+          city?: string | null
           created_at?: string
           created_by: string
           date: string
@@ -113,12 +116,14 @@ export type Database = {
           max_participants?: number | null
           price?: number | null
           private_code?: string | null
+          state?: string | null
           time: string
           title: string
           updated_at?: string
         }
         Update: {
           category?: string
+          city?: string | null
           created_at?: string
           created_by?: string
           date?: string
@@ -130,6 +135,7 @@ export type Database = {
           max_participants?: number | null
           price?: number | null
           private_code?: string | null
+          state?: string | null
           time?: string
           title?: string
           updated_at?: string

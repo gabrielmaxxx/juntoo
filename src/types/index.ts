@@ -4,6 +4,8 @@ export interface Event {
   category: string;
   subtitle?: string;
   location: string;
+  state?: string;
+  city?: string;
   date: string;
   time: string;
   price: string;

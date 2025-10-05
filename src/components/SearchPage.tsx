@@ -10,6 +10,8 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
+import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
@@ -18,13 +20,13 @@ interface SearchPageProps {
 interface SearchFilters {
   text: string;
   category: string;
-  location: string;
+  state: string;
+  city: string;
   date: Date | undefined;
   priceRange: 'all' | 'free' | 'paid';
 }
 
-const CATEGORIES = ['Todos', 'Esportes', 'Estudos', 'Eventos', 'Encontros', 'Jogos', 'Música', 'Outro'];
-const LOCATIONS = ['Todos', 'Parque Central', 'Parque das Águas', 'Café Literário', 'Arena UNIFAA', 'Biblioteca Central', 'UNIFAA - Auditório B'];
+const CATEGORIES = ['Todos', 'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Fitness', 'Educação', 'Social', 'Negócios', 'Outro'];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -32,7 +34,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   const [filters, setFilters] = useState<SearchFilters>({
     text: '',
     category: 'Todos',
-    location: 'Todos',
+    state: '',
+    city: '',
     date: undefined,
     priceRange: 'all'
   });
@@ -69,6 +72,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             title: event.title,
             category: event.category,
             location: event.location,
+            state: event.state,
+            city: event.city,
             date: event.date,
             time: event.time,
             price: event.price?.toString() || 'Gratuito',
@@ -112,8 +117,13 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
         return false;
       }
 
-      // Location filter
-      if (filters.location !== 'Todos' && !event.location.includes(filters.location)) {
+      // State filter
+      if (filters.state && event.state !== filters.state) {
+        return false;
+      }
+
+      // City filter
+      if (filters.city && event.city !== filters.city) {
         return false;
       }
 
@@ -142,7 +152,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
     setFilters({
       text: '',
       category: 'Todos',
-      location: 'Todos',
+      state: '',
+      city: '',
       date: undefined,
       priceRange: 'all'
     });
@@ -150,7 +161,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
 
   const activeFiltersCount = [
     filters.category !== 'Todos',
-    filters.location !== 'Todos',
+    filters.state !== '',
+    filters.city !== '',
     filters.date !== undefined,
     filters.priceRange !== 'all'
   ].filter(Boolean).length;
@@ -215,30 +227,77 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             </PopoverContent>
           </Popover>
 
-          {/* Location Filter */}
+          {/* State Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={filters.location !== 'Todos' ? 'default' : 'outline'} size="sm" className="h-8">
+              <Button variant={filters.state ? 'default' : 'outline'} size="sm" className="h-8">
                 <MapPin className="w-4 h-4 mr-1" />
-                {filters.location === 'Todos' ? 'Local' : filters.location.split(' ')[0]}
+                {filters.state || 'Estado'}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-2">
-              <div className="space-y-1">
-                {LOCATIONS.map(location => (
+            <PopoverContent className="w-64 p-2 bg-background z-50">
+              <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                <Button
+                  variant={!filters.state ? 'default' : 'ghost'}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setFilters(prev => ({ ...prev, state: '', city: '' }));
+                  }}
+                >
+                  Todos os estados
+                </Button>
+                {BRAZIL_STATES.map((state) => (
                   <Button
-                    key={location}
-                    variant={filters.location === location ? 'default' : 'ghost'}
+                    key={state.value}
+                    variant={filters.state === state.value ? 'default' : 'ghost'}
                     size="sm"
                     className="w-full justify-start text-left"
-                    onClick={() => setFilters(prev => ({ ...prev, location }))}
+                    onClick={() => {
+                      setFilters(prev => ({ ...prev, state: state.value, city: '' }));
+                    }}
                   >
-                    {location}
+                    {state.label}
                   </Button>
                 ))}
               </div>
             </PopoverContent>
           </Popover>
+
+          {/* City Filter */}
+          {filters.state && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant={filters.city ? 'default' : 'outline'} size="sm" className="h-8">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {filters.city || 'Cidade'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2 bg-background z-50">
+                <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                  <Button
+                    variant={!filters.city ? 'default' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => setFilters(prev => ({ ...prev, city: '' }))}
+                  >
+                    Todas as cidades
+                  </Button>
+                  {BRAZIL_STATES_AND_CITIES[filters.state]?.map((city) => (
+                    <Button
+                      key={city}
+                      variant={filters.city === city ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start text-left"
+                      onClick={() => setFilters(prev => ({ ...prev, city }))}
+                    >
+                      {city}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
 
           {/* Date Filter */}
           <Popover>
