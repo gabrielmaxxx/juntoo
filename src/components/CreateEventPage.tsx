@@ -482,6 +482,61 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                   </>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Localização
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="state">Estado *</Label>
+                  <Select 
+                    value={formData.state} 
+                    onValueChange={(value) => {
+                      handleInputChange('state', value);
+                      handleInputChange('city', ''); // Reset city when state changes
+                    }} 
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {BRAZIL_STATES.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">Cidade *</Label>
+                  <Select 
+                    value={formData.city} 
+                    onValueChange={(value) => handleInputChange('city', value)} 
+                    required
+                    disabled={!formData.state}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={formData.state ? "Selecione" : "Escolha estado"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50 max-h-[300px]">
+                      {formData.state && BRAZIL_STATES_AND_CITIES[formData.state]?.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="location">Endereço/Local Específico *</Label>
