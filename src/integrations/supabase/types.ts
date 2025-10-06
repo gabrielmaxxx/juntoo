@@ -93,10 +93,14 @@ export type Database = {
           id: string
           image_url: string | null
           is_private: boolean | null
+          is_recurring: boolean | null
           location: string
           max_participants: number | null
+          parent_event_id: string | null
           price: number | null
           private_code: string | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
           state: string | null
           time: string
           title: string
@@ -112,10 +116,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_private?: boolean | null
+          is_recurring?: boolean | null
           location: string
           max_participants?: number | null
+          parent_event_id?: string | null
           price?: number | null
           private_code?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           state?: string | null
           time: string
           title: string
@@ -131,16 +139,28 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_private?: boolean | null
+          is_recurring?: boolean | null
           location?: string
           max_participants?: number | null
+          parent_event_id?: string | null
           price?: number | null
           private_code?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           state?: string | null
           time?: string
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {

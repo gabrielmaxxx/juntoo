@@ -31,6 +31,9 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     price: '',
     maxParticipants: '',
     isPrivate: false,
+    isRecurring: false,
+    recurrenceType: 'none' as 'none' | 'weekly' | 'biweekly' | 'monthly',
+    recurrenceEndDate: '',
     imageUrl: ''
   });
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -133,6 +136,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         return;
       }
 
+      // Criar o evento principal
       const eventData = {
         title: formData.title,
         description: formData.description || null,
@@ -145,6 +149,9 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         price: formData.price ? parseFloat(formData.price) : 0,
         max_participants: formData.maxParticipants ? parseInt(formData.maxParticipants) : null,
         is_private: formData.isPrivate,
+        is_recurring: formData.isRecurring,
+        recurrence_type: formData.isRecurring ? formData.recurrenceType : 'none',
+        recurrence_end_date: formData.isRecurring && formData.recurrenceEndDate ? formData.recurrenceEndDate : null,
         image_url: formData.imageUrl || null,
         created_by: user.id
       };
@@ -159,7 +166,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         throw error;
       }
 
-      // Automatically add creator as participant
+      // Adicionar criador como participante
       const { error: participantError } = await supabase
         .from('event_participants')
         .insert({
@@ -171,6 +178,26 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         console.error('Erro ao adicionar criador como participante:', participantError);
       }
 
+      // Gerar eventos recorrentes se necessário
+      if (formData.isRecurring && formData.recurrenceType !== 'none') {
+        const recurringEvents = generateRecurringEvents(data, formData);
+        
+        if (recurringEvents.length > 0) {
+          const { error: recurringError } = await supabase
+            .from('events')
+            .insert(recurringEvents);
+
+          if (recurringError) {
+            console.error('Erro ao criar eventos recorrentes:', recurringError);
+            toast({
+              title: "Aviso",
+              description: "O evento principal foi criado, mas houve erro ao criar as repetições.",
+              variant: "destructive"
+            });
+          }
+        }
+      }
+
       if (data?.is_private && data?.private_code) {
         const link = `${window.location.origin}/events/join/${data.private_code}`;
         setPrivateLink(link);
@@ -180,7 +207,9 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         title: "Evento criado com sucesso!",
         description: formData.isPrivate 
           ? "Seu evento privado foi criado. Compartilhe o link para convidar participantes."
-          : "Seu evento público foi criado e já está visível para todos.",
+          : formData.isRecurring 
+            ? "Seu evento e suas repetições foram criados com sucesso."
+            : "Seu evento público foi criado e já está visível para todos.",
       });
 
       if (!formData.isPrivate) {
@@ -197,6 +226,64 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Função para gerar eventos recorrentes
+  const generateRecurringEvents = (parentEvent: any, formData: any) => {
+    const events = [];
+    const startDate = new Date(formData.date);
+    const endDate = formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate) : null;
+    
+    // Limitar a 52 repetições (1 ano) se não houver data de término
+    const maxOccurrences = 52;
+    let currentDate = new Date(startDate);
+    let occurrenceCount = 0;
+
+    while (occurrenceCount < maxOccurrences) {
+      // Calcular próxima data baseado no tipo de recorrência
+      switch (formData.recurrenceType) {
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7);
+          break;
+        case 'biweekly':
+          currentDate.setDate(currentDate.getDate() + 14);
+          break;
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          break;
+        default:
+          return events;
+      }
+
+      // Verificar se ultrapassou a data de término
+      if (endDate && currentDate > endDate) {
+        break;
+      }
+
+      // Criar evento recorrente
+      events.push({
+        title: parentEvent.title,
+        description: parentEvent.description,
+        category: parentEvent.category,
+        state: parentEvent.state,
+        city: parentEvent.city,
+        location: parentEvent.location,
+        date: currentDate.toISOString().split('T')[0],
+        time: parentEvent.time,
+        price: parentEvent.price,
+        max_participants: parentEvent.max_participants,
+        is_private: parentEvent.is_private,
+        is_recurring: false, // Eventos filhos não são recorrentes
+        recurrence_type: 'none',
+        parent_event_id: parentEvent.id,
+        image_url: parentEvent.image_url,
+        created_by: parentEvent.created_by
+      });
+
+      occurrenceCount++;
+    }
+
+    return events;
   };
 
   const copyPrivateLink = () => {
@@ -309,7 +396,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                Data e Horário
+                Data, Horário e Recorrência
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -335,60 +422,65 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Localização
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="state">Estado *</Label>
-                  <Select 
-                    value={formData.state} 
-                    onValueChange={(value) => {
-                      handleInputChange('state', value);
-                      handleInputChange('city', ''); // Reset city when state changes
-                    }} 
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      {BRAZIL_STATES.map((state) => (
-                        <SelectItem key={state.value} value={state.value}>
-                          {state.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="recurring">Evento Recorrente</Label>
+                    <p className="text-sm text-muted-foreground">
+                      O evento se repetirá automaticamente
+                    </p>
+                  </div>
+                  <Switch
+                    id="recurring"
+                    checked={formData.isRecurring}
+                    onCheckedChange={(checked) => {
+                      handleInputChange('isRecurring', checked);
+                      if (!checked) {
+                        handleInputChange('recurrenceType', 'none');
+                        handleInputChange('recurrenceEndDate', '');
+                      }
+                    }}
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="city">Cidade *</Label>
-                  <Select 
-                    value={formData.city} 
-                    onValueChange={(value) => handleInputChange('city', value)} 
-                    required
-                    disabled={!formData.state}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={formData.state ? "Selecione" : "Escolha estado"} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50 max-h-[300px]">
-                      {formData.state && BRAZIL_STATES_AND_CITIES[formData.state]?.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+
+                {formData.isRecurring && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="recurrenceType">Frequência de Repetição</Label>
+                      <Select 
+                        value={formData.recurrenceType} 
+                        onValueChange={(value) => handleInputChange('recurrenceType', value)}
+                        required={formData.isRecurring}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a frequência" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background z-50">
+                          <SelectItem value="weekly">Semanalmente</SelectItem>
+                          <SelectItem value="biweekly">Quinzenalmente</SelectItem>
+                          <SelectItem value="monthly">Mensalmente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="recurrenceEndDate">Data de Término (Opcional)</Label>
+                      <Input
+                        id="recurrenceEndDate"
+                        type="date"
+                        value={formData.recurrenceEndDate}
+                        onChange={(e) => handleInputChange('recurrenceEndDate', e.target.value)}
+                        min={formData.date}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {formData.recurrenceEndDate 
+                          ? 'O evento se repetirá até esta data' 
+                          : 'Sem data de término, o evento se repetirá por até 1 ano (52 ocorrências)'}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="space-y-2">
