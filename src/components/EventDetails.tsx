@@ -265,7 +265,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Hero Image */}
-      <div className="relative w-full h-64 flex-shrink-0">
+      <div className="relative w-full h-48 sm:h-56 md:h-64 flex-shrink-0">
         <img 
           src={event.imageUrl} 
           alt={event.title}
@@ -278,37 +278,37 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className="absolute top-4 left-4 bg-black/20 text-white hover:bg-black/40"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-black/20 text-white hover:bg-black/40 h-9 w-9 sm:h-10 sm:w-10"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </Button>
 
         {/* Share Button */}
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 bg-black/20 text-white hover:bg-black/40"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/20 text-white hover:bg-black/40 h-9 w-9 sm:h-10 sm:w-10"
         >
-          <Share2 className="w-5 h-5" />
+          <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-hidden bg-white rounded-t-2xl -mt-4 z-10 relative">
         <Tabs defaultValue="details" className="h-full flex flex-col">
-          <TabsList className="w-full justify-start rounded-none border-b px-4">
-            <TabsTrigger value="details">Detalhes</TabsTrigger>
-            {isParticipating && <TabsTrigger value="chat">Chat</TabsTrigger>}
+          <TabsList className="w-full justify-start rounded-none border-b px-3 sm:px-4">
+            <TabsTrigger value="details" className="text-sm sm:text-base">Detalhes</TabsTrigger>
+            {isParticipating && <TabsTrigger value="chat" className="text-sm sm:text-base">Chat</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="details" className="flex-1 p-4 space-y-6 overflow-y-auto mt-0">
+          <TabsContent value="details" className="flex-1 p-3 sm:p-4 space-y-4 sm:space-y-6 overflow-y-auto mt-0 pb-20">
             {/* Event Title and Category */}
             <div>
-              <div className="flex items-start justify-between mb-2">
-                <h1 className="text-2xl font-bold text-gray-900 flex-1 pr-4 font-poppins">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex-1 font-poppins">
                   {event.title}
                 </h1>
-                <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full font-medium flex-shrink-0">
+                <span className="bg-primary/10 text-primary text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full font-medium flex-shrink-0">
                   {event.category}
                 </span>
               </div>
@@ -318,25 +318,25 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
             </div>
 
             {/* Event Details */}
-            <div className="space-y-3">
-              <div className="flex items-center text-gray-700">
-                <Calendar className="w-5 h-5 mr-3 text-primary" />
-                <span>{formatDateTime(event.date, event.time)}</span>
+            <div className="space-y-2.5 sm:space-y-3">
+              <div className="flex items-center text-gray-700 text-sm sm:text-base">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary flex-shrink-0" />
+                <span className="break-words">{formatDateTime(event.date, event.time)}</span>
               </div>
-              <div className="flex items-center text-gray-700">
-                <MapPin className="w-5 h-5 mr-3 text-primary" />
-                <span>{event.location}</span>
+              <div className="flex items-center text-gray-700 text-sm sm:text-base">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary flex-shrink-0" />
+                <span className="break-words">{event.location}</span>
               </div>
-              <div className="flex items-center text-gray-700">
-                <Tag className="w-5 h-5 mr-3 text-primary" />
+              <div className="flex items-center text-gray-700 text-sm sm:text-base">
+                <Tag className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-primary flex-shrink-0" />
                 <span className="font-medium">{event.price}</span>
               </div>
             </div>
 
             {/* Description */}
             <div>
-              <h3 className="font-semibold text-gray-800 mb-2">Sobre o evento</h3>
-              <p className="text-gray-700 leading-relaxed">{event.description}</p>
+              <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Sobre o evento</h3>
+              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{event.description}</p>
             </div>
 
             {/* Participants */}
@@ -452,10 +452,10 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       </div>
 
       {/* Action Button */}
-      <div className="p-4 bg-white border-t border-gray-200">
+      <div className="p-3 sm:p-4 bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-20">
         <Button 
           variant={isParticipating ? "outline" : "hero"} 
-          className="w-full" 
+          className="w-full h-11 sm:h-12 text-sm sm:text-base" 
           onClick={handleParticipate}
           disabled={loading}
         >

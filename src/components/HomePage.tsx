@@ -78,14 +78,14 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   }
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-6 pb-24">
       {/* Welcome Section */}
-      <div className="px-4 pt-6">
+      <div className="px-4 pt-4">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 font-poppins">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 font-poppins">
             Olá, {userName.split(' ')[0]}
           </h2>
-          <p className="text-gray-600 leading-relaxed -mt-1">
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             O que vamos fazer hoje?
           </p>
         </div>
@@ -93,18 +93,18 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
       {/* Mission Card */}
       <div className="px-4">
-        <div className="relative rounded-2xl overflow-hidden juntoo-shadow">
+        <div className="relative rounded-xl sm:rounded-2xl overflow-hidden juntoo-shadow">
           <img 
             src={heroImage}
             alt="Pessoas se conectando através de atividades"
-            className="w-full h-32 object-cover"
+            className="w-full h-28 sm:h-32 object-cover"
           />
           <div className="absolute inset-0 juntoo-gradient opacity-80" />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center px-4">
             <div className="text-center text-white">
-              <Sparkles className="w-8 h-8 mx-auto mb-2" />
-              <h3 className="font-bold text-lg">Conecte-se através de atividades</h3>
-              <p className="text-sm opacity-90">Descubra pessoas com seus interesses</p>
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" />
+              <h3 className="font-bold text-base sm:text-lg">Conecte-se através de atividades</h3>
+              <p className="text-xs sm:text-sm opacity-90">Descubra pessoas com seus interesses</p>
             </div>
           </div>
         </div>
@@ -112,10 +112,10 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
       {/* Recommended Events */}
       <div className="px-4">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-semibold text-gray-800">Eventos para você</h3>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800">Eventos para você</h3>
           <div className="flex items-center">
-            <Sparkles className="w-4 h-4 text-primary mr-1" />
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1" />
             <p className="text-xs text-gray-500">Com base nos seus interesses</p>
           </div>
         </div>

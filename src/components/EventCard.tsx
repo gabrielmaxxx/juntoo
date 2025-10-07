@@ -52,37 +52,37 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
   if (variant === 'compact') {
     return (
       <div 
-        className="bg-white rounded-xl juntoo-shadow p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
+        className="bg-white rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
         onClick={() => onEventClick?.(event)}
       >
-        <div className="flex space-x-3">
+        <div className="flex space-x-2 sm:space-x-3">
           <img 
             src={event.imageUrl} 
             alt={event.title}
-            className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">{event.title}</h3>
-            <div className="flex items-center text-sm text-gray-600 mt-1">
-              <Clock className="w-4 h-4 mr-1" />
-              <span>{formatDate(event.date, event.time)}</span>
+            <h3 className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-2">{event.title}</h3>
+            <div className="flex items-center text-xs sm:text-sm text-gray-600 mt-1">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
+              <span className="truncate">{formatDate(event.date, event.time)}</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <MapPin className="w-4 h-4 mr-1" />
+            <div className="flex items-center text-xs sm:text-sm text-gray-600">
+              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
               <span className="truncate">{event.location}</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
           <div className="flex items-center">
-            <Users className="w-4 h-4 text-primary mr-1" />
-            <span className="text-sm text-gray-600">{event.attendees.length} participante{event.attendees.length !== 1 ? 's' : ''}</span>
+            <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-gray-600">{event.attendees.length} participante{event.attendees.length !== 1 ? 's' : ''}</span>
           </div>
           {event.creatorAvatar && (
             <img 
               src={event.creatorAvatar} 
               alt={event.creatorName || 'Criador'}
-              className="w-6 h-6 rounded-full object-cover"
+              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
               title={event.creatorName}
             />
           )}

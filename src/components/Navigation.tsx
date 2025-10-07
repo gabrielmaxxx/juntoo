@@ -17,8 +17,8 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   return (
     <>
-      <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-30">
-        <div className="flex justify-around items-center h-16 text-gray-500 relative max-w-sm mx-auto">
+      <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom">
+        <div className="flex justify-around items-center h-14 sm:h-16 text-gray-500 relative mx-auto">
           {navItems.map((item) => {
             if (item.id === 'placeholder') {
               return <div key={item.id} className="w-1/5" />;
@@ -35,8 +35,8 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                   isActive ? 'text-primary' : 'text-gray-500'
                 }`}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium">{item.label}</span>
               </button>
             );
           })}
@@ -44,14 +44,14 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       </nav>
       
       {/* Floating Action Button */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-7 sm:bottom-8 left-1/2 -translate-x-1/2 z-40">
         <Button 
           variant="fab" 
           size="fab"
           onClick={() => onTabChange('create')}
-          className="shadow-lg"
+          className="shadow-lg w-12 h-12 sm:w-14 sm:h-14"
         >
-          <Plus className="w-8 h-8" />
+          <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
         </Button>
       </div>
     </>

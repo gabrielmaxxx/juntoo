@@ -75,10 +75,10 @@ const Index = () => {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
-  // Mobile frame layout
+  // Fully responsive mobile layout
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm h-[800px] bg-white rounded-3xl juntoo-shadow-elevated overflow-hidden relative animate-fade-in">
+    <div className="min-h-screen bg-white">
+      <div className="w-full h-screen overflow-hidden relative animate-fade-in">
         
         {selectedEvent ? (
           <EventDetails event={selectedEvent} onBack={handleBack} />

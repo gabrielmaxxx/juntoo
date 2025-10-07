@@ -184,29 +184,29 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 sm:p-4 space-y-4 pb-24">
       {/* Search Header */}
       <div className="space-y-3">
-        <h1 className="text-2xl font-bold text-gray-900">Buscar Eventos</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Buscar Eventos</h1>
         
         {/* Main Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <Input
-            placeholder="Buscar por eventos, lugares, categorias..."
+            placeholder="Buscar eventos..."
             value={filters.text}
             onChange={(e) => setFilters(prev => ({ ...prev, text: e.target.value }))}
-            className="pl-10 h-12 text-base"
+            className="pl-9 sm:pl-10 h-10 sm:h-12 text-sm sm:text-base"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           {/* Category Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={filters.category !== 'Todos' ? 'default' : 'outline'} size="sm" className="h-8">
-                <Tag className="w-4 h-4 mr-1" />
+              <Button variant={filters.category !== 'Todos' ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
+                <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {filters.category}
               </Button>
             </PopoverTrigger>
@@ -230,8 +230,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           {/* State Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={filters.state ? 'default' : 'outline'} size="sm" className="h-8">
-                <MapPin className="w-4 h-4 mr-1" />
+              <Button variant={filters.state ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
+                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {filters.state || 'Estado'}
               </Button>
             </PopoverTrigger>
@@ -268,8 +268,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           {filters.state && (
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant={filters.city ? 'default' : 'outline'} size="sm" className="h-8">
-                  <MapPin className="w-4 h-4 mr-1" />
+                <Button variant={filters.city ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   {filters.city || 'Cidade'}
                 </Button>
               </PopoverTrigger>
@@ -302,8 +302,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           {/* Date Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={filters.date ? 'default' : 'outline'} size="sm" className="h-8">
-                <Calendar className="w-4 h-4 mr-1" />
+              <Button variant={filters.date ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {filters.date ? format(filters.date, 'dd/MM', { locale: ptBR }) : 'Data'}
               </Button>
             </PopoverTrigger>
@@ -321,8 +321,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           {/* Price Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={filters.priceRange !== 'all' ? 'default' : 'outline'} size="sm" className="h-8">
-                <Filter className="w-4 h-4 mr-1" />
+              <Button variant={filters.priceRange !== 'all' ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {filters.priceRange === 'all' ? 'Preço' : filters.priceRange === 'free' ? 'Gratuito' : 'Pago'}
               </Button>
             </PopoverTrigger>
@@ -349,8 +349,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
 
           {/* Clear Filters */}
           {activeFiltersCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-red-600">
-              <X className="w-4 h-4 mr-1" />
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 sm:h-8 text-xs sm:text-sm text-red-600">
+              <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Limpar ({activeFiltersCount})
             </Button>
           )}
