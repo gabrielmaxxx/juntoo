@@ -141,20 +141,40 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const sendMessage = async () => {
     if (!user || !newMessage.trim()) return;
 
+    const messageText = newMessage.trim();
+    const tempId = `temp-${Date.now()}`;
+    
+    // Optimistic update - add message immediately to UI
+    const optimisticMessage = {
+      id: tempId,
+      event_id: event.id,
+      user_id: user.id,
+      message: messageText,
+      created_at: new Date().toISOString(),
+      profiles: {
+        full_name: user.user_metadata?.full_name || 'Você',
+        avatar_url: user.user_metadata?.avatar_url
+      }
+    };
+    
+    setMessages(prev => [...prev, optimisticMessage]);
+    setNewMessage('');
+
     try {
       const { error } = await supabase
         .from('event_messages')
         .insert({
           event_id: event.id,
           user_id: user.id,
-          message: newMessage.trim()
+          message: messageText
         });
 
       if (error) throw error;
-
-      setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      setNewMessage(messageText);
       toast({
         title: 'Erro',
         description: 'Não foi possível enviar a mensagem',
