@@ -10,9 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface ActivitiesPageProps {
   currentUser: User;
   onEventClick: (event: Event) => void;
+  onCreateEvent: () => void;
 }
 
-export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProps) => {
+export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
@@ -168,7 +169,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProp
       <div className="bg-white border-b border-border/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-foreground">Minhas Atividades</h1>
-          <Button size="sm" className="bg-primary hover:bg-primary/90">
+          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onCreateEvent}>
             <Plus className="w-4 h-4 mr-2" />
             Criar
           </Button>
@@ -231,7 +232,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProp
                 <p className="text-sm text-muted-foreground">
                   Que tal organizar seu primeiro evento?
                 </p>
-                <Button className="mt-4" size="sm">
+                <Button className="mt-4" size="sm" onClick={onCreateEvent}>
                   <Plus className="w-4 h-4 mr-2" />
                   Criar Evento
                 </Button>

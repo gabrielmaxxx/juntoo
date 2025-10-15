@@ -99,7 +99,7 @@ const Index = () => {
                 <SearchPage onEventClick={handleEventClick} />
               )}
               {activeTab === 'activities' && (
-                <ActivitiesPage 
+                <ActivitiesPage
                   currentUser={{
                     id: user.id,
                     name: profile?.full_name || 'Usuário',
@@ -115,6 +115,7 @@ const Index = () => {
                     attendedEvents: []
                   }}
                   onEventClick={handleEventClick}
+                  onCreateEvent={() => setActiveTab('create')}
                 />
               )}
               {activeTab === 'profile' && (
