@@ -44,19 +44,16 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        await supabase.rpc('update_event_status');
-
         const { data, error } = await supabase
           .from('events')
           .select('*')
           .eq('is_private', false)
-          .eq('status', 'upcoming')
           .order('date', { ascending: true });
 
         if (error) throw error;
 
         // Get all participant counts and creator info
-        const eventsWithData = await Promise.all(data.map(async (event) => {
+        const eventsWithData = await Promise.all((data || []).map(async (event) => {
           // Get participants
           const { data: participants } = await supabase
             .from('event_participants')
@@ -89,7 +86,14 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           };
         }));
 
-        setEvents(eventsWithData);
+        // Keep only upcoming events (date/time >= now)
+        const now = new Date();
+        const upcoming = eventsWithData.filter((e) => {
+          const eventDateTime = new Date(`${e.date}T${e.time}`);
+          return eventDateTime.getTime() >= now.getTime();
+        });
+
+        setEvents(upcoming);
       } catch (error) {
         console.error('Erro ao carregar eventos:', error);
       } finally {
