@@ -22,13 +22,12 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const fetchEvents = async () => {
     try {
-      await supabase.rpc('update_event_status');
-
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('is_private', false)
-        .eq('status', 'upcoming')
+        .gte('date', today)
         .order('created_at', { ascending: false })
         .limit(20);
 
