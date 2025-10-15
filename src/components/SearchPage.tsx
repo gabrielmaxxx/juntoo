@@ -44,10 +44,13 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        await supabase.rpc('update_event_status');
+
         const { data, error } = await supabase
           .from('events')
           .select('*')
           .eq('is_private', false)
+          .eq('status', 'upcoming')
           .order('date', { ascending: true });
 
         if (error) throw error;
@@ -86,14 +89,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           };
         }));
 
-        // Keep only upcoming events (date/time >= now)
-        const now = new Date();
-        const upcoming = eventsWithData.filter((e) => {
-          const eventDateTime = new Date(`${e.date}T${e.time}`);
-          return eventDateTime.getTime() >= now.getTime();
-        });
-
-        setEvents(upcoming);
+        setEvents(eventsWithData);
       } catch (error) {
         console.error('Erro ao carregar eventos:', error);
       } finally {

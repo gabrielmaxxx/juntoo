@@ -22,14 +22,15 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const fetchEvents = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      await supabase.rpc('update_event_status');
+
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('is_private', false)
-        .gte('date', today)
-        .order('date', { ascending: true })
-        .order('time', { ascending: true });
+        .eq('status', 'upcoming')
+        .order('created_at', { ascending: false })
+        .limit(20);
 
       if (error) throw error;
 
@@ -50,15 +51,8 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         isFeatured: false
       })) || [];
 
-      // Keep only upcoming events (date/time >= now)
-      const now = new Date();
-      const upcomingEvents = formattedEvents.filter((e) => {
-        const eventDateTime = new Date(`${e.date}T${e.time}`);
-        return eventDateTime.getTime() >= now.getTime();
-      });
-
       // Filter recommended events based on user interests
-      const recommendedEvents = upcomingEvents.filter(event => {
+      const recommendedEvents = formattedEvents.filter(event => {
         if (!profile?.interests) return true;
         return profile.interests.some(interest => 
           event.category.toLowerCase().includes(interest.toLowerCase()) ||

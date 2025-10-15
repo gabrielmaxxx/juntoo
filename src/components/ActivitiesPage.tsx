@@ -25,6 +25,8 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        await supabase.rpc('update_event_status');
+
         // Fetch events where user is participant
         const { data: participantData, error: participantError } = await supabase
           .from('event_participants')
@@ -39,7 +41,8 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
           const { data: eventsData, error: eventsError } = await supabase
             .from('events')
             .select('*')
-            .in('id', eventIds);
+            .in('id', eventIds)
+            .eq('status', 'upcoming');
 
           if (eventsError) throw eventsError;
 
@@ -76,13 +79,6 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
             })
           );
 
-          // Filter to upcoming only based on date/time
-          const now = new Date();
-          transformedEvents = transformedEvents.filter((e) => {
-            const eventDateTime = new Date(`${e.date}T${e.time}`);
-            return eventDateTime.getTime() >= now.getTime();
-          });
-
           setRegisteredEvents(transformedEvents);
         }
 
@@ -90,7 +86,8 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
         const { data: createdData, error: createdError } = await supabase
           .from('events')
           .select('*')
-          .eq('created_by', user.id);
+          .eq('created_by', user.id)
+          .order('date', { ascending: true });
 
         if (createdError) throw createdError;
 
