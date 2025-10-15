@@ -22,12 +22,14 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const fetchEvents = async () => {
     try {
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('is_private', false)
+        .gte('date', today)
         .order('date', { ascending: true })
-        .limit(50);
+        .order('time', { ascending: true });
 
       if (error) throw error;
 
