@@ -44,13 +44,12 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        await supabase.rpc('update_event_status');
-
+        const today = new Date().toISOString().split('T')[0];
         const { data, error } = await supabase
           .from('events')
           .select('*')
           .eq('is_private', false)
-          .eq('status', 'upcoming')
+          .gte('date', today)
           .order('date', { ascending: true });
 
         if (error) throw error;

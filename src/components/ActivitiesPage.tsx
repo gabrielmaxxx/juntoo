@@ -25,8 +25,6 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        await supabase.rpc('update_event_status');
-
         // Fetch events where user is participant
         const { data: participantData, error: participantError } = await supabase
           .from('event_participants')
@@ -38,11 +36,12 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
         const eventIds = participantData?.map(p => p.event_id) || [];
 
         if (eventIds.length > 0) {
+          const today = new Date().toISOString().split('T')[0];
           const { data: eventsData, error: eventsError } = await supabase
             .from('events')
             .select('*')
             .in('id', eventIds)
-            .eq('status', 'upcoming');
+            .gte('date', today);
 
           if (eventsError) throw eventsError;
 

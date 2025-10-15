@@ -80,8 +80,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (!authUser) return;
 
-        await supabase.rpc('update_event_status');
-
         const { data: participantData, error: participantError } = await supabase
           .from('event_participants')
           .select('event_id')
@@ -92,11 +90,12 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         const eventIds = participantData?.map(p => p.event_id) || [];
 
         if (eventIds.length > 0) {
+          const today = new Date().toISOString().split('T')[0];
           const { data: upcomingData, error: upcomingError } = await supabase
             .from('events')
             .select('*')
             .in('id', eventIds)
-            .eq('status', 'upcoming')
+            .gte('date', today)
             .order('date', { ascending: true });
 
           if (upcomingError) throw upcomingError;
@@ -105,7 +104,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
             .from('events')
             .select('*')
             .in('id', eventIds)
-            .eq('status', 'completed')
+            .lt('date', today)
             .order('date', { ascending: false });
 
           if (completedError) throw completedError;
