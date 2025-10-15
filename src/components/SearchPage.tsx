@@ -56,7 +56,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
         if (error) throw error;
 
         // Get all participant counts and creator info
-        const eventsWithData = await Promise.all(data.map(async (event) => {
+        const eventsWithData = await Promise.all((data || []).map(async (event) => {
           // Get participants
           const { data: participants } = await supabase
             .from('event_participants')

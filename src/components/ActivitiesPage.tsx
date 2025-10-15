@@ -46,7 +46,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
 
           if (eventsError) throw eventsError;
 
-          const transformedEvents: Event[] = await Promise.all(
+          let transformedEvents: Event[] = await Promise.all(
             (eventsData || []).map(async (event) => {
               // Get participants for each event
               const { data: participants } = await supabase
@@ -86,11 +86,12 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
         const { data: createdData, error: createdError } = await supabase
           .from('events')
           .select('*')
-          .eq('created_by', user.id);
+          .eq('created_by', user.id)
+          .order('date', { ascending: true });
 
         if (createdError) throw createdError;
 
-        const transformedCreated: Event[] = await Promise.all(
+        let transformedCreated: Event[] = await Promise.all(
           (createdData || []).map(async (event) => {
             // Get participants for each event
             const { data: participants } = await supabase
@@ -123,6 +124,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
           })
         );
 
+        // No filter for created; show all created events
         setCreatedEvents(transformedCreated);
       } catch (error) {
         console.error('Erro ao carregar eventos do usuário:', error);
