@@ -10,10 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 interface ActivitiesPageProps {
   currentUser: User;
   onEventClick: (event: Event) => void;
-  onCreateEvent: () => void;
 }
 
-export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: ActivitiesPageProps) => {
+export const ActivitiesPage = ({ currentUser, onEventClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
@@ -24,12 +23,6 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-
-        try {
-          await supabase.rpc('update_event_status');
-        } catch (rpcError) {
-          console.log('Could not update event status:', rpcError);
-        }
 
         // Fetch events where user is participant
         const { data: participantData, error: participantError } = await supabase
@@ -45,8 +38,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
           const { data: eventsData, error: eventsError } = await supabase
             .from('events')
             .select('*')
-            .in('id', eventIds)
-            .eq('status', 'upcoming');
+            .in('id', eventIds);
 
           if (eventsError) throw eventsError;
 
@@ -176,7 +168,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
       <div className="bg-white border-b border-border/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-foreground">Minhas Atividades</h1>
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onCreateEvent}>
+          <Button size="sm" className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             Criar
           </Button>
@@ -239,7 +231,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateEvent }: Act
                 <p className="text-sm text-muted-foreground">
                   Que tal organizar seu primeiro evento?
                 </p>
-                <Button className="mt-4" size="sm" onClick={onCreateEvent}>
+                <Button className="mt-4" size="sm">
                   <Plus className="w-4 h-4 mr-2" />
                   Criar Evento
                 </Button>
