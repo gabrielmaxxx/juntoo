@@ -22,17 +22,10 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const fetchEvents = async () => {
     try {
-      try {
-        await supabase.rpc('update_event_status');
-      } catch (rpcError) {
-        console.log('Could not update event status:', rpcError);
-      }
-
       const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('is_private', false)
-        .eq('status', 'upcoming')
         .order('created_at', { ascending: false })
         .limit(20);
 
