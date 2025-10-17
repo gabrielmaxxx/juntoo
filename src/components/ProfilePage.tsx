@@ -52,6 +52,9 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(user.interests || []);
   const [userNumber, setUserNumber] = useState<string>('');
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [completedEvents, setCompletedEvents] = useState<Event[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   useEffect(() => {
     const fetchUserNumber = async () => {
@@ -61,15 +64,84 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           .select('user_number')
           .eq('user_id', profile.user_id)
           .single();
-        
+
         if (data && !error) {
           setUserNumber(data.user_number.toString().padStart(6, '0'));
         }
       }
     };
-    
+
     fetchUserNumber();
   }, [profile]);
+
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (!authUser) return;
+
+        try {
+          await supabase.rpc('update_event_status');
+        } catch (rpcError) {
+          console.log('Could not update event status:', rpcError);
+        }
+
+        const { data: participantData, error: participantError } = await supabase
+          .from('event_participants')
+          .select('event_id')
+          .eq('user_id', authUser.id);
+
+        if (participantError) throw participantError;
+
+        const eventIds = participantData?.map(p => p.event_id) || [];
+
+        if (eventIds.length > 0) {
+          const { data: upcomingData, error: upcomingError } = await supabase
+            .from('events')
+            .select('*')
+            .in('id', eventIds)
+            .eq('status', 'upcoming')
+            .order('date', { ascending: true });
+
+          if (upcomingError) throw upcomingError;
+
+          const { data: completedData, error: completedError } = await supabase
+            .from('events')
+            .select('*')
+            .in('id', eventIds)
+            .eq('status', 'completed')
+            .order('date', { ascending: false });
+
+          if (completedError) throw completedError;
+
+          const transformEvents = (events: any[]): Event[] => {
+            return events.map(event => ({
+              id: event.id,
+              title: event.title,
+              category: event.category,
+              location: event.location,
+              date: event.date,
+              time: event.time,
+              price: event.price?.toString() || 'Gratuito',
+              description: event.description || '',
+              imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
+              attendees: [],
+              createdBy: event.created_by
+            }));
+          };
+
+          setUpcomingEvents(transformEvents(upcomingData || []));
+          setCompletedEvents(transformEvents(completedData || []));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar eventos do usuário:', error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchUserEvents();
+  }, []);
 
   useEffect(() => {
     // Parse location to set state and city
@@ -455,8 +527,13 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </TabsContent>
 
           <TabsContent value="events" className="p-4 space-y-4">
-            {user.eventsRegistered && user.eventsRegistered.length > 0 ? (
-              user.eventsRegistered.map((event) => (
+            {loadingEvents ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-sm text-muted-foreground">Carregando eventos...</p>
+              </div>
+            ) : upcomingEvents && upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event) => (
                 <Card key={event.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
@@ -489,8 +566,13 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </TabsContent>
 
           <TabsContent value="history" className="p-4 space-y-4">
-            {user.eventsAttended && user.eventsAttended.length > 0 ? (
-              user.eventsAttended.map((event) => (
+            {loadingEvents ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-sm text-muted-foreground">Carregando histórico...</p>
+              </div>
+            ) : completedEvents && completedEvents.length > 0 ? (
+              completedEvents.map((event) => (
                 <Card key={event.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
