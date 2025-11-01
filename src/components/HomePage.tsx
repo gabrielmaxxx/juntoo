@@ -31,8 +31,20 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
       if (error) throw error;
 
+      // Filter out completed events (events > 24h after scheduled time, except recurring ones)
+      const now = new Date();
+      const activeEvents = data?.filter(event => {
+        // Recurring events are always shown
+        if (event.is_recurring) return true;
+        
+        // Check if event is completed (more than 24h after scheduled time)
+        const eventDateTime = new Date(`${event.date}T${event.time}`);
+        const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
+        return now < twentyFourHoursAfter;
+      }) || [];
+
       // Convert database events to our Event type
-      const formattedEvents: Event[] = data?.map(event => ({
+      const formattedEvents: Event[] = activeEvents.map(event => ({
         id: event.id,
         title: event.title,
         category: event.category,
@@ -45,8 +57,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         createdBy: event.created_by,
         attendees: [],
         isTrending: false,
-        isFeatured: false
-      })) || [];
+        isFeatured: false,
+        isRecurring: event.is_recurring
+      }));
 
       // Filter recommended events based on user interests
       const recommendedEvents = formattedEvents.filter(event => {

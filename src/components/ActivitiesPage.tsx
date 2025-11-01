@@ -19,6 +19,24 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to check if event is completed
+  const isEventCompleted = (event: Event): boolean => {
+    // Recurring events are never considered completed
+    if (event.isRecurring) return false;
+    
+    const eventDateTime = new Date(`${event.date}T${event.time}`);
+    const now = new Date();
+    const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
+    
+    return now > twentyFourHoursAfter;
+  };
+
+  // Separate events into upcoming and completed
+  const upcomingRegistered = registeredEvents.filter(e => !isEventCompleted(e));
+  const completedRegistered = registeredEvents.filter(e => isEventCompleted(e));
+  const upcomingCreated = createdEvents.filter(e => !isEventCompleted(e));
+  const completedCreated = createdEvents.filter(e => isEventCompleted(e));
+
   useEffect(() => {
     const fetchUserEvents = async () => {
       try {
@@ -71,7 +89,8 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                 attendees: participants?.map(p => p.user_id) || [],
                 createdBy: event.created_by,
                 creatorAvatar: creatorProfile?.avatar_url,
-                creatorName: creatorProfile?.full_name
+                creatorName: creatorProfile?.full_name,
+                isRecurring: event.is_recurring
               };
             })
           );
@@ -115,7 +134,8 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
               attendees: participants?.map(p => p.user_id) || [],
               createdBy: event.created_by,
               creatorAvatar: creatorProfile?.avatar_url,
-              creatorName: creatorProfile?.full_name
+              creatorName: creatorProfile?.full_name,
+              isRecurring: event.is_recurring
             };
           })
         );
@@ -211,15 +231,52 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {registeredEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onEventClick={() => handleActivityClick(event)}
-                    variant="compact"
-                  />
-                ))}
+              <div className="space-y-6">
+                {/* Upcoming Events */}
+                {upcomingRegistered.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold text-foreground">Próximos</h3>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        {upcomingRegistered.length}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {upcomingRegistered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onEventClick={() => handleActivityClick(event)}
+                          variant="compact"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Completed Events */}
+                {completedRegistered.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <h3 className="font-semibold text-muted-foreground">Concluídos</h3>
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                        {completedRegistered.length}
+                      </span>
+                    </div>
+                    <div className="space-y-3 opacity-60">
+                      {completedRegistered.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onEventClick={() => handleActivityClick(event)}
+                          variant="compact"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
@@ -238,15 +295,52 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {createdEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onEventClick={() => handleActivityClick(event)}
-                    variant="compact"
-                  />
-                ))}
+              <div className="space-y-6">
+                {/* Upcoming Events */}
+                {upcomingCreated.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold text-foreground">Próximos</h3>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        {upcomingCreated.length}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {upcomingCreated.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onEventClick={() => handleActivityClick(event)}
+                          variant="compact"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Completed Events */}
+                {completedCreated.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <h3 className="font-semibold text-muted-foreground">Concluídos</h3>
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                        {completedCreated.length}
+                      </span>
+                    </div>
+                    <div className="space-y-3 opacity-60">
+                      {completedCreated.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          onEventClick={() => handleActivityClick(event)}
+                          variant="compact"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>

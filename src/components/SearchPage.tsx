@@ -52,8 +52,20 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
 
         if (error) throw error;
 
+        // Filter out completed events (events > 24h after scheduled time, except recurring ones)
+        const now = new Date();
+        const activeEvents = data.filter(event => {
+          // Recurring events are always shown
+          if (event.is_recurring) return true;
+          
+          // Check if event is completed (more than 24h after scheduled time)
+          const eventDateTime = new Date(`${event.date}T${event.time}`);
+          const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
+          return now < twentyFourHoursAfter;
+        });
+
         // Get all participant counts and creator info
-        const eventsWithData = await Promise.all(data.map(async (event) => {
+        const eventsWithData = await Promise.all(activeEvents.map(async (event) => {
           // Get participants
           const { data: participants } = await supabase
             .from('event_participants')
@@ -82,7 +94,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             attendees: participants?.map(p => p.user_id) || [],
             createdBy: event.created_by,
             creatorAvatar: creatorProfile?.avatar_url,
-            creatorName: creatorProfile?.full_name
+            creatorName: creatorProfile?.full_name,
+            isRecurring: event.is_recurring
           };
         }));
 

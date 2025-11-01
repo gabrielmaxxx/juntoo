@@ -19,6 +19,7 @@ export interface Event {
   creatorName?: string;
   friendsGoing?: string[];
   distance?: string;
+  isRecurring?: boolean;
 }
 
 export interface User {
