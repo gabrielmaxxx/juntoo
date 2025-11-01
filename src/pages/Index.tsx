@@ -115,6 +115,7 @@ const Index = () => {
                     attendedEvents: []
                   }}
                   onEventClick={handleEventClick}
+                  onCreateClick={() => setActiveTab('create')}
                 />
               )}
               {activeTab === 'profile' && (
