@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Event } from '@/types';
 import { Calendar, MapPin, Tag, Users, Share2, ArrowLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ interface EventDetailsProps {
 export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isParticipating, setIsParticipating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [participants, setParticipants] = useState<any[]>([]);
@@ -347,7 +349,16 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                 </h3>
                 <div className="flex items-center -space-x-2">
                   {participants.slice(0, 5).map((participant, index) => (
-                    <div key={participant.user_id} className="relative" style={{ zIndex: 5 - index }}>
+                    <div 
+                      key={participant.user_id} 
+                      className="relative cursor-pointer hover:z-50 hover:scale-110 transition-transform" 
+                      style={{ zIndex: 5 - index }}
+                      onClick={() => {
+                        if (participant.user_id !== user?.id) {
+                          navigate(`/user/${participant.user_id}`);
+                        }
+                      }}
+                    >
                       <div className="w-12 h-12 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
                         {participant.profiles?.avatar_url ? (
                           <img 
