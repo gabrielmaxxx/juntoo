@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { parseISO, addHours, isBefore } from 'date-fns';
 import { 
   Star, 
   Calendar, 
@@ -52,6 +53,18 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>(user.interests || []);
   const [userNumber, setUserNumber] = useState<string>('');
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [completedEvents, setCompletedEvents] = useState<Event[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
+  // Helper function to check if event is completed
+  const isEventCompleted = (event: Event): boolean => {
+    if (event.isRecurring) return false;
+    
+    const eventDateTime = parseISO(`${event.date}T${event.time}`);
+    const eventEndTime = addHours(eventDateTime, 24);
+    return isBefore(eventEndTime, new Date());
+  };
 
   useEffect(() => {
     const fetchUserNumber = async () => {
@@ -70,6 +83,92 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     
     fetchUserNumber();
   }, [profile]);
+
+  useEffect(() => {
+    const fetchUserEvents = async () => {
+      if (!profile?.user_id) return;
+      
+      setLoadingEvents(true);
+      try {
+        // Fetch events where user is a participant
+        const { data: participations, error: participationsError } = await supabase
+          .from('event_participants')
+          .select('event_id')
+          .eq('user_id', profile.user_id);
+
+        if (participationsError) throw participationsError;
+        
+        if (!participations || participations.length === 0) {
+          setUpcomingEvents([]);
+          setCompletedEvents([]);
+          setLoadingEvents(false);
+          return;
+        }
+
+        const eventIds = participations.map(p => p.event_id);
+
+        // Fetch event details
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .in('id', eventIds);
+
+        if (eventsError) throw eventsError;
+
+        // Fetch creator profiles for all events
+        const creatorIds = [...new Set(eventsData?.map(e => e.created_by) || [])];
+        const { data: creatorsData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', creatorIds);
+
+        const creatorsMap = new Map(
+          creatorsData?.map(creator => [creator.user_id, creator]) || []
+        );
+
+        // Transform and categorize events
+        const transformedEvents: Event[] = (eventsData || []).map(event => {
+          const creator = creatorsMap.get(event.created_by);
+          return {
+            id: event.id,
+            title: event.title,
+            category: event.category,
+            location: event.location,
+            state: event.state || '',
+            city: event.city || '',
+            date: event.date,
+            time: event.time,
+            price: event.price?.toString() || '0',
+            description: event.description || '',
+            imageUrl: event.image_url || '',
+            attendees: [],
+            createdBy: event.created_by,
+            creatorName: creator?.full_name || 'Usuário',
+            creatorAvatar: creator?.avatar_url || '',
+            isRecurring: event.is_recurring || false,
+          };
+        });
+
+        // Separate into upcoming and completed
+        const upcoming = transformedEvents.filter(event => !isEventCompleted(event));
+        const completed = transformedEvents.filter(event => isEventCompleted(event));
+
+        setUpcomingEvents(upcoming);
+        setCompletedEvents(completed);
+      } catch (error) {
+        console.error('Error fetching user events:', error);
+        toast({
+          title: "Erro ao carregar eventos",
+          description: "Não foi possível carregar seus eventos.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchUserEvents();
+  }, [profile, toast]);
 
   useEffect(() => {
     // Parse location to set state and city
@@ -455,8 +554,12 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </TabsContent>
 
           <TabsContent value="events" className="p-4 space-y-4">
-            {user.eventsRegistered && user.eventsRegistered.length > 0 ? (
-              user.eventsRegistered.map((event) => (
+            {loadingEvents ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              </div>
+            ) : upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event) => (
                 <Card key={event.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
@@ -469,48 +572,56 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                         <h3 className="font-semibold text-gray-900">{event.title}</h3>
                         <p className="text-sm text-gray-600 flex items-center">
                           <Calendar className="w-3 h-3 mr-1" />
-                          {new Date(event.date).toLocaleDateString()}
+                          {new Date(event.date).toLocaleDateString('pt-BR')} às {event.time}
                         </p>
                         <p className="text-sm text-gray-600 flex items-center">
                           <MapPin className="w-3 h-3 mr-1" />
                           {event.location}
                         </p>
                       </div>
-                      <Badge variant="outline">Inscrito</Badge>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        A realizar
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
               ))
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>Nenhum evento inscrito</p>
+                <p>Nenhum evento próximo</p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="history" className="p-4 space-y-4">
-            {user.eventsAttended && user.eventsAttended.length > 0 ? (
-              user.eventsAttended.map((event) => (
-                <Card key={event.id}>
+            {loadingEvents ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              </div>
+            ) : completedEvents.length > 0 ? (
+              completedEvents.map((event) => (
+                <Card key={event.id} className="opacity-75">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
                       <img
                         src={event.imageUrl}
                         alt={event.title}
-                        className="w-16 h-16 rounded-lg object-cover"
+                        className="w-16 h-16 rounded-lg object-cover grayscale"
                       />
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">{event.title}</h3>
                         <p className="text-sm text-gray-600 flex items-center">
                           <Calendar className="w-3 h-3 mr-1" />
-                          {new Date(event.date).toLocaleDateString()}
+                          {new Date(event.date).toLocaleDateString('pt-BR')} às {event.time}
                         </p>
                         <p className="text-sm text-gray-600 flex items-center">
                           <MapPin className="w-3 h-3 mr-1" />
                           {event.location}
                         </p>
                       </div>
-                      <Badge variant="secondary">Participou</Badge>
+                      <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">
+                        Concluído
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
