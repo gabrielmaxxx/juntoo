@@ -162,6 +162,33 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -239,10 +266,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_private_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_private_code: { Args: never; Returns: string }
+      get_complete_schema: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never
