@@ -18,6 +18,7 @@ interface CreateEventPageProps {
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const [privateLink, setPrivateLink] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
@@ -136,6 +137,40 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         return;
       }
 
+      let imageUrl = formData.imageUrl;
+
+      // Generate image if no image was uploaded
+      if (!imageUrl && formData.category) {
+        setGeneratingImage(true);
+        toast({
+          title: "Gerando capa...",
+          description: "Criando uma imagem para o seu evento.",
+        });
+
+        try {
+          const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-event-image', {
+            body: { category: formData.category }
+          });
+
+          if (imageError) throw imageError;
+          
+          if (imageData?.imageUrl) {
+            imageUrl = imageData.imageUrl;
+            console.log('Image generated successfully');
+          }
+        } catch (error) {
+          console.error('Error generating image:', error);
+          // Continue without image if generation fails
+          toast({
+            title: "Aviso",
+            description: "Não foi possível gerar a imagem automaticamente. O evento será criado sem capa.",
+            variant: "destructive"
+          });
+        } finally {
+          setGeneratingImage(false);
+        }
+      }
+
       // Criar o evento principal
       const eventData = {
         title: formData.title,
@@ -152,7 +187,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
         is_recurring: formData.isRecurring,
         recurrence_type: formData.isRecurring ? formData.recurrenceType : 'none',
         recurrence_end_date: formData.isRecurring && formData.recurrenceEndDate ? formData.recurrenceEndDate : null,
-        image_url: formData.imageUrl || null,
+        image_url: imageUrl || null,
         created_by: user.id
       };
 
@@ -584,6 +619,9 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
 
               <div className="space-y-2">
                 <Label>Foto de Capa do Evento</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Uma imagem será gerada automaticamente se você não fizer upload
+                </p>
                 
                 {formData.imageUrl ? (
                   <div className="relative">
@@ -615,7 +653,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                     <label htmlFor="imageUpload" className="cursor-pointer block">
                       <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                       <p className="text-sm text-foreground font-medium mb-1">
-                        {uploadingImage ? 'Carregando imagem...' : 'Clique para adicionar foto de capa'}
+                        {uploadingImage ? 'Carregando imagem...' : 'Clique para adicionar foto de capa (opcional)'}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         PNG, JPG até 5MB
@@ -654,9 +692,9 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
           <Button 
             type="submit" 
             className="w-full h-12" 
-            disabled={isSubmitting}
+            disabled={isSubmitting || generatingImage}
           >
-            {isSubmitting ? 'Criando...' : 'Criar Evento'}
+            {generatingImage ? 'Gerando capa...' : isSubmitting ? 'Criando...' : 'Criar Evento'}
           </Button>
         </form>
       </div>

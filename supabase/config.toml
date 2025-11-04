@@ -1,1 +1,4 @@
 project_id = "hspfyakugditkxrvngrc"
+
+[functions.generate-event-image]
+verify_jwt = false
