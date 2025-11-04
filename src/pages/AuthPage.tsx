@@ -17,9 +17,8 @@ const INTEREST_OPTIONS = [
 
 const Logo = () => (
   <div className="relative w-32 h-32 mx-auto mb-6">
-    <div className="absolute inset-0 flex items-center justify-center">
-      <Globe className="w-24 h-24" strokeWidth={2.5} />
-      <Plane className="absolute w-16 h-16 rotate-45 translate-x-4 -translate-y-4" strokeWidth={2.5} />
+    <div className="flex items-center justify-center">
+      <Globe className="w-24 h-24 text-primary" strokeWidth={2} />
     </div>
   </div>
 );
