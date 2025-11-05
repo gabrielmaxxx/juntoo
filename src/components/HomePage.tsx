@@ -122,6 +122,16 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   return (
     <div className="space-y-6 pb-24">
+      {/* Greeting Message */}
+      <div className="px-4 pt-4">
+        <h2 className="text-2xl font-bold text-foreground">
+          Olá, {userName}! 👋
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          Descubra eventos incríveis perto de você
+        </p>
+      </div>
+
       {/* Trending Events - Horizontal Scroll */}
       {trendingEvents.length > 0 && (
         <div>
