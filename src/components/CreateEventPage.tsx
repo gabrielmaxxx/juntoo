@@ -139,8 +139,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
 
       let imageUrl = formData.imageUrl;
 
-      // Generate image if no image was uploaded
-      if (!imageUrl && formData.category) {
+      // Always generate image if no image was uploaded
+      if (!imageUrl) {
         setGeneratingImage(true);
         toast({
           title: "Gerando capa...",
@@ -149,18 +149,22 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
 
         try {
           const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-event-image', {
-            body: { category: formData.category }
+            body: { category: formData.category || 'Outro' }
           });
 
-          if (imageError) throw imageError;
+          if (imageError) {
+            console.error('Error invoking function:', imageError);
+            throw imageError;
+          }
           
           if (imageData?.imageUrl) {
             imageUrl = imageData.imageUrl;
-            console.log('Image generated successfully');
+            console.log('Image generated successfully:', imageUrl);
+          } else {
+            console.error('No image URL returned from function');
           }
         } catch (error) {
           console.error('Error generating image:', error);
-          // Continue without image if generation fails
           toast({
             title: "Aviso",
             description: "Não foi possível gerar a imagem automaticamente. O evento será criado sem capa.",

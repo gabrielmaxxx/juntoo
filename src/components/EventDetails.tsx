@@ -25,6 +25,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const [participants, setParticipants] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [creator, setCreator] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       checkParticipation();
       fetchParticipants();
     }
+    fetchCreator();
   }, [user, event.id]);
 
   useEffect(() => {
@@ -137,6 +139,23 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       setMessages(data || []);
     } catch (error) {
       console.error('Error fetching messages:', error);
+    }
+  };
+
+  const fetchCreator = async () => {
+    if (!event.createdBy) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .eq('user_id', event.createdBy)
+        .single();
+
+      if (error) throw error;
+      setCreator(data);
+    } catch (error) {
+      console.error('Error fetching creator:', error);
     }
   };
 
@@ -334,6 +353,39 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                 <span className="font-medium">{event.price}</span>
               </div>
             </div>
+
+            {/* Creator */}
+            {creator && (
+              <div className="bg-muted/50 rounded-lg p-3 sm:p-4">
+                <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Organizador</h3>
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => {
+                    if (creator.user_id !== user?.id) {
+                      navigate(`/user/${creator.user_id}`);
+                    }
+                  }}
+                >
+                  {creator.avatar_url ? (
+                    <img 
+                      src={creator.avatar_url} 
+                      alt={creator.full_name}
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-medium text-primary">
+                        {creator.full_name?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">{creator.full_name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Criador do evento</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <div>
