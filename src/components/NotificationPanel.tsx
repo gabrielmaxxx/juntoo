@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, X, Calendar, MessageCircle, Sparkles } from 'lucide-react';
+import { Bell, X, Calendar, MessageCircle, Sparkles, UserPlus, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface Notification {
   id: string;
-  type: 'event_join' | 'new_message' | 'new_event';
+  type: 'event_join' | 'new_message' | 'new_event' | 'friend_request' | 'friend_request_accepted';
   title: string;
   message: string;
   read: boolean;
@@ -130,6 +130,58 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
     setNotifications(prev => prev.filter(n => n.id !== notificationId));
   };
 
+  const handleAcceptFriendRequest = async (friendshipId: string, notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('friendships')
+        .update({ status: 'accepted' })
+        .eq('id', friendshipId);
+
+      if (error) throw error;
+
+      // Mark notification as read and remove it
+      await deleteNotification(notificationId);
+      
+      toast({
+        title: 'Solicitação aceita!',
+        description: 'Você agora são amigos.',
+      });
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível aceitar a solicitação.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectFriendRequest = async (friendshipId: string, notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('id', friendshipId);
+
+      if (error) throw error;
+
+      // Remove notification
+      await deleteNotification(notificationId);
+      
+      toast({
+        title: 'Solicitação rejeitada',
+        description: 'A solicitação de amizade foi rejeitada.',
+      });
+    } catch (error) {
+      console.error('Error rejecting friend request:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível rejeitar a solicitação.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'event_join':
@@ -138,6 +190,10 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         return <MessageCircle className="w-5 h-5 text-blue-500" />;
       case 'new_event':
         return <Sparkles className="w-5 h-5 text-purple-500" />;
+      case 'friend_request':
+        return <UserPlus className="w-5 h-5 text-green-500" />;
+      case 'friend_request_accepted':
+        return <UserCheck className="w-5 h-5 text-green-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
@@ -208,8 +264,10 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 rounded-lg border transition-colors cursor-pointer group ${
+                  onClick={() => notification.type !== 'friend_request' && handleNotificationClick(notification)}
+                  className={`p-4 rounded-lg border transition-colors group ${
+                    notification.type === 'friend_request' ? '' : 'cursor-pointer'
+                  } ${
                     notification.read
                       ? 'bg-background hover:bg-accent/50'
                       : 'bg-primary/5 hover:bg-primary/10 border-primary/20'
@@ -220,21 +278,50 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="font-semibold text-sm">{notification.title}</h4>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteNotification(notification.id);
-                          }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        {notification.type !== 'friend_request' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(notification.id);
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         {notification.message}
                       </p>
+                      
+                      {notification.type === 'friend_request' && notification.event_id && (
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAcceptFriendRequest(notification.event_id!, notification.id);
+                            }}
+                            className="flex-1"
+                          >
+                            Aceitar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRejectFriendRequest(notification.event_id!, notification.id);
+                            }}
+                            className="flex-1"
+                          >
+                            Rejeitar
+                          </Button>
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-muted-foreground mt-2">
                         {formatTime(notification.created_at)}
                       </p>
