@@ -30,7 +30,8 @@ import {
   Target,
   Users,
   Zap,
-  Upload
+  Upload,
+  UserPlus
 } from 'lucide-react';
 
 const INTEREST_OPTIONS = [
@@ -419,93 +420,104 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
             </div>
           </div>
           
-          <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Edit3 className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Editar Perfil</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nome</Label>
-                  <Input
-                    id="name"
-                    value={editedUser.name}
-                    onChange={(e) => setEditedUser({...editedUser, name: e.target.value})}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="state">Estado</Label>
-                  <Select value={selectedState} onValueChange={(value) => {
-                    setSelectedState(value);
-                    setSelectedCity('');
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione seu estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BRAZIL_STATES.map((state) => (
-                        <SelectItem key={state.value} value={state.value}>
-                          {state.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="city">Cidade</Label>
-                  <Select value={selectedCity} onValueChange={setSelectedCity} disabled={!selectedState}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={selectedState ? "Selecione sua cidade" : "Primeiro selecione o estado"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedState && BRAZIL_STATES_AND_CITIES[selectedState as keyof typeof BRAZIL_STATES_AND_CITIES]?.map((cityName) => (
-                        <SelectItem key={cityName} value={cityName}>
-                          {cityName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={editedUser.bio || ''}
-                    onChange={(e) => setEditedUser({...editedUser, bio: e.target.value})}
-                  />
-                </div>
-                
-                <div>
-                  <Label>Interesses</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {INTEREST_OPTIONS.map((interest) => (
-                      <Badge
-                        key={interest}
-                        variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => toggleInterest(interest)}
-                      >
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <Button onClick={handleSaveProfile} className="w-full">
-                  Salvar
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/friend-suggestions')}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Encontrar
+            </Button>
+            
+            <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Editar
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Editar Perfil</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Nome</Label>
+                    <Input
+                      id="name"
+                      value={editedUser.name}
+                      onChange={(e) => setEditedUser({...editedUser, name: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="state">Estado</Label>
+                    <Select value={selectedState} onValueChange={(value) => {
+                      setSelectedState(value);
+                      setSelectedCity('');
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione seu estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BRAZIL_STATES.map((state) => (
+                          <SelectItem key={state.value} value={state.value}>
+                            {state.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="city">Cidade</Label>
+                    <Select value={selectedCity} onValueChange={setSelectedCity} disabled={!selectedState}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={selectedState ? "Selecione sua cidade" : "Primeiro selecione o estado"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedState && BRAZIL_STATES_AND_CITIES[selectedState as keyof typeof BRAZIL_STATES_AND_CITIES]?.map((cityName) => (
+                          <SelectItem key={cityName} value={cityName}>
+                            {cityName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={editedUser.bio || ''}
+                      onChange={(e) => setEditedUser({...editedUser, bio: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Interesses</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {INTEREST_OPTIONS.map((interest) => (
+                        <Badge
+                          key={interest}
+                          variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleInterest(interest)}
+                        >
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Button onClick={handleSaveProfile} className="w-full">
+                    Salvar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {user.bio && (
