@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Event } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,6 +44,7 @@ interface ProfilePageProps {
 }
 
 export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
+  const navigate = useNavigate();
   const { updateProfile, profile } = useAuth();
   const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -55,6 +57,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
   const [userNumber, setUserNumber] = useState<string>('');
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [completedEvents, setCompletedEvents] = useState<Event[]>([]);
+  const [friends, setFriends] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
   // Helper function to check if event is completed
@@ -169,6 +172,40 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
 
     fetchUserEvents();
   }, [profile, toast]);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!profile?.user_id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('friendships')
+          .select('user_id, friend_id')
+          .eq('status', 'accepted')
+          .or(`user_id.eq.${profile.user_id},friend_id.eq.${profile.user_id}`);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const friendIds = data.map(f => 
+            f.user_id === profile.user_id ? f.friend_id : f.user_id
+          );
+
+          const { data: friendsData, error: friendsError } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url, city')
+            .in('user_id', friendIds);
+
+          if (friendsError) throw friendsError;
+          setFriends(friendsData || []);
+        }
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      }
+    };
+
+    fetchFriends();
+  }, [profile]);
 
   useEffect(() => {
     // Parse location to set state and city
@@ -515,6 +552,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
             <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
             <TabsTrigger value="events" className="flex-1">Eventos</TabsTrigger>
             <TabsTrigger value="history" className="flex-1">Histórico</TabsTrigger>
+            <TabsTrigger value="friends" className="flex-1">Amigos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="p-4 space-y-4">
@@ -629,6 +667,49 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <p>Nenhum evento no histórico</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="friends" className="p-4 space-y-4">
+            {friends.length > 0 ? (
+              friends.map((friend) => (
+                <Card 
+                  key={friend.user_id} 
+                  className="cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => navigate(`/user/${friend.user_id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-4">
+                      {friend.avatar_url ? (
+                        <img 
+                          src={friend.avatar_url} 
+                          alt={friend.full_name}
+                          className="w-14 h-14 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-lg font-medium text-primary">
+                            {friend.full_name?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{friend.full_name}</h3>
+                        {friend.city && (
+                          <p className="text-sm text-gray-600 flex items-center">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {friend.city}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Nenhum amigo ainda</p>
               </div>
             )}
           </TabsContent>
