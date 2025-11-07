@@ -152,19 +152,19 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
       {/* Daily Mission */}
       <div className="px-4">
-        <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-          <div className="flex items-start gap-4">
+        <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-6 shadow-md relative overflow-hidden">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <h3 className="text-white font-semibold text-lg mb-2">
+              <h3 className="text-white font-bold text-lg mb-2">
                 Missão do Dia
               </h3>
-              <p className="text-white/95 text-base">
+              <p className="text-white text-base leading-relaxed">
                 {dailyMission.text}
               </p>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <ShieldCheck className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 rounded-full bg-white/25 flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
             </div>
           </div>
