@@ -3,7 +3,7 @@ import { Event } from '@/types';
 import { EventCard } from './EventCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Sparkles, Flame, ChevronRight } from 'lucide-react';
+import { Sparkles, Flame, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 interface HomePageProps {
@@ -20,6 +20,24 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const userName = currentUser?.name || 'Usuário';
+
+  // Daily missions that change based on the day
+  const getDailyMission = () => {
+    const missions = [
+      { text: "Confirme presença em um evento de esportes!", category: "Esportes" },
+      { text: "Participe de um evento cultural hoje!", category: "Cultura" },
+      { text: "Faça um novo amigo na plataforma!", category: "Social" },
+      { text: "Crie seu primeiro evento da semana!", category: "Criar" },
+      { text: "Explore eventos de música perto de você!", category: "Música" },
+      { text: "Participe de um evento de gastronomia!", category: "Gastronomia" },
+      { text: "Conecte-se com amigos em um evento!", category: "Social" }
+    ];
+    
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    return missions[dayOfYear % missions.length];
+  };
+
+  const dailyMission = getDailyMission();
 
   const fetchEvents = async () => {
     try {
@@ -122,14 +140,35 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Greeting Message */}
-      <div className="px-4 pt-4">
+      {/* Greeting Message - Centered */}
+      <div className="px-4 pt-6 text-center">
         <h2 className="text-2xl font-bold text-foreground">
-          Olá, {userName}! 👋
+          Olá, {userName}
         </h2>
-        <p className="text-muted-foreground mt-1">
-          Descubra eventos incríveis perto de você
+        <p className="text-muted-foreground mt-2">
+          O que vamos fazer hoje?
         </p>
+      </div>
+
+      {/* Daily Mission */}
+      <div className="px-4">
+        <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-lg mb-2">
+                Missão do Dia
+              </h3>
+              <p className="text-white/95 text-base">
+                {dailyMission.text}
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <ShieldCheck className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Trending Events - Horizontal Scroll */}
