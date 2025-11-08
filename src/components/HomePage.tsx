@@ -152,8 +152,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
       {/* Daily Mission */}
       <div className="px-4">
-        <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-6 shadow-md relative overflow-hidden">
-          <div className="flex items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl p-6 shadow-md relative overflow-hidden animate-fade-in">
+          {/* Shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[slide-in-right_3s_ease-in-out_infinite]" />
+          
+          <div className="flex items-center justify-between gap-4 relative z-10">
             <div className="flex-1">
               <h3 className="text-white font-bold text-lg mb-2">
                 Missão do Dia
@@ -163,7 +166,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
               </p>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-14 h-14 rounded-full bg-white/25 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-white/25 flex items-center justify-center animate-pulse">
                 <ShieldCheck className="w-8 h-8 text-white" strokeWidth={2.5} />
               </div>
             </div>
