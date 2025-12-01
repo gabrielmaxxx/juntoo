@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Event } from '@/types';
-import { Calendar, MapPin, Tag, Users, Share2, ArrowLeft, Send } from 'lucide-react';
+import { Calendar, MapPin, Tag, Users, Share2, ArrowLeft, Send, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { UserAvatar } from './UserAvatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EventReview } from './EventReview';
+import { EventReviewForm } from './EventReviewForm';
 
 interface EventDetailsProps {
   event: Event;
@@ -26,6 +28,10 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [creator, setCreator] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+  const [userHasReviewed, setUserHasReviewed] = useState(false);
+  const [isEventCompleted, setIsEventCompleted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +40,22 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       fetchParticipants();
     }
     fetchCreator();
+    fetchReviews();
+    checkIfEventCompleted();
   }, [user, event.id]);
+
+  const checkIfEventCompleted = () => {
+    if (event.isRecurring) {
+      setIsEventCompleted(false);
+      return;
+    }
+    
+    const eventDateTime = new Date(`${event.date}T${event.time}`);
+    const now = new Date();
+    const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
+    
+    setIsEventCompleted(now > twentyFourHoursAfter);
+  };
 
   useEffect(() => {
     if (isParticipating) {
@@ -156,6 +177,67 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       setCreator(data);
     } catch (error) {
       console.error('Error fetching creator:', error);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('event_reviews')
+        .select(`
+          *,
+          profiles!event_reviews_user_id_fkey (
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('event_id', event.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setReviews(data || []);
+
+      // Calculate average rating
+      if (data && data.length > 0) {
+        const avg = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
+        setAverageRating(Math.round(avg * 10) / 10);
+      } else {
+        setAverageRating(null);
+      }
+
+      // Check if user has already reviewed
+      if (user) {
+        const userReview = data?.find(review => review.user_id === user.id);
+        setUserHasReviewed(!!userReview);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      const { error } = await supabase
+        .from('event_reviews')
+        .delete()
+        .eq('id', reviewId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Avaliação removida',
+        description: 'Sua avaliação foi removida com sucesso.'
+      });
+
+      fetchReviews();
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover a avaliação.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -434,6 +516,69 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                 </div>
               </div>
             )}
+
+            {/* Reviews Section */}
+            <div className="border-t border-border/50 pt-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-base sm:text-lg">Avaliações</h3>
+                  {averageRating !== null && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= Math.round(averageRating)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {averageRating.toFixed(1)} ({reviews.length} {reviews.length === 1 ? 'avaliação' : 'avaliações'})
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Review Form - Only show if event is completed, user participated, and hasn't reviewed */}
+              {isEventCompleted && isParticipating && !userHasReviewed && user && (
+                <div className="mb-6">
+                  <EventReviewForm
+                    eventId={event.id}
+                    userId={user.id}
+                    onReviewSubmitted={fetchReviews}
+                  />
+                </div>
+              )}
+
+              {/* Reviews List */}
+              {reviews.length === 0 ? (
+                <div className="text-center py-8 bg-muted/20 rounded-lg">
+                  <Star className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {isEventCompleted 
+                      ? 'Seja o primeiro a avaliar este evento!'
+                      : 'As avaliações estarão disponíveis após o evento.'
+                    }
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <EventReview
+                      key={review.id}
+                      review={review}
+                      currentUserId={user?.id}
+                      onDelete={handleDeleteReview}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {isParticipating && (
