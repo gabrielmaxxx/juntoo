@@ -1,6 +1,8 @@
 import { Event } from '@/types';
-import { MapPin, Clock, Users, Tag } from 'lucide-react';
+import { MapPin, Clock, Users, Tag, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EventCardProps {
   event: Event;
@@ -9,6 +11,32 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, variant = 'default', onEventClick }: EventCardProps) => {
+  const [averageRating, setAverageRating] = useState<number | null>(null);
+  const [reviewCount, setReviewCount] = useState(0);
+
+  useEffect(() => {
+    fetchRating();
+  }, [event.id]);
+
+  const fetchRating = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('event_reviews')
+        .select('rating')
+        .eq('event_id', event.id);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const avg = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
+        setAverageRating(Math.round(avg * 10) / 10);
+        setReviewCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching rating:', error);
+    }
+  };
+
   const formatDate = (date: string, time: string) => {
     const eventDate = new Date(`${date}T${time}`);
     return eventDate.toLocaleDateString('pt-BR', { 
@@ -35,9 +63,17 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
           {event.subtitle && (
             <p className="text-sm opacity-90 mb-2">{event.subtitle}</p>
           )}
-          <div className="flex items-center text-sm opacity-90">
-            <MapPin className="w-4 h-4 mr-1" />
-            <span>{event.location}</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm opacity-90">
+              <MapPin className="w-4 h-4 mr-1" />
+              <span>{event.location}</span>
+            </div>
+            {averageRating !== null && (
+              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-medium">{averageRating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
         </div>
         {event.isTrending && (
@@ -74,9 +110,17 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
           </div>
         </div>
         <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
-          <div className="flex items-center">
-            <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" />
-            <span className="text-xs sm:text-sm text-gray-600">{event.attendees.length} participante{event.attendees.length !== 1 ? 's' : ''}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center">
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-600">{event.attendees.length}</span>
+            </div>
+            {averageRating !== null && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-gray-600">{averageRating.toFixed(1)}</span>
+              </div>
+            )}
           </div>
           {event.creatorAvatar && (
             <img 
@@ -144,17 +188,25 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
           </div>
         )}
 
-        {event.attendees.length > 0 && (
-          <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-3">
             <div className="flex items-center">
               <Users className="w-4 h-4 text-primary mr-1" />
-              <span className="text-sm text-gray-600">{event.attendees.length} pessoas vão</span>
+              <span className="text-sm text-gray-600">{event.attendees.length}</span>
             </div>
-            <Button variant="outline" size="sm">
-              Participar
-            </Button>
+            {averageRating !== null && (
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm text-gray-600 font-medium">
+                  {averageRating.toFixed(1)} ({reviewCount})
+                </span>
+              </div>
+            )}
           </div>
-        )}
+          <Button variant="outline" size="sm">
+            Participar
+          </Button>
+        </div>
       </div>
     </div>
   );
