@@ -12,6 +12,7 @@ import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CATEGORIES } from '@/constants/categories';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
@@ -26,7 +27,7 @@ interface SearchFilters {
   priceRange: 'all' | 'free' | 'paid';
 }
 
-const CATEGORIES = ['Todos', 'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Fitness', 'Educação', 'Social', 'Negócios', 'Outro'];
+const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -225,7 +226,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             </PopoverTrigger>
             <PopoverContent className="w-48 p-2">
               <div className="space-y-1">
-                {CATEGORIES.map(category => (
+                {SEARCH_CATEGORIES.map(category => (
                   <Button
                     key={category}
                     variant={filters.category === category ? 'default' : 'ghost'}

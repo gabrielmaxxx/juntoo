@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { CATEGORIES } from '@/constants/categories';
 import { parseISO, addHours, isBefore } from 'date-fns';
 import { 
   Star, 
@@ -33,11 +34,6 @@ import {
   Upload,
   UserPlus
 } from 'lucide-react';
-
-const INTEREST_OPTIONS = [
-  'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Viagem',
-  'Fotografia', 'Leitura', 'Cinema', 'Dança', 'Natureza', 'Fitness'
-];
 
 interface ProfilePageProps {
   user: User;
@@ -224,10 +220,10 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
         // Only keep valid interest strings that don't contain JSON artifacts
         return interest && 
                typeof interest === 'string' && 
-               !interest.includes('[') && 
-               !interest.includes('"') && 
-               !interest.includes('\\') &&
-               INTEREST_OPTIONS.includes(interest);
+                !interest.includes('[') && 
+                !interest.includes('"') && 
+                !interest.includes('\\') &&
+                CATEGORIES.includes(interest as any);
       });
       setSelectedInterests(cleanInterests);
     } else {
@@ -498,7 +494,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                   <div>
                     <Label>Interesses</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {INTEREST_OPTIONS.map((interest) => (
+                      {CATEGORIES.map((interest) => (
                         <Badge
                           key={interest}
                           variant={selectedInterests.includes(interest) ? "default" : "outline"}

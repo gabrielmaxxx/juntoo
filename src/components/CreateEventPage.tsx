@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Users, Lock, Share2, Copy, Upload, 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { CATEGORIES } from '@/constants/categories';
 
 interface CreateEventPageProps {
   onBack: () => void;
@@ -39,19 +40,6 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   });
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const categories = [
-    'Esportes',
-    'Música',
-    'Arte',
-    'Tecnologia',
-    'Culinária',
-    'Fitness',
-    'Educação',
-    'Social',
-    'Negócios',
-    'Outro'
-  ];
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -409,7 +397,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {CATEGORIES.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>

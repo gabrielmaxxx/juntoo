@@ -9,11 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plane, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
-
-const INTEREST_OPTIONS = [
-  'Esportes', 'Música', 'Arte', 'Tecnologia', 'Culinária', 'Viagem',
-  'Fotografia', 'Leitura', 'Cinema', 'Dança', 'Natureza', 'Fitness'
-];
+import { CATEGORIES } from '@/constants/categories';
 
 const Logo = () => (
   <div className="relative w-32 h-32 mx-auto mb-6">
@@ -314,7 +310,7 @@ export const AuthPage = () => {
               <div className="space-y-2">
                 <Label className="text-base font-semibold">Interesses (selecione pelo menos um)</Label>
                 <div className="flex flex-wrap gap-2">
-                  {INTEREST_OPTIONS.map((interest) => (
+                  {CATEGORIES.map((interest) => (
                     <Badge
                       key={interest}
                       variant={selectedInterests.includes(interest) ? "default" : "outline"}
