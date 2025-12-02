@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SplashScreen } from '@/components/SplashScreen';
 import { AppHeader } from '@/components/AppHeader';
 import { Navigation } from '@/components/Navigation';
@@ -16,9 +17,19 @@ import { Event } from '@/types';
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  const activeTab = searchParams.get('tab') || 'home';
+
+  const setActiveTab = (tab: string) => {
+    if (tab === 'home') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ tab });
+    }
+  };
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
