@@ -31,11 +31,11 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`flex flex-col items-center justify-center w-1/5 h-full transition-juntoo ${
-                  isActive ? 'text-primary' : 'text-gray-500'
+                className={`flex flex-col items-center justify-center w-1/5 h-full transition-all duration-200 ${
+                  isActive ? 'text-primary scale-105' : 'text-gray-500'
                 }`}
               >
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`} />
                 <span className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium">{item.label}</span>
               </button>
             );
