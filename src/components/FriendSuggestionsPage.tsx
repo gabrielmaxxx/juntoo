@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, UserPlus, Heart } from 'lucide-react';
+import { MapPin, UserPlus, Heart, ArrowLeft } from 'lucide-react';
 import { AppHeader } from './AppHeader';
 
 interface SuggestedUser {
@@ -174,6 +174,15 @@ export const FriendSuggestionsPage = () => {
       <AppHeader />
       <div className="container mx-auto px-4 py-6 pb-20">
         <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="mb-4 -ml-2"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
           <h1 className="text-2xl font-bold text-foreground">Sugestões de Amizade</h1>
           <p className="text-muted-foreground mt-1">
             Pessoas com interesses e localização em comum com você
