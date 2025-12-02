@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, UserPlus, Heart, ArrowLeft } from 'lucide-react';
 import { AppHeader } from './AppHeader';
+import { BottomNavigation } from './BottomNavigation';
 
 interface SuggestedUser {
   user_id: string;
@@ -145,7 +146,7 @@ export const FriendSuggestionsPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container mx-auto px-4 py-6 pb-20">
+        <div className="container mx-auto px-4 py-6 pb-24">
           <h1 className="text-2xl font-bold mb-6">Sugestões de Amizade</h1>
           <div className="space-y-4">
             {[1, 2, 3, 4].map(i => (
@@ -165,6 +166,7 @@ export const FriendSuggestionsPage = () => {
             ))}
           </div>
         </div>
+        <BottomNavigation />
       </div>
     );
   }
@@ -172,7 +174,7 @@ export const FriendSuggestionsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <div className="container mx-auto px-4 py-6 pb-20">
+      <div className="container mx-auto px-4 py-6 pb-24">
         <div className="mb-6">
           <Button
             variant="ghost"
@@ -292,6 +294,7 @@ export const FriendSuggestionsPage = () => {
           </div>
         )}
       </div>
+      <BottomNavigation />
     </div>
   );
 };

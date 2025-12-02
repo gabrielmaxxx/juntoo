@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { AppHeader } from '@/components/AppHeader';
+import { BottomNavigation } from '@/components/BottomNavigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -235,7 +236,7 @@ export default function UserProfilePage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
@@ -366,6 +367,7 @@ export default function UserProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+      <BottomNavigation />
     </div>
   );
 }
