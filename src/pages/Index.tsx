@@ -100,57 +100,59 @@ const Index = () => {
             
             {/* Main Content */}
             <main className="overflow-y-auto">
-              {activeTab === 'home' && (
-                <HomePage 
-                  onEventClick={handleEventClick}
-                  currentUser={{ name: profile?.full_name || 'Usuário' }}
-                />
-              )}
-              {activeTab === 'search' && (
-                <SearchPage onEventClick={handleEventClick} />
-              )}
-              {activeTab === 'activities' && (
-                <ActivitiesPage 
-                  currentUser={{
-                    id: user.id,
-                    name: profile?.full_name || 'Usuário',
-                    email: user.email || '',
-                    avatarUrl: profile?.avatar_url || '',
-                    bio: '',
-                    location: profile?.city || '',
-                    rating: 4.8,
-                    interests: profile?.interests || [],
-                    badges: [],
-                    posts: [],
-                    registeredEvents: [],
-                    attendedEvents: []
-                  }}
-                  onEventClick={handleEventClick}
-                  onCreateClick={() => setActiveTab('create')}
-                />
-              )}
-              {activeTab === 'profile' && (
-                <ProfilePage 
-                  user={{
-                    id: user.id,
-                    name: profile?.full_name || 'Usuário',
-                    email: user.email || '',
-                    avatarUrl: profile?.avatar_url || '',
-                    bio: '',
-                    location: profile?.city || '',
-                    rating: 4.8,
-                    interests: profile?.interests || [],
-                    badges: [],
-                    posts: [],
-                    registeredEvents: [],
-                    attendedEvents: []
-                  }}
-                  onUserUpdate={() => {}}
-                />
-              )}
-              {activeTab === 'create' && (
-                <CreateEventPage onBack={() => setActiveTab('home')} />
-              )}
+              <div key={activeTab} className="animate-fade-in">
+                {activeTab === 'home' && (
+                  <HomePage 
+                    onEventClick={handleEventClick}
+                    currentUser={{ name: profile?.full_name || 'Usuário' }}
+                  />
+                )}
+                {activeTab === 'search' && (
+                  <SearchPage onEventClick={handleEventClick} />
+                )}
+                {activeTab === 'activities' && (
+                  <ActivitiesPage 
+                    currentUser={{
+                      id: user.id,
+                      name: profile?.full_name || 'Usuário',
+                      email: user.email || '',
+                      avatarUrl: profile?.avatar_url || '',
+                      bio: '',
+                      location: profile?.city || '',
+                      rating: 4.8,
+                      interests: profile?.interests || [],
+                      badges: [],
+                      posts: [],
+                      registeredEvents: [],
+                      attendedEvents: []
+                    }}
+                    onEventClick={handleEventClick}
+                    onCreateClick={() => setActiveTab('create')}
+                  />
+                )}
+                {activeTab === 'profile' && (
+                  <ProfilePage 
+                    user={{
+                      id: user.id,
+                      name: profile?.full_name || 'Usuário',
+                      email: user.email || '',
+                      avatarUrl: profile?.avatar_url || '',
+                      bio: '',
+                      location: profile?.city || '',
+                      rating: 4.8,
+                      interests: profile?.interests || [],
+                      badges: [],
+                      posts: [],
+                      registeredEvents: [],
+                      attendedEvents: []
+                    }}
+                    onUserUpdate={() => {}}
+                  />
+                )}
+                {activeTab === 'create' && (
+                  <CreateEventPage onBack={() => setActiveTab('home')} />
+                )}
+              </div>
             </main>
             
             {/* Navigation */}
