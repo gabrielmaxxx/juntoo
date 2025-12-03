@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export const usePinnedEvents = () => {
   const [pinnedEventIds, setPinnedEventIds] = useState<string[]>([]);
@@ -44,6 +45,10 @@ export const usePinnedEvents = () => {
 
         if (error) throw error;
         setPinnedEventIds(prev => prev.filter(id => id !== eventId));
+        toast({
+          title: "Evento desafixado",
+          description: "O evento foi removido dos seus fixados.",
+        });
       } else {
         const { error } = await supabase
           .from('pinned_events')
@@ -51,6 +56,10 @@ export const usePinnedEvents = () => {
 
         if (error) throw error;
         setPinnedEventIds(prev => [...prev, eventId]);
+        toast({
+          title: "Evento fixado",
+          description: "O evento aparecerá no topo da sua lista.",
+        });
       }
       return true;
     } catch (error) {
