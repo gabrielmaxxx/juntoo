@@ -4,8 +4,9 @@ import { EventCard } from '@/components/EventCard';
 import { EventDetails } from '@/components/EventDetails';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Users, Plus } from 'lucide-react';
+import { Calendar, Users, Plus, Pin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 
 interface ActivitiesPageProps {
   currentUser: User;
@@ -18,6 +19,7 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isPinned, togglePin } = usePinnedEvents();
 
   // Helper function to check if event is completed
   const isEventCompleted = (event: Event): boolean => {
@@ -31,11 +33,22 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
     return now > twentyFourHoursAfter;
   };
 
-  // Separate events into upcoming and completed
-  const upcomingRegistered = registeredEvents.filter(e => !isEventCompleted(e));
-  const completedRegistered = registeredEvents.filter(e => isEventCompleted(e));
-  const upcomingCreated = createdEvents.filter(e => !isEventCompleted(e));
-  const completedCreated = createdEvents.filter(e => isEventCompleted(e));
+  // Sort events with pinned first
+  const sortByPinned = (events: Event[]) => {
+    return [...events].sort((a, b) => {
+      const aPinned = isPinned(a.id);
+      const bPinned = isPinned(b.id);
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      return 0;
+    });
+  };
+
+  // Separate events into upcoming and completed, sorted by pinned
+  const upcomingRegistered = sortByPinned(registeredEvents.filter(e => !isEventCompleted(e)));
+  const completedRegistered = sortByPinned(registeredEvents.filter(e => isEventCompleted(e)));
+  const upcomingCreated = sortByPinned(createdEvents.filter(e => !isEventCompleted(e)));
+  const completedCreated = sortByPinned(createdEvents.filter(e => isEventCompleted(e)));
 
   useEffect(() => {
     const fetchUserEvents = async () => {
@@ -249,6 +262,9 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                           event={event}
                           onEventClick={() => handleActivityClick(event)}
                           variant="compact"
+                          isPinned={isPinned(event.id)}
+                          onTogglePin={togglePin}
+                          showPinButton={true}
                         />
                       ))}
                     </div>
@@ -272,6 +288,9 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                           event={event}
                           onEventClick={() => handleActivityClick(event)}
                           variant="compact"
+                          isPinned={isPinned(event.id)}
+                          onTogglePin={togglePin}
+                          showPinButton={true}
                         />
                       ))}
                     </div>
@@ -313,6 +332,9 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                           event={event}
                           onEventClick={() => handleActivityClick(event)}
                           variant="compact"
+                          isPinned={isPinned(event.id)}
+                          onTogglePin={togglePin}
+                          showPinButton={true}
                         />
                       ))}
                     </div>
@@ -336,6 +358,9 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
                           event={event}
                           onEventClick={() => handleActivityClick(event)}
                           variant="compact"
+                          isPinned={isPinned(event.id)}
+                          onTogglePin={togglePin}
+                          showPinButton={true}
                         />
                       ))}
                     </div>

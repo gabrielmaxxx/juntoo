@@ -1,16 +1,27 @@
 import { Event } from '@/types';
-import { MapPin, Clock, Users, Tag, Star } from 'lucide-react';
+import { MapPin, Clock, Users, Tag, Star, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface EventCardProps {
   event: Event;
   variant?: 'default' | 'compact' | 'featured';
   onEventClick?: (event: Event) => void;
+  isPinned?: boolean;
+  onTogglePin?: (eventId: string) => void;
+  showPinButton?: boolean;
 }
 
-export const EventCard = ({ event, variant = 'default', onEventClick }: EventCardProps) => {
+export const EventCard = ({ 
+  event, 
+  variant = 'default', 
+  onEventClick,
+  isPinned = false,
+  onTogglePin,
+  showPinButton = false
+}: EventCardProps) => {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [reviewCount, setReviewCount] = useState(0);
 
@@ -86,11 +97,24 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
   }
 
   if (variant === 'compact') {
+    const handlePinClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onTogglePin?.(event.id);
+    };
+
     return (
       <div 
-        className="bg-white rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
+        className={cn(
+          "bg-white rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated relative",
+          isPinned && "ring-2 ring-primary/30"
+        )}
         onClick={() => onEventClick?.(event)}
       >
+        {isPinned && (
+          <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-1">
+            <Pin className="w-3 h-3" />
+          </div>
+        )}
         <div className="flex space-x-2 sm:space-x-3">
           <img 
             src={event.imageUrl} 
@@ -122,14 +146,30 @@ export const EventCard = ({ event, variant = 'default', onEventClick }: EventCar
               </div>
             )}
           </div>
-          {event.creatorAvatar && (
-            <img 
-              src={event.creatorAvatar} 
-              alt={event.creatorName || 'Criador'}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-              title={event.creatorName}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            {showPinButton && (
+              <button
+                onClick={handlePinClick}
+                className={cn(
+                  "p-1.5 rounded-full transition-colors",
+                  isPinned 
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                title={isPinned ? "Desafixar" : "Fixar"}
+              >
+                <Pin className="w-4 h-4" />
+              </button>
+            )}
+            {event.creatorAvatar && (
+              <img 
+                src={event.creatorAvatar} 
+                alt={event.creatorName || 'Criador'}
+                className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                title={event.creatorName}
+              />
+            )}
+          </div>
         </div>
       </div>
     );
