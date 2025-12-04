@@ -32,8 +32,10 @@ import {
   Users,
   Zap,
   Upload,
-  UserPlus
+  UserPlus,
+  Bell
 } from 'lucide-react';
+import { NotificationPreferencesPage } from './NotificationPreferences';
 
 interface ProfilePageProps {
   user: User;
@@ -45,6 +47,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
   const { updateProfile, profile } = useAuth();
   const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showNotificationPreferences, setShowNotificationPreferences] = useState(false);
   const [editedUser, setEditedUser] = useState(user);
   const [activeTab, setActiveTab] = useState('posts');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -367,6 +370,10 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     'Zap': Zap
   };
 
+  if (showNotificationPreferences) {
+    return <NotificationPreferencesPage onBack={() => setShowNotificationPreferences(false)} />;
+  }
+
   return (
     <div className="pb-20">
       {/* Profile Header */}
@@ -417,6 +424,15 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </div>
           
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => setShowNotificationPreferences(true)}
+              title="Notificações"
+            >
+              <Bell className="w-4 h-4" />
+            </Button>
+            
             <Button 
               variant="outline" 
               size="sm"
