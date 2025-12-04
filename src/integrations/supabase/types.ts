@@ -238,6 +238,7 @@ export type Database = {
           new_event: boolean
           new_message: boolean
           participant_joined: boolean
+          push_enabled: boolean
           updated_at: string
           user_id: string
         }
@@ -251,6 +252,7 @@ export type Database = {
           new_event?: boolean
           new_message?: boolean
           participant_joined?: boolean
+          push_enabled?: boolean
           updated_at?: string
           user_id: string
         }
@@ -264,6 +266,7 @@ export type Database = {
           new_event?: boolean
           new_message?: boolean
           participant_joined?: boolean
+          push_enabled?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -367,6 +370,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_number?: number
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
