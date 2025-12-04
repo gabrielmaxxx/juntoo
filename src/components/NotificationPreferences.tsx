@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, Users, RefreshCw, MessageCircle, Sparkles, UserPlus, Clock } from 'lucide-react';
+import { ArrowLeft, Bell, Users, RefreshCw, MessageCircle, Sparkles, UserPlus, Clock, Smartphone } from 'lucide-react';
 
 interface NotificationPreferences {
   event_join: boolean;
@@ -77,6 +78,8 @@ const PREFERENCE_CONFIG = [
 export const NotificationPreferencesPage = ({ onBack }: NotificationPreferencesPageProps) => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
+  
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     event_join: true,
     participant_joined: true,
@@ -162,6 +165,14 @@ export const NotificationPreferencesPage = ({ onBack }: NotificationPreferencesP
     }
   };
 
+  const handlePushToggle = async () => {
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -180,11 +191,48 @@ export const NotificationPreferencesPage = ({ onBack }: NotificationPreferencesP
       </div>
 
       <div className="p-4 space-y-4">
+        {/* Push Notifications Card */}
+        {isSupported && (
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Smartphone className="h-5 w-5 text-primary" />
+                Notificações Push
+              </CardTitle>
+              <CardDescription>
+                Receba notificações mesmo quando o navegador estiver fechado
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {isSubscribed ? 'Notificações push ativadas' : 'Ativar notificações push'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {permission === 'denied' 
+                      ? 'Bloqueado pelo navegador. Altere nas configurações.'
+                      : isSubscribed 
+                        ? 'Você receberá alertas no navegador'
+                        : 'Clique para permitir notificações'}
+                  </p>
+                </div>
+                <Switch
+                  checked={isSubscribed}
+                  onCheckedChange={handlePushToggle}
+                  disabled={pushLoading || permission === 'denied'}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* In-App Notifications Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />
-              Notificações
+              Notificações no App
             </CardTitle>
             <CardDescription>
               Escolha quais notificações você deseja receber
