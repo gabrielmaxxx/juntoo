@@ -227,6 +227,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          event_join: boolean
+          event_reminder: boolean
+          event_updated: boolean
+          friend_request: boolean
+          id: string
+          new_event: boolean
+          new_message: boolean
+          participant_joined: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_join?: boolean
+          event_reminder?: boolean
+          event_updated?: boolean
+          friend_request?: boolean
+          id?: string
+          new_event?: boolean
+          new_message?: boolean
+          participant_joined?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_join?: boolean
+          event_reminder?: boolean
+          event_updated?: boolean
+          friend_request?: boolean
+          id?: string
+          new_event?: boolean
+          new_message?: boolean
+          participant_joined?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -335,6 +377,10 @@ export type Database = {
     Functions: {
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
+      user_wants_notification: {
+        Args: { p_type: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
