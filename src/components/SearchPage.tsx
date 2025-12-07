@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Search, Calendar, MapPin, Tag, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES } from '@/constants/categories';
+import { usePublicEvents } from '@/hooks/useEvents';
+import { useState } from 'react';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
@@ -30,8 +30,7 @@ interface SearchFilters {
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: events = [], isLoading: loading } = usePublicEvents();
   const [filters, setFilters] = useState<SearchFilters>({
     text: '',
     category: 'Todos',
@@ -40,76 +39,6 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
     date: undefined,
     priceRange: 'all'
   });
-
-  // Fetch events from Supabase
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('is_private', false)
-          .order('date', { ascending: true });
-
-        if (error) throw error;
-
-        // Filter out completed events (events > 24h after scheduled time, except recurring ones)
-        const now = new Date();
-        const activeEvents = data.filter(event => {
-          // Recurring events are always shown
-          if (event.is_recurring) return true;
-          
-          // Check if event is completed (more than 24h after scheduled time)
-          const eventDateTime = new Date(`${event.date}T${event.time}`);
-          const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
-          return now < twentyFourHoursAfter;
-        });
-
-        // Get all participant counts and creator info
-        const eventsWithData = await Promise.all(activeEvents.map(async (event) => {
-          // Get participants
-          const { data: participants } = await supabase
-            .from('event_participants')
-            .select('user_id')
-            .eq('event_id', event.id);
-
-          // Get creator profile
-          const { data: creatorProfile } = await supabase
-            .from('profiles')
-            .select('avatar_url, full_name')
-            .eq('user_id', event.created_by)
-            .single();
-
-          return {
-            id: event.id,
-            title: event.title,
-            category: event.category,
-            location: event.location,
-            state: event.state,
-            city: event.city,
-            date: event.date,
-            time: event.time,
-            price: event.price?.toString() || 'Gratuito',
-            description: event.description || '',
-            imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-            attendees: participants?.map(p => p.user_id) || [],
-            createdBy: event.created_by,
-            creatorAvatar: creatorProfile?.avatar_url,
-            creatorName: creatorProfile?.full_name,
-            isRecurring: event.is_recurring
-          };
-        }));
-
-        setEvents(eventsWithData);
-      } catch (error) {
-        console.error('Erro ao carregar eventos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
 
   // Filter events based on search criteria
   const filteredEvents = useMemo(() => {

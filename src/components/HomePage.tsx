@@ -1,10 +1,8 @@
-import { useState, useEffect } from 'react';
 import { Event } from '@/types';
-import { EventCard } from './EventCard';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Flame, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
+import { useTrendingEvents, useFriendsEvents, useRecommendedEvents } from '@/hooks/useEvents';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
@@ -15,11 +13,18 @@ interface HomePageProps {
 
 export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const { profile, user } = useAuth();
-  const [trendingEvents, setTrendingEvents] = useState<Event[]>([]);
-  const [friendsEvents, setFriendsEvents] = useState<Event[]>([]);
-  const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const userName = currentUser?.name || 'Usuário';
+
+  // Use optimized hooks with React Query caching
+  const { data: trendingEvents = [], isLoading: loadingTrending } = useTrendingEvents(5);
+  const { data: friendsEvents = [], isLoading: loadingFriends } = useFriendsEvents(user?.id, 3);
+  const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
+    user?.id,
+    profile?.interests || null,
+    10
+  );
+
+  const loading = loadingTrending || loadingFriends || loadingRecommended;
 
   // Daily missions that change based on the day
   const getDailyMission = () => {
@@ -38,95 +43,6 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   };
 
   const dailyMission = getDailyMission();
-
-  const fetchEvents = async () => {
-    try {
-      // Fetch all public events
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('is_private', false)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      // Filter out completed events
-      const now = new Date();
-      const activeEvents = data?.filter(event => {
-        if (event.is_recurring) return true;
-        const eventDateTime = new Date(`${event.date}T${event.time}`);
-        const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
-        return now < twentyFourHoursAfter;
-      }) || [];
-
-      // Convert to Event type
-      const formattedEvents: Event[] = activeEvents.map(event => ({
-        id: event.id,
-        title: event.title,
-        category: event.category,
-        location: event.location,
-        date: event.date,
-        time: event.time,
-        price: event.price ? `R$ ${event.price}` : 'Gratuito',
-        description: event.description || '',
-        imageUrl: event.image_url || '/placeholder.svg',
-        createdBy: event.created_by,
-        attendees: [],
-        isTrending: false,
-        isFeatured: false,
-        isRecurring: event.is_recurring
-      }));
-
-      // 1. Trending Events - Most recent events (top 5)
-      setTrendingEvents(formattedEvents.slice(0, 5));
-
-      // 2. Friends' Events - Events where friends are participants
-      if (user?.id) {
-        // Get user's friends
-        const { data: friendships } = await supabase
-          .from('friendships')
-          .select('user_id, friend_id')
-          .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
-          .eq('status', 'accepted');
-
-        const friendIds = friendships?.map(f => 
-          f.user_id === user.id ? f.friend_id : f.user_id
-        ) || [];
-
-        if (friendIds.length > 0) {
-          // Get events where friends are participants
-          const { data: friendParticipations } = await supabase
-            .from('event_participants')
-            .select('event_id')
-            .in('user_id', friendIds);
-
-          const friendEventIds = friendParticipations?.map(p => p.event_id) || [];
-          const friendsGoingEvents = formattedEvents.filter(e => friendEventIds.includes(e.id));
-          setFriendsEvents(friendsGoingEvents.slice(0, 3));
-        }
-      }
-
-      // 3. Recommended Events - Based on user interests
-      const recommended = formattedEvents.filter(event => {
-        if (!profile?.interests || profile.interests.length === 0) return true;
-        return profile.interests.some(interest => 
-          event.category.toLowerCase().includes(interest.toLowerCase()) ||
-          event.title.toLowerCase().includes(interest.toLowerCase())
-        );
-      });
-      setRecommendedEvents(recommended.slice(0, 10));
-
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEvents();
-  }, [profile, user]);
 
   if (loading) {
     return (
