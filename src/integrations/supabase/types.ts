@@ -45,6 +45,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "event_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "event_messages_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -78,6 +85,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -116,6 +130,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -196,6 +217,13 @@ export type Database = {
             columns: ["parent_event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -335,6 +363,13 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pinned_events_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -405,7 +440,52 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      events_with_details: {
+        Row: {
+          average_rating: number | null
+          category: string | null
+          city: string | null
+          created_at: string | null
+          created_by: string | null
+          creator_avatar: string | null
+          creator_name: string | null
+          date: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          is_private: boolean | null
+          is_recurring: boolean | null
+          location: string | null
+          max_participants: number | null
+          parent_event_id: string | null
+          participants_count: number | null
+          price: number | null
+          private_code: string | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
+          review_count: number | null
+          state: string | null
+          time: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       generate_private_code: { Args: never; Returns: string }
