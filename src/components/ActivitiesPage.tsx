@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Event, User } from '@/types';
 import { EventCard } from '@/components/EventCard';
 import { EventDetails } from '@/components/EventDetails';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Users, Plus, Pin } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Calendar, Users, Plus } from 'lucide-react';
 import { usePinnedEvents } from '@/hooks/usePinnedEvents';
+import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ActivitiesPageProps {
   currentUser: User;
@@ -16,10 +17,13 @@ interface ActivitiesPageProps {
 
 export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
-  const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
-  const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const { isPinned, togglePin } = usePinnedEvents();
+  
+  const { data: registeredEvents = [], isLoading: loadingRegistered } = useUserRegisteredEvents(user?.id);
+  const { data: createdEvents = [], isLoading: loadingCreated } = useUserCreatedEvents(user?.id);
+  
+  const loading = loadingRegistered || loadingCreated;
 
   // Helper function to check if event is completed
   const isEventCompleted = (event: Event): boolean => {
@@ -49,120 +53,6 @@ export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: Act
   const completedRegistered = sortByPinned(registeredEvents.filter(e => isEventCompleted(e)));
   const upcomingCreated = sortByPinned(createdEvents.filter(e => !isEventCompleted(e)));
   const completedCreated = sortByPinned(createdEvents.filter(e => isEventCompleted(e)));
-
-  useEffect(() => {
-    const fetchUserEvents = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Fetch events where user is participant
-        const { data: participantData, error: participantError } = await supabase
-          .from('event_participants')
-          .select('event_id')
-          .eq('user_id', user.id);
-
-        if (participantError) throw participantError;
-
-        const eventIds = participantData?.map(p => p.event_id) || [];
-
-        if (eventIds.length > 0) {
-          const { data: eventsData, error: eventsError } = await supabase
-            .from('events')
-            .select('*')
-            .in('id', eventIds);
-
-          if (eventsError) throw eventsError;
-
-          const transformedEvents: Event[] = await Promise.all(
-            (eventsData || []).map(async (event) => {
-              // Get participants for each event
-              const { data: participants } = await supabase
-                .from('event_participants')
-                .select('user_id')
-                .eq('event_id', event.id);
-
-              // Get creator profile
-              const { data: creatorProfile } = await supabase
-                .from('profiles')
-                .select('avatar_url, full_name')
-                .eq('user_id', event.created_by)
-                .single();
-
-              return {
-                id: event.id,
-                title: event.title,
-                category: event.category,
-                location: event.location,
-                date: event.date,
-                time: event.time,
-                price: event.price?.toString() || 'Gratuito',
-                description: event.description || '',
-                imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-                attendees: participants?.map(p => p.user_id) || [],
-                createdBy: event.created_by,
-                creatorAvatar: creatorProfile?.avatar_url,
-                creatorName: creatorProfile?.full_name,
-                isRecurring: event.is_recurring
-              };
-            })
-          );
-
-          setRegisteredEvents(transformedEvents);
-        }
-
-        // Fetch events created by user
-        const { data: createdData, error: createdError } = await supabase
-          .from('events')
-          .select('*')
-          .eq('created_by', user.id);
-
-        if (createdError) throw createdError;
-
-        const transformedCreated: Event[] = await Promise.all(
-          (createdData || []).map(async (event) => {
-            // Get participants for each event
-            const { data: participants } = await supabase
-              .from('event_participants')
-              .select('user_id')
-              .eq('event_id', event.id);
-
-            // Get creator profile
-            const { data: creatorProfile } = await supabase
-              .from('profiles')
-              .select('avatar_url, full_name')
-              .eq('user_id', event.created_by)
-              .single();
-
-            return {
-              id: event.id,
-              title: event.title,
-              category: event.category,
-              location: event.location,
-              date: event.date,
-              time: event.time,
-              price: event.price?.toString() || 'Gratuito',
-              description: event.description || '',
-              imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-              attendees: participants?.map(p => p.user_id) || [],
-              createdBy: event.created_by,
-              creatorAvatar: creatorProfile?.avatar_url,
-              creatorName: creatorProfile?.full_name,
-              isRecurring: event.is_recurring
-            };
-          })
-        );
-
-        setCreatedEvents(transformedCreated);
-      } catch (error) {
-        console.error('Erro ao carregar eventos do usuário:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserEvents();
-  }, []);
 
   const handleActivityClick = (event: Event) => {
     setSelectedActivity(event);

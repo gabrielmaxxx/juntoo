@@ -20,6 +20,8 @@ export interface Event {
   friendsGoing?: string[];
   distance?: string;
   isRecurring?: boolean;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 export interface User {

@@ -1,8 +1,6 @@
 import { Event } from '@/types';
 import { MapPin, Clock, Users, Tag, Star, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface EventCardProps {
@@ -22,31 +20,9 @@ export const EventCard = ({
   onTogglePin,
   showPinButton = false
 }: EventCardProps) => {
-  const [averageRating, setAverageRating] = useState<number | null>(null);
-  const [reviewCount, setReviewCount] = useState(0);
-
-  useEffect(() => {
-    fetchRating();
-  }, [event.id]);
-
-  const fetchRating = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('event_reviews')
-        .select('rating')
-        .eq('event_id', event.id);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const avg = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
-        setAverageRating(Math.round(avg * 10) / 10);
-        setReviewCount(data.length);
-      }
-    } catch (error) {
-      console.error('Error fetching rating:', error);
-    }
-  };
+  // Use pre-loaded rating data from event props
+  const averageRating = event.averageRating ?? null;
+  const reviewCount = event.reviewCount ?? 0;
 
   const formatDate = (date: string, time: string) => {
     const eventDate = new Date(`${date}T${time}`);
@@ -79,7 +55,7 @@ export const EventCard = ({
               <MapPin className="w-4 h-4 mr-1" />
               <span>{event.location}</span>
             </div>
-            {averageRating !== null && (
+            {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 <span className="text-sm font-medium">{averageRating.toFixed(1)}</span>
@@ -139,7 +115,7 @@ export const EventCard = ({
               <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" />
               <span className="text-xs sm:text-sm text-gray-600">{event.attendees.length}</span>
             </div>
-            {averageRating !== null && (
+            {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
                 <span className="text-xs sm:text-sm text-gray-600">{averageRating.toFixed(1)}</span>
@@ -234,7 +210,7 @@ export const EventCard = ({
               <Users className="w-4 h-4 text-primary mr-1" />
               <span className="text-sm text-gray-600">{event.attendees.length}</span>
             </div>
-            {averageRating !== null && (
+            {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 <span className="text-sm text-gray-600 font-medium">
