@@ -26,7 +26,7 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 40%; /* Improved contrast: was 46.9% */
 
     --accent: 179 93% 49%; /* #0AE9E7 */
     --accent-foreground: 0 0% 100%;
@@ -39,6 +39,10 @@
     --ring: 186 100% 39%;
 
     --radius: 0.75rem;
+
+    /* Focus ring for accessibility */
+    --focus-ring: 186 100% 39%;
+    --focus-ring-offset: 0 0% 100%;
 
     /* Juntoo Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
@@ -82,7 +86,7 @@
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 70%; /* Improved contrast: was 65.1% */
 
     --accent: 179 93% 49%;
     --accent-foreground: 0 0% 100%;
@@ -93,6 +97,10 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 186 100% 39%;
+
+    /* Focus ring for accessibility - dark mode */
+    --focus-ring: 179 93% 49%;
+    --focus-ring-offset: 222.2 84% 4.9%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -112,6 +120,11 @@
 
   body {
     @apply bg-background text-foreground font-poppins;
+  }
+
+  /* Enhanced focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
 
@@ -153,6 +166,20 @@
   .transition-juntoo-bounce {
     transition: var(--transition-bounce);
   }
+
+  /* Skip link for keyboard navigation */
+  .skip-link {
+    @apply absolute -top-10 left-0 bg-primary text-primary-foreground px-4 py-2 z-50 transition-all;
+  }
+  
+  .skip-link:focus {
+    @apply top-0;
+  }
+
+  /* Interactive element focus enhancement */
+  .focus-highlight:focus-visible {
+    @apply ring-2 ring-primary ring-offset-2 ring-offset-background outline-none;
+  }
 }
 
 @layer utilities {
@@ -163,6 +190,19 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 }
 

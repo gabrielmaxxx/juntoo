@@ -35,16 +35,21 @@ export const EventCard = ({
 
   if (variant === 'featured') {
     return (
-      <div 
-        className="relative w-80 h-48 rounded-2xl overflow-hidden juntoo-shadow cursor-pointer transition-juntoo hover:scale-[1.02]"
+      <article 
+        className="relative w-80 h-48 rounded-2xl overflow-hidden juntoo-shadow cursor-pointer transition-juntoo hover:scale-[1.02] focus-highlight"
         onClick={() => onEventClick?.(event)}
+        onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
+        tabIndex={0}
+        role="button"
+        aria-label={`Evento: ${event.title}. Local: ${event.location}${averageRating ? `. Avaliação: ${averageRating.toFixed(1)} estrelas` : ''}`}
       >
         <img 
           src={event.imageUrl} 
-          alt={event.title}
+          alt=""
+          aria-hidden="true"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true" />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <h3 className="font-bold text-lg mb-1">{event.title}</h3>
           {event.subtitle && (
@@ -52,23 +57,23 @@ export const EventCard = ({
           )}
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm opacity-90">
-              <MapPin className="w-4 h-4 mr-1" />
+              <MapPin className="w-4 h-4 mr-1" aria-hidden="true" />
               <span>{event.location}</span>
             </div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" aria-hidden="true" />
                 <span className="text-sm font-medium">{averageRating.toFixed(1)}</span>
               </div>
             )}
           </div>
         </div>
         {event.isTrending && (
-          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium" aria-label="Evento em alta">
             🔥 Em Alta
           </div>
         )}
-      </div>
+      </article>
     );
   }
 
@@ -127,14 +132,15 @@ export const EventCard = ({
               <button
                 onClick={handlePinClick}
                 className={cn(
-                  "p-1.5 rounded-full transition-colors",
+                  "p-1.5 rounded-full transition-colors focus-highlight",
                   isPinned 
                     ? "bg-primary/10 text-primary" 
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
-                title={isPinned ? "Desafixar" : "Fixar"}
+                aria-label={isPinned ? "Desafixar evento" : "Fixar evento"}
+                aria-pressed={isPinned}
               >
-                <Pin className="w-4 h-4" />
+                <Pin className="w-4 h-4" aria-hidden="true" />
               </button>
             )}
             {event.creatorAvatar && (
