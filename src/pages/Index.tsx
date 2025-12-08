@@ -10,6 +10,7 @@ import { ActivitiesPage } from '@/components/ActivitiesPage';
 import { CreateEventPage } from '@/components/CreateEventPage';
 import { SearchPage } from '@/components/SearchPage';
 import { AuthPage } from '@/pages/AuthPage';
+import { SkipLink } from '@/components/SkipLink';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { EVENTS, USERS } from '@/data/mockData';
@@ -68,9 +69,9 @@ const Index = () => {
   // Show loading while checking auth status
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center" role="status" aria-label="Carregando aplicação">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
           <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
@@ -90,6 +91,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="w-full h-screen overflow-hidden relative animate-fade-in">
+        {/* Skip Link for Accessibility */}
+        <SkipLink />
         
         {selectedEvent ? (
           <EventDetails event={selectedEvent} onBack={handleBack} />
@@ -99,7 +102,7 @@ const Index = () => {
             <AppHeader onEventClick={handleEventClickById} />
             
             {/* Main Content */}
-            <main className="overflow-y-auto">
+            <main id="main-content" className="overflow-y-auto" tabIndex={-1}>
               <div key={activeTab} className="animate-fade-in">
                 {activeTab === 'home' && (
                   <HomePage 
@@ -165,3 +168,4 @@ const Index = () => {
 };
 
 export default Index;
+

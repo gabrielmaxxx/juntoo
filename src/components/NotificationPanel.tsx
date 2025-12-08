@@ -288,13 +288,14 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation();
                               deleteNotification(notification.id);
                             }}
+                            aria-label={`Excluir notificação: ${notification.title}`}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4" aria-hidden="true" />
                           </Button>
                         )}
                       </div>
