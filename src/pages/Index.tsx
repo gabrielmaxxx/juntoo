@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SplashScreen } from '@/components/SplashScreen';
 import { AppHeader } from '@/components/AppHeader';
@@ -11,13 +11,12 @@ import { CreateEventPage } from '@/components/CreateEventPage';
 import { SearchPage } from '@/components/SearchPage';
 import { AuthPage } from '@/pages/AuthPage';
 import { SkipLink } from '@/components/SkipLink';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { EVENTS, USERS } from '@/data/mockData';
 import { Event } from '@/types';
 
 const Index = () => {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading } = useAuthContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -44,7 +43,6 @@ const Index = () => {
       .single();
 
     if (!error && data) {
-      // Convert database event to Event type
       const event: Event = {
         id: data.id,
         title: data.title,
@@ -115,42 +113,12 @@ const Index = () => {
                 )}
                 {activeTab === 'activities' && (
                   <ActivitiesPage 
-                    currentUser={{
-                      id: user.id,
-                      name: profile?.full_name || 'Usuário',
-                      email: user.email || '',
-                      avatarUrl: profile?.avatar_url || '',
-                      bio: '',
-                      location: profile?.city || '',
-                      rating: 4.8,
-                      interests: profile?.interests || [],
-                      badges: [],
-                      posts: [],
-                      registeredEvents: [],
-                      attendedEvents: []
-                    }}
                     onEventClick={handleEventClick}
                     onCreateClick={() => setActiveTab('create')}
                   />
                 )}
                 {activeTab === 'profile' && (
-                  <ProfilePage 
-                    user={{
-                      id: user.id,
-                      name: profile?.full_name || 'Usuário',
-                      email: user.email || '',
-                      avatarUrl: profile?.avatar_url || '',
-                      bio: '',
-                      location: profile?.city || '',
-                      rating: 4.8,
-                      interests: profile?.interests || [],
-                      badges: [],
-                      posts: [],
-                      registeredEvents: [],
-                      attendedEvents: []
-                    }}
-                    onUserUpdate={() => {}}
-                  />
+                  <ProfilePage />
                 )}
                 {activeTab === 'create' && (
                   <CreateEventPage onBack={() => setActiveTab('home')} />
@@ -168,4 +136,3 @@ const Index = () => {
 };
 
 export default Index;
-
