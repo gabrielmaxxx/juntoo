@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Event } from '@/types';
+import { Event } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,10 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { CATEGORIES } from '@/constants/categories';
@@ -26,34 +25,27 @@ import {
   Edit3, 
   Heart, 
   MessageCircle,
-  Settings,
   Trophy,
   Target,
   Users,
   Zap,
-  Upload,
   UserPlus,
   Bell
 } from 'lucide-react';
 import { NotificationPreferencesPage } from './NotificationPreferences';
 
-interface ProfilePageProps {
-  user: User;
-  onUserUpdate?: (user: User) => void;
-}
-
-export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
+export const ProfilePage = () => {
   const navigate = useNavigate();
-  const { updateProfile, profile } = useAuth();
+  const { user, profile, updateProfile, refreshProfile } = useAuthContext();
   const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showNotificationPreferences, setShowNotificationPreferences] = useState(false);
-  const [editedUser, setEditedUser] = useState(user);
+  const [editedName, setEditedName] = useState(profile?.full_name || '');
   const [activeTab, setActiveTab] = useState('posts');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(user.interests || []);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(profile?.interests || []);
   const [userNumber, setUserNumber] = useState<string>('');
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [completedEvents, setCompletedEvents] = useState<Event[]>([]);
@@ -93,7 +85,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
       
       setLoadingEvents(true);
       try {
-        // Fetch events where user is a participant
         const { data: participations, error: participationsError } = await supabase
           .from('event_participants')
           .select('event_id')
@@ -110,7 +101,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
 
         const eventIds = participations.map(p => p.event_id);
 
-        // Fetch event details
         const { data: eventsData, error: eventsError } = await supabase
           .from('events')
           .select('*')
@@ -118,7 +108,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
 
         if (eventsError) throw eventsError;
 
-        // Fetch creator profiles for all events
         const creatorIds = [...new Set(eventsData?.map(e => e.created_by) || [])];
         const { data: creatorsData } = await supabase
           .from('profiles')
@@ -129,7 +118,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           creatorsData?.map(creator => [creator.user_id, creator]) || []
         );
 
-        // Transform and categorize events
         const transformedEvents: Event[] = (eventsData || []).map(event => {
           const creator = creatorsMap.get(event.created_by);
           return {
@@ -152,7 +140,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           };
         });
 
-        // Separate into upcoming and completed
         const upcoming = transformedEvents.filter(event => !isEventCompleted(event));
         const completed = transformedEvents.filter(event => isEventCompleted(event));
 
@@ -209,18 +196,20 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
 
   useEffect(() => {
     // Parse location to set state and city
-    if (user.location) {
-      const parts = user.location.split(', ');
+    if (profile?.city) {
+      const parts = profile.city.split(', ');
       if (parts.length === 2) {
         setSelectedCity(parts[0]);
         setSelectedState(parts[1]);
       }
     }
     
+    // Sync local state with profile
+    setEditedName(profile?.full_name || '');
+    
     // Clean up interests - filter out any malformed data
-    if (user.interests && Array.isArray(user.interests)) {
-      const cleanInterests = user.interests.filter((interest: string) => {
-        // Only keep valid interest strings that don't contain JSON artifacts
+    if (profile?.interests && Array.isArray(profile.interests)) {
+      const cleanInterests = profile.interests.filter((interest: string) => {
         return interest && 
                typeof interest === 'string' && 
                 !interest.includes('[') && 
@@ -232,7 +221,7 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     } else {
       setSelectedInterests([]);
     }
-  }, [user]);
+  }, [profile]);
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -257,22 +246,14 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     try {
       const location = selectedCity && selectedState 
         ? `${selectedCity}, ${selectedState}` 
-        : editedUser.location;
+        : profile?.city || null;
 
       await updateProfile({
-        full_name: editedUser.name,
-        city: location || null,
+        full_name: editedName,
+        city: location,
         interests: selectedInterests.length > 0 ? selectedInterests : null,
-        avatar_url: editedUser.avatarUrl || null
       });
       
-      const updatedUser = {
-        ...editedUser,
-        location: location || '',
-        interests: selectedInterests
-      };
-      
-      onUserUpdate?.(updatedUser);
       setIsEditingProfile(false);
       
       toast({
@@ -328,27 +309,16 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
       // Add timestamp to force reload
       const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
 
-      // Update profile with new avatar URL
+      // Update profile with new avatar URL - this will trigger optimistic update
       await updateProfile({ avatar_url: avatarUrl });
-      
-      // Update local state
-      setEditedUser(prev => ({ ...prev, avatarUrl }));
-      
-      // Update parent component
-      if (onUserUpdate) {
-        onUserUpdate({
-          ...user,
-          avatarUrl
-        });
-      }
       
       toast({
         title: "Avatar atualizado!",
         description: "Sua foto de perfil foi atualizada com sucesso.",
       });
       
-      // Force page reload to update all avatar instances
-      window.location.reload();
+      // Refresh profile to ensure all components get the update
+      await refreshProfile();
       
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -374,6 +344,10 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
     return <NotificationPreferencesPage onBack={() => setShowNotificationPreferences(false)} />;
   }
 
+  const displayName = profile?.full_name || 'Usuário';
+  const displayAvatar = profile?.avatar_url || '';
+  const displayLocation = profile?.city || '';
+
   return (
     <div className="pb-20">
       {/* Profile Header */}
@@ -382,9 +356,9 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <Avatar className="w-20 h-20 cursor-pointer" onClick={() => document.getElementById('avatarUpload')?.click()}>
-                <AvatarImage src={user.avatarUrl} alt={user.name} />
+                <AvatarImage src={displayAvatar} alt={displayName} />
                 <AvatarFallback className="bg-primary/10 text-primary font-medium text-3xl">
-                  {user.name.charAt(0).toUpperCase()}
+                  {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <Label htmlFor="avatarUpload" className="absolute -bottom-1 -right-1 cursor-pointer">
@@ -406,18 +380,20 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
               {userNumber && (
                 <p className="text-sm text-gray-500">ID: {userNumber}</p>
               )}
-              <p className="text-gray-600 flex items-center">
-                <MapPin className="w-4 h-4 mr-1" />
-                {user.location}
-              </p>
+              {displayLocation && (
+                <p className="text-gray-600 flex items-center">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {displayLocation}
+                </p>
+              )}
               <div className="flex items-center mt-2">
-                {renderStars(user.rating || 0)}
+                {renderStars(4.8)}
                 <span className="ml-2 text-sm text-gray-600">
-                  ({user.reviews} avaliações)
+                  (0 avaliações)
                 </span>
               </div>
             </div>
@@ -429,23 +405,25 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
               size="icon"
               onClick={() => setShowNotificationPreferences(true)}
               title="Notificações"
+              aria-label="Configurações de notificações"
             >
-              <Bell className="w-4 h-4" />
+              <Bell className="w-4 h-4" aria-hidden="true" />
             </Button>
             
             <Button 
               variant="outline" 
               size="sm"
               onClick={() => navigate('/friend-suggestions')}
+              aria-label="Encontrar amigos"
             >
-              <UserPlus className="w-4 h-4 mr-2" />
+              <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
               Encontrar
             </Button>
             
             <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Edit3 className="w-4 h-4 mr-2" />
+                <Button variant="outline" size="sm" aria-label="Editar perfil">
+                  <Edit3 className="w-4 h-4 mr-2" aria-hidden="true" />
                   Editar
                 </Button>
               </DialogTrigger>
@@ -458,8 +436,8 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                     <Label htmlFor="name">Nome</Label>
                     <Input
                       id="name"
-                      value={editedUser.name}
-                      onChange={(e) => setEditedUser({...editedUser, name: e.target.value})}
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
                     />
                   </div>
                   
@@ -497,15 +475,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div>
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={editedUser.bio || ''}
-                      onChange={(e) => setEditedUser({...editedUser, bio: e.target.value})}
-                    />
-                  </div>
                   
                   <div>
                     <Label>Interesses</Label>
@@ -532,10 +501,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </div>
         </div>
 
-        {user.bio && (
-          <p className="text-gray-700 mb-4">{user.bio}</p>
-        )}
-
         {/* Interests */}
         {selectedInterests && selectedInterests.length > 0 && (
           <div className="mb-4">
@@ -546,24 +511,6 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
                   {interest}
                 </Badge>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Achievements */}
-        {user.badges && user.badges.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Conquistas</h3>
-            <div className="flex flex-wrap gap-2">
-              {user.badges.map((badge, index) => {
-                const IconComponent = badgeIcons[badge.icon as keyof typeof badgeIcons] || Award;
-                return (
-                  <div key={index} className="flex items-center bg-gray-50 rounded-full px-3 py-1">
-                    <IconComponent className={`w-4 h-4 mr-2 ${badge.color}`} />
-                    <span className="text-xs font-medium">{badge.name}</span>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
@@ -580,39 +527,9 @@ export const ProfilePage = ({ user, onUserUpdate }: ProfilePageProps) => {
           </TabsList>
 
           <TabsContent value="posts" className="p-4 space-y-4">
-            {user.posts && user.posts.length > 0 ? (
-              user.posts.map((post) => (
-                <Card key={post.id}>
-                  <CardContent className="p-4">
-                    <p className="text-gray-800 mb-3">{post.content}</p>
-                    {post.imageUrl && (
-                      <img
-                        src={post.imageUrl}
-                        alt="Post"
-                        className="w-full h-48 object-cover rounded-lg mb-3"
-                      />
-                    )}
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                      <div className="flex items-center space-x-4">
-                        <span className="flex items-center">
-                          <Heart className="w-4 h-4 mr-1" />
-                          {post.likes}
-                        </span>
-                        <span className="flex items-center">
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          {post.comments}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>Nenhum post ainda</p>
-              </div>
-            )}
+            <div className="text-center py-8 text-gray-500">
+              <p>Nenhum post ainda</p>
+            </div>
           </TabsContent>
 
           <TabsContent value="events" className="p-4 space-y-4">

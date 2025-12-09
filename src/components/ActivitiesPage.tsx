@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Event, User } from '@/types';
+import { Event } from '@/types';
 import { EventCard } from '@/components/EventCard';
 import { EventDetails } from '@/components/EventDetails';
 import { Button } from '@/components/ui/button';
@@ -7,17 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, Plus } from 'lucide-react';
 import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface ActivitiesPageProps {
-  currentUser: User;
   onEventClick: (event: Event) => void;
   onCreateClick?: () => void;
 }
 
-export const ActivitiesPage = ({ currentUser, onEventClick, onCreateClick }: ActivitiesPageProps) => {
+export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const { isPinned, togglePin } = usePinnedEvents();
   
   const { data: registeredEvents = [], isLoading: loadingRegistered } = useUserRegisteredEvents(user?.id);
