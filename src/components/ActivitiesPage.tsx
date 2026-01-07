@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Event } from '@/types';
 import { EventCard } from '@/components/EventCard';
 import { EventDetails } from '@/components/EventDetails';
+import { CreatorDashboard } from '@/components/CreatorDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Users, Plus } from 'lucide-react';
+import { Calendar, Users, Plus, BarChart3 } from 'lucide-react';
 import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -16,6 +17,7 @@ interface ActivitiesPageProps {
 
 export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
   const { user } = useAuthContext();
   const { isPinned, togglePin } = usePinnedEvents();
   
@@ -61,6 +63,12 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
     setSelectedActivity(null);
   };
 
+  if (showDashboard) {
+    return (
+      <CreatorDashboard onBack={() => setShowDashboard(false)} />
+    );
+  }
+
   if (selectedActivity) {
     return (
       <EventDetails 
@@ -91,10 +99,23 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
       <div className="bg-white border-b border-border/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-foreground">Minhas Atividades</h1>
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onCreateClick}>
-            <Plus className="w-4 h-4 mr-2" />
-            Criar
-          </Button>
+          <div className="flex gap-2">
+            {createdEvents.length > 0 && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setShowDashboard(true)}
+                aria-label="Ver dashboard de estatísticas"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+                Dashboard
+              </Button>
+            )}
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onCreateClick}>
+              <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+              Criar
+            </Button>
+          </div>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
