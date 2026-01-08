@@ -3,6 +3,7 @@ import { Event } from '@/types';
 import { EventCard } from '@/components/EventCard';
 import { EventDetails } from '@/components/EventDetails';
 import { CreatorDashboard } from '@/components/CreatorDashboard';
+import { EventDashboard } from '@/components/EventDashboard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, Plus, BarChart3 } from 'lucide-react';
@@ -18,6 +19,7 @@ interface ActivitiesPageProps {
 export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPageProps) => {
   const [selectedActivity, setSelectedActivity] = useState<Event | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [selectedEventDashboard, setSelectedEventDashboard] = useState<string | null>(null);
   const { user } = useAuthContext();
   const { isPinned, togglePin } = usePinnedEvents();
   
@@ -63,9 +65,21 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
     setSelectedActivity(null);
   };
 
+  if (selectedEventDashboard) {
+    return (
+      <EventDashboard 
+        eventId={selectedEventDashboard} 
+        onBack={() => setSelectedEventDashboard(null)} 
+      />
+    );
+  }
+
   if (showDashboard) {
     return (
-      <CreatorDashboard onBack={() => setShowDashboard(false)} />
+      <CreatorDashboard 
+        onBack={() => setShowDashboard(false)} 
+        onEventDashboardClick={(eventId) => setSelectedEventDashboard(eventId)}
+      />
     );
   }
 
