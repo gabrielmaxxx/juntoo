@@ -1,20 +1,23 @@
-import { ArrowLeft, Calendar, Users, Star, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, Star, TrendingUp, Clock, CheckCircle, ChevronRight, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCreatorStats } from '@/hooks/useCreatorStats';
+import { useUserCreatedEvents } from '@/hooks/useUserEvents';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis } from 'recharts';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface CreatorDashboardProps {
   onBack: () => void;
+  onEventDashboardClick: (eventId: string) => void;
 }
 
 const StatCard = ({ 
@@ -63,9 +66,10 @@ const CATEGORY_COLORS = [
   'hsl(var(--chart-5))',
 ];
 
-export const CreatorDashboard = ({ onBack }: CreatorDashboardProps) => {
+export const CreatorDashboard = ({ onBack, onEventDashboardClick }: CreatorDashboardProps) => {
   const { user } = useAuthContext();
   const { data: stats, isLoading } = useCreatorStats(user?.id);
+  const { data: createdEvents = [], isLoading: eventsLoading } = useUserCreatedEvents(user?.id);
 
   const chartConfig = {
     participants: {
@@ -76,6 +80,14 @@ export const CreatorDashboard = ({ onBack }: CreatorDashboardProps) => {
       label: 'Eventos',
       color: 'hsl(var(--primary))',
     },
+  };
+
+  // Helper function to check if event is past
+  const isEventPast = (date: string): boolean => {
+    const eventDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return eventDate < today;
   };
 
   return (
@@ -125,6 +137,59 @@ export const CreatorDashboard = ({ onBack }: CreatorDashboardProps) => {
             loading={isLoading}
           />
         </div>
+
+        {/* Events List - NEW */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" aria-hidden="true" />
+              Seus Eventos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {eventsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : createdEvents.length > 0 ? (
+              <div className="space-y-2 max-h-72 overflow-y-auto">
+                {createdEvents.map((event) => (
+                  <button
+                    key={event.id}
+                    onClick={() => onEventDashboardClick(event.id)}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
+                  >
+                    {event.imageUrl && (
+                      <img 
+                        src={event.imageUrl} 
+                        alt={event.title}
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{event.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(event.date), "dd 'de' MMM", { locale: ptBR })} • {event.attendees?.length || 0} participantes
+                      </p>
+                    </div>
+                    {isEventPast(event.date) ? (
+                      <Badge variant="secondary" className="flex-shrink-0">Realizado</Badge>
+                    ) : (
+                      <Badge variant="outline" className="flex-shrink-0">Próximo</Badge>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 text-center text-muted-foreground text-sm">
+                Nenhum evento criado ainda
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Participants Over Time Chart */}
         <Card>
