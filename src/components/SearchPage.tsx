@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Search, Calendar, MapPin, Tag, Filter, X } from 'lucide-react';
+import { useMemo, useEffect, useRef, useCallback } from 'react';
+import { Search, Calendar, MapPin, Tag, Filter, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { EventCard } from '@/components/EventCard';
@@ -11,8 +11,9 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { CATEGORIES } from '@/constants/categories';
-import { usePublicEvents } from '@/hooks/useEvents';
+import { useInfiniteEvents } from '@/hooks/useInfiniteEvents';
 import { useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
@@ -30,7 +31,6 @@ interface SearchFilters {
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
-  const { data: events = [], isLoading: loading } = usePublicEvents();
   const [filters, setFilters] = useState<SearchFilters>({
     text: '',
     category: 'Todos',
@@ -40,56 +40,58 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
     priceRange: 'all'
   });
 
-  // Filter events based on search criteria
-  const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      // Text search
-      if (filters.text) {
-        const searchText = filters.text.toLowerCase();
-        const matchesText = 
-          event.title.toLowerCase().includes(searchText) ||
-          event.description.toLowerCase().includes(searchText) ||
-          event.location.toLowerCase().includes(searchText) ||
-          event.category.toLowerCase().includes(searchText);
-        
-        if (!matchesText) return false;
-      }
+  const [debouncedText, setDebouncedText] = useState('');
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-      // Category filter
-      if (filters.category !== 'Todos' && event.category !== filters.category) {
-        return false;
-      }
+  // Debounce text search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedText(filters.text);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filters.text]);
 
-      // State filter
-      if (filters.state && event.state !== filters.state) {
-        return false;
-      }
+  const filtersForQuery = useMemo(() => ({
+    ...filters,
+    text: debouncedText
+  }), [filters.category, filters.state, filters.city, filters.date, filters.priceRange, debouncedText]);
 
-      // City filter
-      if (filters.city && event.city !== filters.city) {
-        return false;
-      }
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError
+  } = useInfiniteEvents(filtersForQuery);
 
-      // Date filter
-      if (filters.date) {
-        const eventDate = new Date(event.date);
-        const filterDate = filters.date;
-        if (eventDate.toDateString() !== filterDate.toDateString()) {
-          return false;
-        }
-      }
+  // Flatten all pages into a single array
+  const allEvents = useMemo(() => {
+    return data?.pages.flatMap(page => page.events) ?? [];
+  }, [data]);
 
-      // Price filter
-      if (filters.priceRange === 'free' && event.price !== 'Gratuito' && !event.price.includes('0')) {
-        return false;
-      }
-      if (filters.priceRange === 'paid' && (event.price === 'Gratuito' || event.price.includes('0'))) {
-        return false;
-      }
+  // Infinite scroll observer
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries;
+    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-      return true;
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(handleObserver, {
+      rootMargin: '100px',
     });
-  }, [events, filters]);
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [handleObserver]);
 
   const clearFilters = () => {
     setFilters({
@@ -110,15 +112,15 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
     filters.priceRange !== 'all'
   ].filter(Boolean).length;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-gray-200 rounded-lg"></div>
-          <div className="h-10 bg-gray-200 rounded-lg"></div>
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-lg" />
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+              <Skeleton key={i} className="h-32 w-full rounded-lg" />
             ))}
           </div>
         </div>
@@ -127,29 +129,30 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
   }
 
   return (
-    <div className="p-3 sm:p-4 space-y-4 pb-24">
+    <main className="p-3 sm:p-4 space-y-4 pb-24">
       {/* Search Header */}
-      <div className="space-y-3">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Buscar Eventos</h1>
+      <header className="space-y-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Buscar Eventos</h1>
         
         {/* Main Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
           <Input
             placeholder="Buscar eventos..."
             value={filters.text}
             onChange={(e) => setFilters(prev => ({ ...prev, text: e.target.value }))}
             className="pl-9 sm:pl-10 h-10 sm:h-12 text-sm sm:text-base"
+            aria-label="Buscar eventos"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+        <nav className="flex flex-wrap gap-1.5 sm:gap-2" aria-label="Filtros de busca">
           {/* Category Filter */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={filters.category !== 'Todos' ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
-                <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
                 {filters.category}
               </Button>
             </PopoverTrigger>
@@ -174,7 +177,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={filters.state ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
                 {filters.state || 'Estado'}
               </Button>
             </PopoverTrigger>
@@ -212,7 +215,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant={filters.city ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
                   {filters.city || 'Cidade'}
                 </Button>
               </PopoverTrigger>
@@ -246,7 +249,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={filters.date ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
                 {filters.date ? format(filters.date, 'dd/MM', { locale: ptBR }) : 'Data'}
               </Button>
             </PopoverTrigger>
@@ -265,7 +268,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant={filters.priceRange !== 'all' ? 'default' : 'outline'} size="sm" className="h-7 sm:h-8 text-xs sm:text-sm">
-                <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
                 {filters.priceRange === 'all' ? 'Preço' : filters.priceRange === 'free' ? 'Gratuito' : 'Pago'}
               </Button>
             </PopoverTrigger>
@@ -292,18 +295,18 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
 
           {/* Clear Filters */}
           {activeFiltersCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 sm:h-8 text-xs sm:text-sm text-red-600">
-              <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 sm:h-8 text-xs sm:text-sm text-destructive">
+              <X className="w-3 h-3 sm:w-4 sm:h-4 mr-1" aria-hidden="true" />
               Limpar ({activeFiltersCount})
             </Button>
           )}
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Results Summary */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          {filteredEvents.length} {filteredEvents.length === 1 ? 'evento encontrado' : 'eventos encontrados'}
+        <p className="text-sm text-muted-foreground">
+          {allEvents.length} {allEvents.length === 1 ? 'evento encontrado' : 'eventos encontrados'}
         </p>
         {filters.text && (
           <Badge variant="secondary" className="text-xs">
@@ -313,14 +316,21 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
       </div>
 
       {/* Results */}
-      <div className="space-y-3">
-        {filteredEvents.length === 0 ? (
+      <section className="space-y-3" aria-label="Resultados da busca">
+        {isError ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-              <Search className="w-8 h-8 text-gray-400" />
+            <p className="text-destructive">Erro ao carregar eventos. Tente novamente.</p>
+            <Button variant="outline" onClick={() => window.location.reload()} className="mt-4">
+              Recarregar
+            </Button>
+          </div>
+        ) : allEvents.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+              <Search className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum evento encontrado</h3>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-lg font-medium text-foreground mb-2">Nenhum evento encontrado</h2>
+            <p className="text-muted-foreground mb-4">
               Tente ajustar seus filtros ou termos de busca
             </p>
             <Button variant="outline" onClick={clearFilters}>
@@ -328,16 +338,31 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             </Button>
           </div>
         ) : (
-          filteredEvents.map(event => (
-            <EventCard
-              key={event.id}
-              event={event}
-              variant="compact"
-              onEventClick={onEventClick}
-            />
-          ))
+          <>
+            {allEvents.map(event => (
+              <EventCard
+                key={event.id}
+                event={event}
+                variant="compact"
+                onEventClick={onEventClick}
+              />
+            ))}
+            
+            {/* Load more trigger */}
+            <div ref={loadMoreRef} className="flex justify-center py-4">
+              {isFetchingNextPage && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                  <span>Carregando mais eventos...</span>
+                </div>
+              )}
+              {!hasNextPage && allEvents.length > 0 && (
+                <p className="text-sm text-muted-foreground">Você viu todos os eventos</p>
+              )}
+            </div>
+          </>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };

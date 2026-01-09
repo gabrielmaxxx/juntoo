@@ -1,6 +1,7 @@
 import { Event } from '@/types';
 import { MapPin, Clock, Users, Tag, Star, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
 
 interface EventCardProps {
@@ -43,14 +44,13 @@ export const EventCard = ({
         role="button"
         aria-label={`Evento: ${event.title}. Local: ${event.location}${averageRating ? `. Avaliação: ${averageRating.toFixed(1)} estrelas` : ''}`}
       >
-        <img 
+        <LazyImage 
           src={event.imageUrl} 
-          alt=""
-          aria-hidden="true"
-          className="w-full h-full object-cover"
+          alt={event.title}
+          className="w-full h-full"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-primary-foreground">
           <h3 className="font-bold text-lg mb-1">{event.title}</h3>
           {event.subtitle && (
             <p className="text-sm opacity-90 mb-2">{event.subtitle}</p>
@@ -69,7 +69,7 @@ export const EventCard = ({
           </div>
         </div>
         {event.isTrending && (
-          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium" aria-label="Evento em alta">
+          <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full font-medium" aria-label="Evento em alta">
             🔥 Em Alta
           </div>
         )}
@@ -84,46 +84,51 @@ export const EventCard = ({
     };
 
     return (
-      <div 
+      <article 
         className={cn(
-          "bg-white rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated relative",
+          "bg-card rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated relative",
           isPinned && "ring-2 ring-primary/30"
         )}
         onClick={() => onEventClick?.(event)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
+        aria-label={`${event.title} em ${event.location}`}
       >
         {isPinned && (
           <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-1">
-            <Pin className="w-3 h-3" />
+            <Pin className="w-3 h-3" aria-hidden="true" />
           </div>
         )}
         <div className="flex space-x-2 sm:space-x-3">
-          <img 
+          <LazyImage 
             src={event.imageUrl} 
             alt={event.title}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg flex-shrink-0"
+            aspectRatio="square"
           />
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-2">{event.title}</h3>
-            <div className="flex items-center text-xs sm:text-sm text-gray-600 mt-1">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
+            <h3 className="font-semibold text-sm sm:text-base text-foreground line-clamp-2">{event.title}</h3>
+            <div className="flex items-center text-xs sm:text-sm text-muted-foreground mt-1">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">{formatDate(event.date, event.time)}</span>
             </div>
-            <div className="flex items-center text-xs sm:text-sm text-gray-600">
-              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
+            <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" aria-hidden="true" />
               <span className="truncate">{event.location}</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-border">
           <div className="flex items-center gap-3">
             <div className="flex items-center">
-              <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" />
-              <span className="text-xs sm:text-sm text-gray-600">{event.attendees.length}</span>
+              <Users className="w-3 h-3 sm:w-4 sm:h-4 text-primary mr-1 flex-shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm text-muted-foreground">{event.attendees.length}</span>
             </div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                <span className="text-xs sm:text-sm text-gray-600">{averageRating.toFixed(1)}</span>
+                <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" aria-hidden="true" />
+                <span className="text-xs sm:text-sm text-muted-foreground">{averageRating.toFixed(1)}</span>
               </div>
             )}
           </div>
@@ -144,37 +149,43 @@ export const EventCard = ({
               </button>
             )}
             {event.creatorAvatar && (
-              <img 
+              <LazyImage 
                 src={event.creatorAvatar} 
                 alt={event.creatorName || 'Criador'}
-                className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                title={event.creatorName}
+                className="w-6 h-6 rounded-full flex-shrink-0"
+                aspectRatio="square"
+                showSkeleton={false}
               />
             )}
           </div>
         </div>
-      </div>
+      </article>
     );
   }
 
   return (
-    <div 
-      className="bg-white rounded-2xl juntoo-shadow overflow-hidden cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
+    <article 
+      className="bg-card rounded-2xl juntoo-shadow overflow-hidden cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
       onClick={() => onEventClick?.(event)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
+      aria-label={`${event.title} em ${event.location}`}
     >
       <div className="relative">
-        <img 
+        <LazyImage 
           src={event.imageUrl} 
           alt={event.title}
-          className="w-full h-40 object-cover"
+          className="w-full h-40"
+          aspectRatio="video"
         />
         {event.distance && (
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-primary text-xs px-2 py-1 rounded-full font-medium">
+          <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-primary text-xs px-2 py-1 rounded-full font-medium">
             {event.distance}
           </div>
         )}
         {event.isTrending && (
-          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+          <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full font-medium">
             🔥 Em Alta
           </div>
         )}
@@ -182,30 +193,30 @@ export const EventCard = ({
       
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
+          <h3 className="font-semibold text-foreground text-lg">{event.title}</h3>
           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium ml-2 flex-shrink-0">
             {event.category}
           </span>
         </div>
         
-        <div className="space-y-2 text-sm text-gray-600">
+        <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-primary" />
+            <Clock className="w-4 h-4 mr-2 text-primary" aria-hidden="true" />
             <span>{formatDate(event.date, event.time)}</span>
           </div>
           <div className="flex items-center">
-            <MapPin className="w-4 h-4 mr-2 text-primary" />
+            <MapPin className="w-4 h-4 mr-2 text-primary" aria-hidden="true" />
             <span>{event.location}</span>
           </div>
           <div className="flex items-center">
-            <Tag className="w-4 h-4 mr-2 text-primary" />
+            <Tag className="w-4 h-4 mr-2 text-primary" aria-hidden="true" />
             <span>{event.price}</span>
           </div>
         </div>
 
         {event.friendsGoing && event.friendsGoing.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-sm text-gray-600 mb-1">Seus amigos vão:</p>
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-1">Seus amigos vão:</p>
             <p className="text-sm font-medium text-primary">{event.friendsGoing.join(', ')}</p>
           </div>
         )}
@@ -213,13 +224,13 @@ export const EventCard = ({
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center">
-              <Users className="w-4 h-4 text-primary mr-1" />
-              <span className="text-sm text-gray-600">{event.attendees.length}</span>
+              <Users className="w-4 h-4 text-primary mr-1" aria-hidden="true" />
+              <span className="text-sm text-muted-foreground">{event.attendees.length}</span>
             </div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm text-gray-600 font-medium">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" aria-hidden="true" />
+                <span className="text-sm text-muted-foreground font-medium">
                   {averageRating.toFixed(1)} ({reviewCount})
                 </span>
               </div>
@@ -230,6 +241,6 @@ export const EventCard = ({
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
