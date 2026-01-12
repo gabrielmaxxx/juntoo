@@ -490,10 +490,10 @@ export type Database = {
     Functions: {
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
-      user_wants_notification: {
-        Args: { p_type: string; p_user_id: string }
-        Returns: boolean
-      }
+      is_service_role: { Args: never; Returns: boolean }
+      user_wants_notification:
+        | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
+        | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
