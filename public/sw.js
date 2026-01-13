@@ -1,4 +1,80 @@
-// Service Worker for Push Notifications
+// Service Worker for PWA - Push Notifications & Caching
+const CACHE_NAME = 'juntoo-v1';
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/favicon.ico',
+];
+
+// Install event - cache static assets
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+  self.skipWaiting();
+});
+
+// Activate event - cleanup old caches
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames
+          .filter(function(cacheName) {
+            return cacheName !== CACHE_NAME;
+          })
+          .map(function(cacheName) {
+            return caches.delete(cacheName);
+          })
+      );
+    })
+  );
+  event.waitUntil(clients.claim());
+});
+
+// Fetch event - network first, fallback to cache
+self.addEventListener('fetch', function(event) {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+  
+  // Skip Supabase API requests
+  if (event.request.url.includes('supabase.co')) return;
+  
+  event.respondWith(
+    fetch(event.request)
+      .then(function(response) {
+        // Clone the response before caching
+        const responseClone = response.clone();
+        
+        // Cache successful responses
+        if (response.status === 200) {
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseClone);
+          });
+        }
+        
+        return response;
+      })
+      .catch(function() {
+        // Fallback to cache when offline
+        return caches.match(event.request).then(function(response) {
+          if (response) {
+            return response;
+          }
+          // Return offline page for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+          return new Response('Offline', { status: 503 });
+        });
+      })
+  );
+});
+
+// Push notification event
 self.addEventListener('push', function(event) {
   if (!event.data) {
     console.log('Push event but no data');
@@ -24,6 +100,7 @@ self.addEventListener('push', function(event) {
   );
 });
 
+// Notification click event
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
@@ -48,10 +125,9 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-self.addEventListener('install', function(event) {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', function(event) {
-  event.waitUntil(clients.claim());
+// Listen for skip waiting message
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

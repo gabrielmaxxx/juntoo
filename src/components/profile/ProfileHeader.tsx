@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star, MapPin, Camera, Edit3, UserPlus, Bell } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface ProfileHeaderProps {
   displayName: string;
@@ -92,6 +93,8 @@ export const ProfileHeader = ({
         </div>
         
         <div className="flex gap-2">
+          <ThemeToggle />
+          
           <Button 
             variant="outline" 
             size="icon"
