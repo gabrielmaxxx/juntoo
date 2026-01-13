@@ -1,7 +1,7 @@
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Flame, ChevronRight, ShieldCheck } from 'lucide-react';
-import { Skeleton } from './ui/skeleton';
+import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useRecommendedEvents } from '@/hooks/useEvents';
 
@@ -46,13 +46,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const dailyMission = getDailyMission();
 
   if (loading) {
-    return (
-      <div className="space-y-6 pb-24 px-4 pt-4">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-      </div>
-    );
+    return <HomePageSkeleton />;
   }
 
   return (
