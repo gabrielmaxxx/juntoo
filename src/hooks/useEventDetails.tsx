@@ -3,6 +3,8 @@ import { Event } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
+import { haptic } from '@/lib/haptics';
 
 interface Participant {
   user_id: string;
@@ -244,6 +246,13 @@ export const useEventDetails = (event: Event) => {
 
   const handleDeleteReview = async (reviewId: string) => {
     try {
+      // Store review data for potential undo
+      const { data: reviewData } = await supabase
+        .from('event_reviews')
+        .select('*')
+        .eq('id', reviewId)
+        .single();
+
       const { error } = await supabase
         .from('event_reviews')
         .delete()
@@ -251,9 +260,32 @@ export const useEventDetails = (event: Event) => {
 
       if (error) throw error;
 
+      haptic('medium');
       toast({
         title: 'Avaliação removida',
-        description: 'Sua avaliação foi removida com sucesso.'
+        description: 'Sua avaliação foi removida com sucesso.',
+        action: reviewData ? (
+          <ToastAction
+            altText="Desfazer remoção da avaliação"
+            onClick={async () => {
+              try {
+                await supabase.from('event_reviews').insert({
+                  event_id: reviewData.event_id,
+                  user_id: reviewData.user_id,
+                  rating: reviewData.rating,
+                  comment: reviewData.comment,
+                });
+                haptic('success');
+                fetchReviews();
+                toast({ title: 'Avaliação restaurada' });
+              } catch {
+                toast({ title: 'Erro ao restaurar', variant: 'destructive' });
+              }
+            }}
+          >
+            Desfazer
+          </ToastAction>
+        ) : undefined,
       });
 
       fetchReviews();
@@ -325,9 +357,28 @@ export const useEventDetails = (event: Event) => {
         if (error) throw error;
 
         setIsParticipating(false);
+        haptic('medium');
         toast({
           title: "Você saiu do evento",
           description: "Sua participação foi cancelada.",
+          action: (
+            <ToastAction
+              altText="Desfazer saída do evento"
+              onClick={async () => {
+                try {
+                  await supabase.from('event_participants').insert({ event_id: event.id, user_id: user.id });
+                  setIsParticipating(true);
+                  haptic('success');
+                  fetchParticipants();
+                  toast({ title: 'Participação restaurada!' });
+                } catch {
+                  toast({ title: 'Erro ao restaurar', variant: 'destructive' });
+                }
+              }}
+            >
+              Desfazer
+            </ToastAction>
+          ),
         });
       } else {
         const { data: existing } = await supabase
@@ -356,6 +407,7 @@ export const useEventDetails = (event: Event) => {
         if (error) throw error;
 
         setIsParticipating(true);
+        haptic('success');
         toast({
           title: "Parabéns!",
           description: "Você confirmou sua participação no evento.",

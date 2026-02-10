@@ -3,6 +3,7 @@ import { MapPin, Clock, Users, Tag, Star, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
+import { haptic } from '@/lib/haptics';
 
 interface EventCardProps {
   event: Event;
@@ -38,8 +39,8 @@ export const EventCard = ({
     return (
       <article 
         className="relative w-80 h-48 rounded-2xl overflow-hidden juntoo-shadow cursor-pointer transition-juntoo hover:scale-[1.02] focus-highlight"
-        onClick={() => onEventClick?.(event)}
-        onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
+        onClick={() => { haptic('light'); onEventClick?.(event); }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEventClick?.(event); } }}
         tabIndex={0}
         role="button"
         aria-label={`Evento: ${event.title}. Local: ${event.location}${averageRating ? `. Avaliação: ${averageRating.toFixed(1)} estrelas` : ''}`}
@@ -89,10 +90,10 @@ export const EventCard = ({
           "bg-card rounded-xl juntoo-shadow p-3 sm:p-4 cursor-pointer transition-juntoo hover:juntoo-shadow-elevated relative",
           isPinned && "ring-2 ring-primary/30"
         )}
-        onClick={() => onEventClick?.(event)}
+        onClick={() => { haptic('light'); onEventClick?.(event); }}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEventClick?.(event); } }}
         aria-label={`${event.title} em ${event.location}`}
       >
         {isPinned && (
@@ -166,13 +167,13 @@ export const EventCard = ({
   return (
     <article 
       className="bg-card rounded-2xl juntoo-shadow overflow-hidden cursor-pointer transition-juntoo hover:juntoo-shadow-elevated"
-      onClick={() => onEventClick?.(event)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onEventClick?.(event)}
-      aria-label={`${event.title} em ${event.location}`}
-    >
-      <div className="relative">
+        onClick={() => { haptic('light'); onEventClick?.(event); }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEventClick?.(event); } }}
+        aria-label={`${event.title} em ${event.location}`}
+      >
+        <div className="relative">
         <LazyImage 
           src={event.imageUrl} 
           alt={event.title}
