@@ -66,7 +66,7 @@ export const ProfileHeader = ({
             <Input
               id="avatarUpload"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               onChange={onAvatarUpload}
               className="hidden"
               disabled={uploadingAvatar}

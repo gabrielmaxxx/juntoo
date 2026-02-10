@@ -14,6 +14,7 @@ import { CATEGORIES } from '@/constants/categories';
 import { useInfiniteEvents } from '@/hooks/useInfiniteEvents';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LiveRegion } from '@/components/ui/live-region';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
@@ -314,6 +315,15 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           </Badge>
         )}
       </div>
+
+      {/* Accessible announcement for search results */}
+      <LiveRegion
+        message={
+          isLoading
+            ? 'Buscando eventos...'
+            : `${allEvents.length} ${allEvents.length === 1 ? 'evento encontrado' : 'eventos encontrados'}`
+        }
+      />
 
       {/* Results */}
       <section className="space-y-3" aria-label="Resultados da busca">

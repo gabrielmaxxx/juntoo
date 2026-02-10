@@ -8,6 +8,7 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: string;
   aspectRatio?: 'square' | 'video' | 'wide' | 'auto';
   showSkeleton?: boolean;
+  blurPlaceholder?: boolean;
 }
 
 export const LazyImage = ({
@@ -16,13 +17,14 @@ export const LazyImage = ({
   fallback = '/placeholder.svg',
   aspectRatio = 'auto',
   showSkeleton = true,
+  blurPlaceholder = true,
   className,
   ...props
 }: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isInView, setIsInView] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,7 +34,7 @@ export const LazyImage = ({
           observer.disconnect();
         }
       },
-      { rootMargin: '100px' }
+      { rootMargin: '200px' }
     );
 
     if (imgRef.current) {
@@ -58,22 +60,39 @@ export const LazyImage = ({
     setIsLoaded(true);
   };
 
+  const imageSrc = isInView ? (hasError ? fallback : src) : undefined;
+
   return (
-    <div className={cn('relative overflow-hidden', aspectRatioClasses[aspectRatio], className)}>
-      {showSkeleton && !isLoaded && (
+    <div
+      ref={imgRef}
+      className={cn('relative overflow-hidden', aspectRatioClasses[aspectRatio], className)}
+    >
+      {/* Blur placeholder background */}
+      {blurPlaceholder && !isLoaded && (
+        <div
+          className="absolute inset-0 bg-muted animate-pulse"
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-muted-foreground/5 to-muted-foreground/10" />
+        </div>
+      )}
+
+      {/* Skeleton fallback */}
+      {showSkeleton && !blurPlaceholder && !isLoaded && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
+
+      {/* Actual image */}
       <img
-        ref={imgRef}
-        src={isInView ? (hasError ? fallback : src) : undefined}
+        src={imageSrc}
         alt={alt}
         loading="lazy"
         decoding="async"
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
-          'w-full h-full object-cover transition-opacity duration-300',
-          isLoaded ? 'opacity-100' : 'opacity-0'
+          'w-full h-full object-cover transition-all duration-500 ease-out',
+          isLoaded ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-105 blur-sm'
         )}
         {...props}
       />

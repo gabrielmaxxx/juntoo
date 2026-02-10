@@ -96,10 +96,10 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
     return (
       <div className="p-4">
         <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-gray-200 rounded-lg"></div>
+          <div className="h-12 bg-muted rounded-lg"></div>
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-32 bg-muted rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -110,7 +110,7 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
   return (
     <div className="h-full bg-gradient-to-b from-background to-background/50">
       {/* Header */}
-      <div className="bg-white border-b border-border/50 p-4">
+      <div className="bg-card border-b border-border/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-2xl font-bold text-foreground">Minhas Atividades</h1>
           <div className="flex gap-2">

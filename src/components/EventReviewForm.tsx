@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { reviewSchema } from '@/lib/validations/commonSchemas';
 
 interface EventReviewFormProps {
   eventId: string;
@@ -22,10 +23,12 @@ export const EventReviewForm = ({ eventId, userId, onReviewSubmitted }: EventRev
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (rating === 0) {
+    const validation = reviewSchema.safeParse({ rating, comment: comment.trim() || '' });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
         title: 'Avaliação incompleta',
-        description: 'Por favor, selecione uma classificação.',
+        description: firstError.message,
         variant: 'destructive'
       });
       return;
@@ -38,8 +41,8 @@ export const EventReviewForm = ({ eventId, userId, onReviewSubmitted }: EventRev
         .insert({
           event_id: eventId,
           user_id: userId,
-          rating,
-          comment: comment.trim() || null
+          rating: validation.data.rating,
+          comment: validation.data.comment || null
         });
 
       if (error) throw error;
@@ -82,7 +85,7 @@ export const EventReviewForm = ({ eventId, userId, onReviewSubmitted }: EventRev
                 className={`w-8 h-8 ${
                   star <= (hoveredRating || rating)
                     ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
+                    : 'text-muted-foreground/30'
                 }`}
               />
             </button>

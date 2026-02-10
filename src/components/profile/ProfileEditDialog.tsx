@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { CATEGORIES } from '@/constants/categories';
+import { profileSchema } from '@/lib/validations/commonSchemas';
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -34,6 +36,33 @@ export const ProfileEditDialog = ({
   toggleInterest,
   onSave,
 }: ProfileEditDialogProps) => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSave = () => {
+    const city = selectedCity && selectedState
+      ? `${selectedCity}, ${selectedState}`
+      : '';
+
+    const validation = profileSchema.safeParse({
+      full_name: editedName,
+      city,
+      interests: selectedInterests,
+    });
+
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.errors.forEach(err => {
+        const field = err.path[0] as string;
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
+    onSave();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -46,8 +75,18 @@ export const ProfileEditDialog = ({
             <Input
               id="name"
               value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
+              onChange={(e) => {
+                setEditedName(e.target.value);
+                if (errors.full_name) setErrors(prev => ({ ...prev, full_name: '' }));
+              }}
+              aria-invalid={!!errors.full_name}
+              aria-describedby={errors.full_name ? 'name-error' : undefined}
             />
+            {errors.full_name && (
+              <p id="name-error" className="text-sm text-destructive mt-1" role="alert">
+                {errors.full_name}
+              </p>
+            )}
           </div>
           
           <div>
@@ -99,9 +138,14 @@ export const ProfileEditDialog = ({
                 </Badge>
               ))}
             </div>
+            {errors.interests && (
+              <p className="text-sm text-destructive mt-1" role="alert">
+                {errors.interests}
+              </p>
+            )}
           </div>
           
-          <Button onClick={onSave} className="w-full">
+          <Button onClick={handleSave} className="w-full">
             Salvar
           </Button>
         </div>
