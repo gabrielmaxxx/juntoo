@@ -163,11 +163,24 @@ export const useProfileData = () => {
     fetchFriends();
   }, [profile]);
 
+  const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
+    // MIME type validation
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast({
+        title: "Formato não suportado",
+        description: "Use imagens nos formatos JPG, PNG, WebP ou GIF.",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "Arquivo muito grande",
         description: "Por favor, selecione uma imagem menor que 5MB.",
