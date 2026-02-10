@@ -26,7 +26,7 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 40%; /* Improved contrast: was 46.9% */
+    --muted-foreground: 215.4 16.3% 36%; /* WCAG AA contrast: was 40% */
 
     --accent: 179 93% 49%; /* #0AE9E7 */
     --accent-foreground: 0 0% 100%;
@@ -86,7 +86,7 @@
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 70%; /* Improved contrast: was 65.1% */
+    --muted-foreground: 215 20.2% 75%; /* WCAG AA contrast: was 70% */
 
     --accent: 179 93% 49%;
     --accent-foreground: 0 0% 100%;

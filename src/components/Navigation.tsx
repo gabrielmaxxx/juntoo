@@ -1,5 +1,6 @@
 import { Home, Search, Calendar, User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { haptic } from '@/lib/haptics';
 
 interface NavigationProps {
   activeTab: string;
@@ -10,18 +11,27 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const navItems = [
     { id: 'home', icon: Home, label: 'Início' },
     { id: 'search', icon: Search, label: 'Busca' },
-    { id: 'placeholder', icon: null, label: '' }, // Placeholder for FAB
+    { id: 'placeholder', icon: null, label: '' },
     { id: 'activities', icon: Calendar, label: 'Atividades' },
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
 
+  const handleTabChange = (tab: string) => {
+    haptic('light');
+    onTabChange(tab);
+  };
+
   return (
     <>
-      <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom">
-        <div className="flex justify-around items-center h-14 sm:h-16 text-gray-500 relative mx-auto">
+      <nav 
+        className="bg-background border-t border-border fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom"
+        role="navigation"
+        aria-label="Navegação principal"
+      >
+        <div className="flex justify-around items-center h-14 sm:h-16 relative mx-auto">
           {navItems.map((item) => {
             if (item.id === 'placeholder') {
-              return <div key={item.id} className="w-1/5" />;
+              return <div key={item.id} className="w-1/5" aria-hidden="true" />;
             }
             
             const Icon = item.icon!;
@@ -30,12 +40,14 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             return (
               <button
                 key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`flex flex-col items-center justify-center w-1/5 h-full transition-all duration-200 ${
-                  isActive ? 'text-primary scale-105' : 'text-gray-500'
+                onClick={() => handleTabChange(item.id)}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex flex-col items-center justify-center w-1/5 h-full transition-all duration-200 focus-highlight rounded-lg ${
+                  isActive ? 'text-primary scale-105' : 'text-muted-foreground'
                 }`}
               >
-                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`} />
+                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`} aria-hidden="true" />
                 <span className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium">{item.label}</span>
               </button>
             );
@@ -48,10 +60,11 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         <Button 
           variant="fab" 
           size="fab"
-          onClick={() => onTabChange('create')}
+          onClick={() => { haptic('medium'); onTabChange('create'); }}
+          aria-label="Criar novo evento"
           className="shadow-lg w-12 h-12 sm:w-14 sm:h-14"
         >
-          <Plus className="w-6 h-6 sm:w-8 sm:h-8" />
+          <Plus className="w-6 h-6 sm:w-8 sm:h-8" aria-hidden="true" />
         </Button>
       </div>
     </>
