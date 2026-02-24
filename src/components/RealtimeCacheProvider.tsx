@@ -1,16 +1,17 @@
 import { useRealtimeCache } from '@/hooks/useRealtimeCache';
+import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 
 interface RealtimeCacheProviderProps {
   children: React.ReactNode;
 }
 
 /**
- * Provider component that initializes the realtime cache system.
+ * Provider component that initializes the realtime cache and offline storage systems.
  * Should be placed inside AuthProvider and QueryClientProvider.
  */
 export const RealtimeCacheProvider = ({ children }: RealtimeCacheProviderProps) => {
-  // Initialize the realtime cache system
   useRealtimeCache();
+  useOfflineStorage();
 
   return <>{children}</>;
 };

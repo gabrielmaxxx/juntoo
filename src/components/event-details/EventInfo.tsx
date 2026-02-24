@@ -1,12 +1,26 @@
-import { Calendar, MapPin, Tag } from 'lucide-react';
+import { Calendar, MapPin, Tag, Share2, CalendarPlus } from 'lucide-react';
 import { Event } from '@/types';
 import { formatDateTime } from '@/hooks/useEventDetails';
+import { Button } from '@/components/ui/button';
+import { shareEvent } from '@/lib/share';
+import { addToCalendar } from '@/lib/calendar';
+import { haptic } from '@/lib/haptics';
 
 interface EventInfoProps {
   event: Event;
 }
 
 export const EventInfo = ({ event }: EventInfoProps) => {
+  const handleShare = () => {
+    haptic('light');
+    shareEvent(event);
+  };
+
+  const handleAddToCalendar = () => {
+    haptic('success');
+    addToCalendar(event);
+  };
+
   return (
     <>
       {/* Event Title and Category */}
@@ -22,6 +36,18 @@ export const EventInfo = ({ event }: EventInfoProps) => {
         {event.subtitle && (
           <p className="text-muted-foreground font-medium">{event.subtitle}</p>
         )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={handleShare} className="flex-1">
+          <Share2 className="w-4 h-4 mr-1.5" />
+          Compartilhar
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleAddToCalendar} className="flex-1">
+          <CalendarPlus className="w-4 h-4 mr-1.5" />
+          Calendário
+        </Button>
       </div>
 
       {/* Event Details */}
