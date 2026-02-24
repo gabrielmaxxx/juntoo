@@ -1,11 +1,14 @@
 // Service Worker for PWA - Push Notifications & Caching
-const CACHE_NAME = 'juntoo-v1';
+const CACHE_NAME = 'juntoo-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/favicon.ico',
 ];
+
+// Routes that should never be cached
+const DENY_LIST = [/^\/~oauth/, /supabase\.co/];
 
 // Install event - cache static assets
 self.addEventListener('install', function(event) {
@@ -40,8 +43,8 @@ self.addEventListener('fetch', function(event) {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Skip Supabase API requests
-  if (event.request.url.includes('supabase.co')) return;
+  // Skip denied URLs
+  if (DENY_LIST.some(function(re) { return re.test(event.request.url) || re.test(new URL(event.request.url).pathname); })) return;
   
   event.respondWith(
     fetch(event.request)

@@ -1,9 +1,11 @@
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Sparkles, Flame, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Sparkles, Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useRecommendedEvents } from '@/hooks/useEvents';
+import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
+import { Button } from './ui/button';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
@@ -24,6 +26,8 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     profile?.interests || null,
     10
   );
+
+  const { latitude, longitude, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
 
   const loading = loadingTrending || loadingFriends || loadingRecommended;
 
@@ -156,6 +160,22 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
                 </div>
               </article>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Geolocation CTA */}
+      {!latitude && (
+        <section className="px-4" aria-label="Ativar localização">
+          <div className="bg-muted/50 rounded-xl p-4 flex items-center gap-3">
+            <MapPinned className="w-8 h-8 text-primary flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Eventos perto de você</p>
+              <p className="text-xs text-muted-foreground">Ative a localização para ver distâncias</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={requestLocation} disabled={geoLoading}>
+              {geoLoading ? 'Buscando...' : 'Ativar'}
+            </Button>
           </div>
         </section>
       )}

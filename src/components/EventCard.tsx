@@ -1,9 +1,10 @@
 import { Event } from '@/types';
-import { MapPin, Clock, Users, Tag, Star, Pin } from 'lucide-react';
+import { MapPin, Clock, Users, Tag, Star, Pin, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
 import { haptic } from '@/lib/haptics';
+import { shareEvent } from '@/lib/share';
 
 interface EventCardProps {
   event: Event;
@@ -240,6 +241,13 @@ export const EventCard = ({
           <Button variant="outline" size="sm">
             Participar
           </Button>
+          <button
+            onClick={(e) => { e.stopPropagation(); haptic('light'); shareEvent(event); }}
+            className="p-2 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Compartilhar evento"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </article>
