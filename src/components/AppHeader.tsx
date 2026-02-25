@@ -68,10 +68,10 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
   return (
     <>
       <header 
-        className="juntoo-gradient p-4 flex items-center justify-between h-20 text-primary-foreground sticky top-0 z-20"
+        className="juntoo-gradient px-4 flex items-center justify-between h-16 sm:h-20 text-primary-foreground sticky top-0 z-20 safe-area-inset-top"
         role="banner"
       >
-        <h1 className="text-3xl font-bold font-poppins tracking-wide drop-shadow-lg">juntoo</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold font-poppins tracking-wide drop-shadow-lg">juntoo</h1>
         
         <div className="flex items-center space-x-4" role="toolbar" aria-label="Ações do usuário">
           <button 

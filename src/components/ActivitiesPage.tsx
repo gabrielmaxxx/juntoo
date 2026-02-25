@@ -149,7 +149,7 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="registered" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4 mb-2">
+          <TabsList className="grid grid-cols-2 mx-4 mt-4 mb-2 w-[calc(100%-2rem)]">
             <TabsTrigger value="registered" className="text-sm">
               Inscrições ({registeredEvents.length})
             </TabsTrigger>
@@ -158,7 +158,7 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="registered" className="flex-1 overflow-y-auto px-4 pb-4">
+          <TabsContent value="registered" className="flex-1 overflow-y-auto px-4 pb-24">
             {registeredEvents.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
@@ -224,7 +224,7 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
             )}
           </TabsContent>
           
-          <TabsContent value="created" className="flex-1 overflow-y-auto px-4 pb-4">
+          <TabsContent value="created" className="flex-1 overflow-y-auto px-4 pb-24">
             {createdEvents.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
