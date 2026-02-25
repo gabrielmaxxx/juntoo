@@ -80,7 +80,7 @@ const Index = () => {
   // Show loading while checking auth status
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center" role="status" aria-label="Carregando aplicação">
+      <div className="min-h-dvh bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center" role="status" aria-label="Carregando aplicação">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" aria-hidden="true"></div>
           <p className="text-sm text-muted-foreground">Carregando...</p>
@@ -109,8 +109,8 @@ const Index = () => {
 
   // Fully responsive mobile layout
   return (
-    <div className="min-h-screen bg-background">
-      <div className="w-full h-screen overflow-hidden relative animate-fade-in">
+    <div className="min-h-dvh bg-background">
+      <div className="w-full h-dvh overflow-hidden relative animate-fade-in">
         {/* Skip Link for Accessibility */}
         <SkipLink />
         

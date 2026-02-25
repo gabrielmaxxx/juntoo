@@ -24,11 +24,11 @@ export const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   return (
     <>
       <nav 
-        className="bg-background border-t border-border fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom"
+        className="bg-background/95 backdrop-blur-sm border-t border-border fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom"
         role="navigation"
         aria-label="Navegação principal"
       >
-        <div className="flex justify-around items-center h-14 sm:h-16 relative mx-auto">
+        <div className="flex justify-around items-center h-14 sm:h-16 relative mx-auto max-w-lg">
           {navItems.map((item) => {
             if (item.id === 'placeholder') {
               return <div key={item.id} className="w-1/5" aria-hidden="true" />;

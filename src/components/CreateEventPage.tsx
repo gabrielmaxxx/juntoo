@@ -34,10 +34,10 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <EventFormHeader onBack={onBack} />
 
-      <div className="max-w-md mx-auto p-4 pb-8 space-y-6">
+      <div className="max-w-lg mx-auto px-4 pb-24 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6 pb-6" noValidate>
           <BasicInfoSection
             formData={formData}
