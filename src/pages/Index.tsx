@@ -109,8 +109,8 @@ const Index = () => {
 
   // Fully responsive mobile layout
   return (
-    <div className="min-h-dvh bg-background">
-      <div className="w-full h-dvh overflow-hidden relative animate-fade-in">
+    <div className="min-h-dvh bg-background overflow-x-hidden">
+      <div className="w-full h-dvh overflow-x-hidden overflow-y-hidden relative animate-fade-in">
         {/* Skip Link for Accessibility */}
         <SkipLink />
         
