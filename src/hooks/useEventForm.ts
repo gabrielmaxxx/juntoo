@@ -13,6 +13,7 @@ interface UseEventFormResult {
   handleInputChange: (field: keyof EventFormData, value: string | boolean) => void;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   removeImage: () => void;
+  generateCoverImage: () => Promise<void>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   validateForm: () => boolean;
 }
@@ -135,6 +136,35 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
   const removeImage = useCallback(() => {
     setFormData(prev => ({ ...prev, imageUrl: '' }));
   }, []);
+
+  const generateCoverImage = useCallback(async () => {
+    const category = formData.category || 'Outro';
+    setGeneratingImage(true);
+    try {
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-event-image', {
+        body: { category }
+      });
+
+      if (imageError) throw imageError;
+
+      if (imageData?.imageUrl) {
+        setFormData(prev => ({ ...prev, imageUrl: imageData.imageUrl }));
+        toast({
+          title: "Capa gerada!",
+          description: "Uma nova capa foi gerada para o seu evento.",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast({
+        title: "Erro ao gerar capa",
+        description: "Não foi possível gerar a imagem. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [formData.category, toast]);
 
   const generateRecurringEvents = (parentEvent: any, formData: EventFormData) => {
     const events = [];
@@ -323,6 +353,7 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
     handleInputChange,
     handleImageUpload,
     removeImage,
+    generateCoverImage,
     handleSubmit,
     validateForm
   };

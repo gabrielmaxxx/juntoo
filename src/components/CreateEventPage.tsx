@@ -25,6 +25,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     handleInputChange,
     handleImageUpload,
     removeImage,
+    generateCoverImage,
     handleSubmit
   } = useEventForm(onBack);
 
@@ -61,9 +62,11 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
             formData={formData}
             errors={errors}
             uploadingImage={uploadingImage}
+            generatingImage={generatingImage}
             onInputChange={handleInputChange}
             onImageUpload={handleImageUpload}
             onRemoveImage={removeImage}
+            onGenerateCover={generateCoverImage}
           />
 
           <PrivacySection

@@ -1,4 +1,4 @@
-import { Upload, X } from 'lucide-react';
+import { Upload, X, RefreshCw, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,18 +9,22 @@ interface AdditionalDetailsSectionProps {
   formData: EventFormData;
   errors: Record<string, string>;
   uploadingImage: boolean;
+  generatingImage: boolean;
   onInputChange: (field: keyof EventFormData, value: string | boolean) => void;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
+  onGenerateCover: () => void;
 }
 
 export const AdditionalDetailsSection = ({
   formData,
   errors,
   uploadingImage,
+  generatingImage,
   onInputChange,
   onImageUpload,
-  onRemoveImage
+  onRemoveImage,
+  onGenerateCover
 }: AdditionalDetailsSectionProps) => {
   return (
     <Card>
@@ -64,9 +68,6 @@ export const AdditionalDetailsSection = ({
 
         <div className="space-y-2">
           <Label>Foto de Capa do Evento</Label>
-          <p className="text-xs text-muted-foreground mb-2">
-            Uma imagem será gerada automaticamente se você não fizer upload
-          </p>
           
           {formData.imageUrl ? (
             <div className="relative">
@@ -75,35 +76,58 @@ export const AdditionalDetailsSection = ({
                 alt="Preview" 
                 className="w-full h-48 object-cover rounded-lg"
               />
-              <Button
-                type="button"
-                size="icon"
-                variant="destructive"
-                className="absolute top-2 right-2 h-8 w-8"
-                onClick={onRemoveImage}
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="absolute top-2 right-2 flex gap-1.5">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="secondary"
+                  className="h-8 w-8"
+                  onClick={onGenerateCover}
+                  disabled={generatingImage}
+                  title="Gerar nova capa"
+                >
+                  <RefreshCw className={`w-4 h-4 ${generatingImage ? 'animate-spin' : ''}`} />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="destructive"
+                  className="h-8 w-8"
+                  onClick={onRemoveImage}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={onImageUpload}
-                className="hidden"
-                disabled={uploadingImage}
-              />
-              <label htmlFor="imageUpload" className="cursor-pointer block">
-                <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-sm text-foreground font-medium mb-1">
-                  {uploadingImage ? 'Carregando imagem...' : 'Clique para adicionar foto de capa (opcional)'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  PNG, JPG até 5MB
-                </p>
-              </label>
+            <div className="space-y-3">
+              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={onImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage || generatingImage}
+                />
+                <label htmlFor="imageUpload" className="cursor-pointer block">
+                  <Upload className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-foreground font-medium mb-1">
+                    {uploadingImage ? 'Carregando imagem...' : 'Clique para fazer upload'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG até 5MB</p>
+                </label>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={onGenerateCover}
+                disabled={generatingImage || uploadingImage}
+              >
+                <Sparkles className={`w-4 h-4 mr-2 ${generatingImage ? 'animate-pulse' : ''}`} />
+                {generatingImage ? 'Gerando capa com IA...' : 'Gerar capa com IA'}
+              </Button>
             </div>
           )}
         </div>
