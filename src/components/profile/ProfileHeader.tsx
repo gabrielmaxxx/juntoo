@@ -45,9 +45,9 @@ export const ProfileHeader = ({
 
   return (
     <div className="bg-background p-6 border-b border-border">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-center space-x-4 flex-1 min-w-0">
+          <div className="relative shrink-0">
             <Avatar className="w-20 h-20 cursor-pointer" onClick={() => document.getElementById('avatarUpload')?.click()}>
               <AvatarImage src={displayAvatar} alt={displayName} />
               <AvatarFallback className="bg-primary/10 text-primary font-medium text-3xl">
@@ -72,29 +72,28 @@ export const ProfileHeader = ({
               disabled={uploadingAvatar}
             />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{displayName}</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-foreground truncate">{displayName}</h1>
             {userNumber && (
               <p className="text-sm text-muted-foreground">ID: {userNumber}</p>
             )}
             {displayLocation && (
-              <p className="text-muted-foreground flex items-center">
-                <MapPin className="w-4 h-4 mr-1" />
-                {displayLocation}
+              <p className="text-muted-foreground flex items-center text-sm">
+                <MapPin className="w-4 h-4 mr-1 shrink-0" />
+                <span className="truncate">{displayLocation}</span>
               </p>
             )}
-            <div className="flex items-center mt-2">
+            <div className="flex items-center mt-1">
               {renderStars(4.8)}
-              <span className="ml-2 text-sm text-muted-foreground">
+              <span className="ml-2 text-sm text-muted-foreground whitespace-nowrap">
                 (0 avaliações)
               </span>
             </div>
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 shrink-0">
           <ThemeToggle />
-          
           <Button 
             variant="outline" 
             size="icon"
@@ -104,22 +103,24 @@ export const ProfileHeader = ({
           >
             <Bell className="w-4 h-4" aria-hidden="true" />
           </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate('/friend-suggestions')}
-            aria-label="Encontrar amigos"
-          >
-            <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
-            Encontrar
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={onEditClick} aria-label="Editar perfil">
-            <Edit3 className="w-4 h-4 mr-2" aria-hidden="true" />
-            Editar
-          </Button>
         </div>
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate('/friend-suggestions')}
+          aria-label="Encontrar amigos"
+        >
+          <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
+          Encontrar
+        </Button>
+        
+        <Button variant="outline" size="sm" onClick={onEditClick} aria-label="Editar perfil">
+          <Edit3 className="w-4 h-4 mr-2" aria-hidden="true" />
+          Editar
+        </Button>
       </div>
 
       {/* Interests */}
