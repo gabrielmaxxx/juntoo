@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/button';
 import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useConversations } from '@/hooks/useDirectMessages';
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
+  onMessagesClick?: () => void;
 }
 
-export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
+export const AppHeader = ({ onEventClick, onMessagesClick }: AppHeaderProps) => {
   const { signOut, user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { totalUnread } = useConversations();
 
   useEffect(() => {
     if (user) {
@@ -24,13 +26,11 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
 
   const loadUnreadCount = async () => {
     if (!user) return;
-
     const { count, error } = await supabase
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .eq('read', false);
-
     if (!error && count !== null) {
       setUnreadCount(count);
     }
@@ -38,32 +38,17 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
 
   const subscribeToNotifications = () => {
     if (!user) return;
-
     const channel = supabase
       .channel('notification-count')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        () => {
-          loadUnreadCount();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
+        loadUnreadCount();
+      })
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   };
 
   const handleEventClick = (eventId: string) => {
-    if (onEventClick) {
-      onEventClick(eventId);
-    }
+    if (onEventClick) onEventClick(eventId);
   };
 
   return (
@@ -76,11 +61,16 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
         
         <div className="flex items-center space-x-4" role="toolbar" aria-label="Ações do usuário">
           <button 
-            className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight"
-            aria-label="Mensagens"
-            onClick={() => toast({ title: 'Em breve!', description: 'O sistema de mensagens está sendo desenvolvido.' })}
+            className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight relative"
+            aria-label={`Mensagens${totalUnread > 0 ? `, ${totalUnread} não lidas` : ''}`}
+            onClick={onMessagesClick}
           >
             <MessageCircle size={20} className="text-white" aria-hidden="true" />
+            {totalUnread > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
+                {totalUnread > 9 ? '9+' : totalUnread}
+              </span>
+            )}
           </button>
           <button 
             onClick={() => setShowNotifications(true)}
@@ -89,10 +79,7 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
           >
             <Bell size={20} className="text-white" aria-hidden="true" />
             {unreadCount > 0 && (
-              <span 
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
-                aria-hidden="true"
-              >
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
