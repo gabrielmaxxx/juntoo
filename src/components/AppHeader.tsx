@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
@@ -77,6 +78,7 @@ export const AppHeader = ({ onEventClick }: AppHeaderProps) => {
           <button 
             className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight"
             aria-label="Mensagens"
+            onClick={() => toast({ title: 'Em breve!', description: 'O sistema de mensagens está sendo desenvolvido.' })}
           >
             <MessageCircle size={20} className="text-white" aria-hidden="true" />
           </button>
