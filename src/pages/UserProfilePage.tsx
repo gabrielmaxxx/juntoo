@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, UserPlus, UserMinus, UserCheck } from 'lucide-react';
+import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
+import { useConversations } from '@/hooks/useDirectMessages';
 import { toast } from 'sonner';
 import { parseISO, addHours, isBefore } from 'date-fns';
 import type { Event } from '@/types';
@@ -28,6 +29,7 @@ export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { startConversation } = useConversations();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('none');
@@ -273,8 +275,22 @@ export default function UserProfilePage() {
                 )}
               </div>
 
-              <div>
+              <div className="flex gap-2 flex-col sm:flex-row">
                 {getFriendshipButton()}
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={async () => {
+                    if (!userId) return;
+                    const convId = await startConversation(userId);
+                    if (convId) {
+                      navigate('/?tab=messages');
+                    }
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Enviar Mensagem
+                </Button>
               </div>
             </div>
           </CardContent>
