@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BrandLogo } from './BrandLogo';
 
 interface HeaderProps {
   title?: string;
@@ -21,7 +22,7 @@ export const Header = ({ title, showBack, onBack }: HeaderProps) => {
       {title ? (
         <h2 className="text-xl font-semibold font-poppins truncate px-2">{title}</h2>
       ) : (
-        <h1 className="text-3xl font-bold font-poppins tracking-wide drop-shadow-lg">juntoo</h1>
+        <BrandLogo size="sm" showLabel labelClassName="text-xl tracking-[0.22em]" />
       )}
       
       <div className="w-10" />
