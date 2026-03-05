@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrandLogo } from './BrandLogo';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -22,9 +23,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <h1 className="text-white text-6xl font-bold font-poppins tracking-wide drop-shadow-lg">
-        juntoo
-      </h1>
+      <BrandLogo size="lg" showLabel className="flex-col gap-5" labelClassName="text-4xl tracking-[0.32em]" />
     </div>
   );
 };

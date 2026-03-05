@@ -5,6 +5,7 @@ import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
+import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
@@ -57,7 +58,7 @@ export const AppHeader = ({ onEventClick, onMessagesClick }: AppHeaderProps) => 
         className="juntoo-gradient px-4 flex items-center justify-between h-16 sm:h-20 text-primary-foreground sticky top-0 z-20 safe-area-inset-top"
         role="banner"
       >
-        <h1 className="text-2xl sm:text-3xl font-bold font-poppins tracking-wide drop-shadow-lg">juntoo</h1>
+        <BrandLogo size="sm" showLabel labelClassName="text-lg sm:text-xl tracking-[0.22em]" />
         
         <div className="flex items-center space-x-4" role="toolbar" aria-label="Ações do usuário">
           <button 

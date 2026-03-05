@@ -6,18 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Globe, ArrowLeft, Mail, CheckCircle, KeyRound } from 'lucide-react';
+import { ArrowLeft, Mail, CheckCircle, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { CATEGORIES } from '@/constants/categories';
+import { BrandLogo } from '@/components/BrandLogo';
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
 const Logo = () => (
-  <div className="relative w-32 h-32 mx-auto mb-6">
-    <div className="flex items-center justify-center">
-      <Globe className="w-24 h-24 text-primary" strokeWidth={2} />
-    </div>
+  <div className="mb-8 flex justify-center">
+    <BrandLogo size="lg" className="justify-center" />
   </div>
 );
 
