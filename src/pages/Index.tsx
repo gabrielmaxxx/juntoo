@@ -19,6 +19,7 @@ const ActivitiesPage = lazy(() => import('@/components/ActivitiesPage').then(m =
 const ProfilePage = lazy(() => import('@/components/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const CreateEventPage = lazy(() => import('@/components/CreateEventPage').then(m => ({ default: m.CreateEventPage })));
 const MessagesPage = lazy(() => import('@/components/MessagesPage').then(m => ({ default: m.MessagesPage })));
+const SettingsPage = lazy(() => import('@/components/settings').then(m => ({ default: m.SettingsPage })));
 
 const TabLoadingFallback = () => (
   <div className="p-4 space-y-4">
@@ -107,6 +108,7 @@ const Index = () => {
     profile: 'Perfil',
     create: 'Criar evento',
     messages: 'Mensagens',
+    settings: 'Configurações',
   };
 
   // Fully responsive mobile layout
@@ -124,7 +126,7 @@ const Index = () => {
         ) : (
           <div className="grid grid-rows-[auto_1fr_auto] h-full">
             {/* Header */}
-            <AppHeader onEventClick={handleEventClickById} onMessagesClick={() => setActiveTab('messages')} />
+            <AppHeader onEventClick={handleEventClickById} onMessagesClick={() => setActiveTab('messages')} onSettingsClick={() => setActiveTab('settings')} />
             
             {/* Main Content */}
             <main id="main-content" className="overflow-y-auto" tabIndex={-1}>
@@ -153,6 +155,9 @@ const Index = () => {
                   )}
                   {activeTab === 'messages' && (
                     <MessagesPage onBack={() => setActiveTab('home')} />
+                  )}
+                  {activeTab === 'settings' && (
+                    <SettingsPage onBack={() => setActiveTab('home')} />
                   )}
                 </Suspense>
               </div>

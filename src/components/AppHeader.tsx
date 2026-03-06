@@ -1,6 +1,5 @@
-import { Bell, MessageCircle, LogOut } from 'lucide-react';
+import { Bell, MessageCircle, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,10 +9,11 @@ import { BrandLogo } from './BrandLogo';
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
   onMessagesClick?: () => void;
+  onSettingsClick?: () => void;
 }
 
-export const AppHeader = ({ onEventClick, onMessagesClick }: AppHeaderProps) => {
-  const { signOut, user } = useAuth();
+export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: AppHeaderProps) => {
+  const { user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
@@ -85,15 +85,13 @@ export const AppHeader = ({ onEventClick, onMessagesClick }: AppHeaderProps) => 
               </span>
             )}
           </button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={signOut}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            aria-label="Sair da conta"
+          <button
+            onClick={onSettingsClick}
+            className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight"
+            aria-label="Configurações"
           >
-            <LogOut size={20} className="text-white" aria-hidden="true" />
-          </Button>
+            <Settings size={20} className="text-white" aria-hidden="true" />
+          </button>
         </div>
       </header>
 

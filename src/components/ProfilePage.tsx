@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CATEGORIES } from '@/constants/categories';
 import { useProfileData } from '@/hooks/useProfileData';
-import { NotificationPreferencesPage } from './NotificationPreferences';
 import {
   ProfileHeader,
   ProfileEditDialog,
@@ -23,7 +22,6 @@ export const ProfilePage = () => {
   } = useProfileData();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [showNotificationPreferences, setShowNotificationPreferences] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
   const [activeTab, setActiveTab] = useState('posts');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -77,10 +75,6 @@ export const ProfilePage = () => {
     }
   };
 
-  if (showNotificationPreferences) {
-    return <NotificationPreferencesPage onBack={() => setShowNotificationPreferences(false)} />;
-  }
-
   const displayName = profile?.full_name || 'Usuário';
   const displayAvatar = profile?.avatar_url || '';
   const displayLocation = profile?.city || '';
@@ -96,7 +90,6 @@ export const ProfilePage = () => {
         uploadingAvatar={uploadingAvatar}
         onAvatarUpload={onAvatarUpload}
         onEditClick={() => setIsEditingProfile(true)}
-        onNotificationClick={() => setShowNotificationPreferences(true)}
       />
 
       <ProfileEditDialog
