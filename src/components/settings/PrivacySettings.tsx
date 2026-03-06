@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Eye, EyeOff, MapPin, Users, MessageCircle, Shield, Lock } from 'lucide-react';
+import { ArrowLeft, Eye, MapPin, Users, MessageCircle, Shield, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,15 @@ interface PrivacyPrefs {
   show_online_status: boolean;
   show_events_participated: boolean;
 }
+
+const DEFAULT_PREFS: PrivacyPrefs = {
+  show_profile_public: true,
+  show_location: true,
+  allow_friend_requests: true,
+  allow_direct_messages: true,
+  show_online_status: true,
+  show_events_participated: true,
+};
 
 const PRIVACY_ITEMS = [
   {
@@ -69,33 +78,83 @@ const PRIVACY_ITEMS = [
 export const PrivacySettings = ({ onBack }: PrivacySettingsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [prefs, setPrefs] = useState<PrivacyPrefs>({
-    show_profile_public: true,
-    show_location: true,
-    allow_friend_requests: true,
-    allow_direct_messages: true,
-    show_online_status: true,
-    show_events_participated: true,
-  });
+  const [prefs, setPrefs] = useState<PrivacyPrefs>(DEFAULT_PREFS);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Privacy prefs stored in localStorage for now (could be moved to DB later)
   useEffect(() => {
-    const stored = localStorage.getItem(`privacy_prefs_${user?.id}`);
-    if (stored) {
-      try { setPrefs(JSON.parse(stored)); } catch {}
-    }
-  }, [user?.id]);
+    const fetchPrefs = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('privacy_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
 
-  const handleToggle = (key: keyof PrivacyPrefs) => {
-    const updated = { ...prefs, [key]: !prefs[key] };
+        if (error && error.code !== 'PGRST116') throw error;
+
+        if (data) {
+          setPrefs({
+            show_profile_public: data.show_profile_public,
+            show_location: data.show_location,
+            allow_friend_requests: data.allow_friend_requests,
+            allow_direct_messages: data.allow_direct_messages,
+            show_online_status: data.show_online_status,
+            show_events_participated: data.show_events_participated,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching privacy preferences:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPrefs();
+  }, [user]);
+
+  const handleToggle = async (key: keyof PrivacyPrefs) => {
+    if (!user) return;
+
+    const newValue = !prefs[key];
+    const updated = { ...prefs, [key]: newValue };
     setPrefs(updated);
-    localStorage.setItem(`privacy_prefs_${user?.id}`, JSON.stringify(updated));
-    toast({
-      title: 'Preferência atualizada',
-      description: updated[key] ? 'Ativado' : 'Desativado',
-    });
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('privacy_preferences')
+        .upsert({
+          user_id: user.id,
+          ...updated,
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Preferência atualizada',
+        description: newValue ? 'Ativado' : 'Desativado',
+      });
+    } catch (err) {
+      console.error('Error saving privacy preference:', err);
+      setPrefs({ ...prefs }); // rollback
+      toast({
+        title: 'Erro ao salvar',
+        description: 'Não foi possível atualizar a preferência.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="pb-20 bg-background min-h-screen">
@@ -138,6 +197,7 @@ export const PrivacySettings = ({ onBack }: PrivacySettingsProps) => {
                     id={item.key}
                     checked={prefs[item.key]}
                     onCheckedChange={() => handleToggle(item.key)}
+                    disabled={saving}
                   />
                 </div>
               );

@@ -454,6 +454,45 @@ export type Database = {
           },
         ]
       }
+      privacy_preferences: {
+        Row: {
+          allow_direct_messages: boolean
+          allow_friend_requests: boolean
+          created_at: string
+          id: string
+          show_events_participated: boolean
+          show_location: boolean
+          show_online_status: boolean
+          show_profile_public: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_direct_messages?: boolean
+          allow_friend_requests?: boolean
+          created_at?: string
+          id?: string
+          show_events_participated?: boolean
+          show_location?: boolean
+          show_online_status?: boolean
+          show_profile_public?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_direct_messages?: boolean
+          allow_friend_requests?: boolean
+          created_at?: string
+          id?: string
+          show_events_participated?: boolean
+          show_location?: boolean
+          show_online_status?: boolean
+          show_profile_public?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
