@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, MapPin, Camera, Edit3, UserPlus, Bell } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Star, MapPin, Camera, Edit3, UserPlus } from 'lucide-react';
+
 
 interface ProfileHeaderProps {
   displayName: string;
@@ -16,7 +16,6 @@ interface ProfileHeaderProps {
   uploadingAvatar: boolean;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onEditClick: () => void;
-  onNotificationClick: () => void;
 }
 
 export const ProfileHeader = ({
@@ -28,7 +27,6 @@ export const ProfileHeader = ({
   uploadingAvatar,
   onAvatarUpload,
   onEditClick,
-  onNotificationClick,
 }: ProfileHeaderProps) => {
   const navigate = useNavigate();
 
@@ -92,18 +90,7 @@ export const ProfileHeader = ({
           </div>
         </div>
         
-        <div className="flex gap-1.5 shrink-0">
-          <ThemeToggle />
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={onNotificationClick}
-            title="Notificações"
-            aria-label="Configurações de notificações"
-          >
-            <Bell className="w-4 h-4" aria-hidden="true" />
-          </Button>
-        </div>
+        <div className="shrink-0" />
       </div>
 
       <div className="flex gap-2 mb-4">
