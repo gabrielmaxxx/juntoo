@@ -163,6 +163,17 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
           />
         </SettingsGroup>
 
+        {isModerator && (
+          <SettingsGroup title="Moderação">
+            <SettingsItem
+              icon={<Flag className="w-5 h-5" />}
+              label="Painel de Moderação"
+              description="Visualizar e gerenciar denúncias"
+              onClick={() => setView('moderation')}
+            />
+          </SettingsGroup>
+        )}
+
         <SettingsGroup title="Sessão">
           <SettingsItem
             icon={<LogOut className="w-5 h-5" />}
