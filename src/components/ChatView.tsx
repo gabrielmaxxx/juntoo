@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Flag } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,15 +7,17 @@ import { useChat } from '@/hooks/useDirectMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ReportButton } from '@/components/reports';
 
 interface ChatViewProps {
   conversationId: string;
   otherUserName: string;
   otherUserAvatar: string | null;
+  otherUserId?: string;
   onBack: () => void;
 }
 
-export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, onBack }: ChatViewProps) => {
+export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, otherUserId, onBack }: ChatViewProps) => {
   const { user } = useAuth();
   const { messages, loading, sendMessage } = useChat(conversationId);
   const [input, setInput] = useState('');
@@ -52,7 +54,11 @@ export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, onBac
             {otherUserName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="font-semibold text-foreground text-sm">{otherUserName}</span>
+        <span className="font-semibold text-foreground text-sm flex-1">{otherUserName}</span>
+        <ReportButton
+          reportedUserId={otherUserId}
+          contextLabel={`Denunciar conversa com ${otherUserName}`}
+        />
       </div>
 
       {/* Messages */}

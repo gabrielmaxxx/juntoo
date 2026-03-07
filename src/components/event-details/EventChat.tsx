@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { User } from '@supabase/supabase-js';
+import { ReportButton } from '@/components/reports';
 
 interface Message {
   id: string;
@@ -82,6 +83,14 @@ export const EventChat = ({
                   }`}>
                     <p className="text-sm">{msg.message}</p>
                   </div>
+                  {msg.user_id !== currentUser?.id && (
+                    <ReportButton
+                      reportedUserId={msg.user_id}
+                      reportedMessageId={msg.id}
+                      contextLabel="Denunciar esta mensagem"
+                      size="icon"
+                    />
+                  )}
                 </div>
               </div>
             ))}

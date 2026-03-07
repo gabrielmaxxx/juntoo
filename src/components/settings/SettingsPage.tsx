@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,8 +12,10 @@ import { AccountSettings } from './AccountSettings';
 import { AppearanceSettings } from './AppearanceSettings';
 import { SupportPage } from './SupportPage';
 import { AboutPage } from './AboutPage';
+import { ModerationPanel } from '@/components/reports/ModerationPanel';
+import { supabase } from '@/integrations/supabase/client';
 
-type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about';
+type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation';
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -57,6 +59,14 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   const [view, setView] = useState<SettingsView>('main');
   const { signOut, user } = useAuth();
   const { toast } = useToast();
+  const [isModerator, setIsModerator] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', ['moderator', 'admin']).then(({ data }) => {
+      setIsModerator(!!(data && data.length > 0));
+    });
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -80,6 +90,9 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   }
   if (view === 'about') {
     return <AboutPage onBack={() => setView('main')} />;
+  }
+  if (view === 'moderation') {
+    return <ModerationPanel onBack={() => setView('main')} />;
   }
 
   return (
@@ -149,6 +162,17 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
             onClick={() => setView('about')}
           />
         </SettingsGroup>
+
+        {isModerator && (
+          <SettingsGroup title="Moderação">
+            <SettingsItem
+              icon={<Flag className="w-5 h-5" />}
+              label="Painel de Moderação"
+              description="Visualizar e gerenciar denúncias"
+              onClick={() => setView('moderation')}
+            />
+          </SettingsGroup>
+        )}
 
         <SettingsGroup title="Sessão">
           <SettingsItem
