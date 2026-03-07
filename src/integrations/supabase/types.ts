@@ -559,6 +559,120 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          category: Database["public"]["Enums"]["report_category"]
+          created_at: string
+          description: string
+          evidence_image_url: string | null
+          id: string
+          is_urgent: boolean
+          reported_event_id: string | null
+          reported_message_id: string | null
+          reported_user_id: string | null
+          reporter_user_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: Database["public"]["Enums"]["report_status"]
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          description?: string
+          evidence_image_url?: string | null
+          id?: string
+          is_urgent?: boolean
+          reported_event_id?: string | null
+          reported_message_id?: string | null
+          reported_user_id?: string | null
+          reporter_user_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["report_category"]
+          created_at?: string
+          description?: string
+          evidence_image_url?: string | null
+          id?: string
+          is_urgent?: boolean
+          reported_event_id?: string | null
+          reported_message_id?: string | null
+          reported_user_id?: string | null
+          reporter_user_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reported_event_id_fkey"
+            columns: ["reported_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reported_event_id_fkey"
+            columns: ["reported_event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_restrictions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          reason: string | null
+          restriction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          restriction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          restriction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       events_with_details: {
@@ -615,13 +729,32 @@ export type Database = {
       }
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_service_role: { Args: never; Returns: boolean }
       user_wants_notification:
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      report_category:
+        | "harassment"
+        | "hate_speech"
+        | "sexual_content"
+        | "spam"
+        | "fraud"
+        | "fake_profile"
+        | "suspicious_behavior"
+        | "dangerous_event"
+        | "misleading_event"
+        | "other"
+      report_status: "created" | "under_review" | "resolved" | "dismissed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -748,6 +881,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      report_category: [
+        "harassment",
+        "hate_speech",
+        "sexual_content",
+        "spam",
+        "fraud",
+        "fake_profile",
+        "suspicious_behavior",
+        "dangerous_event",
+        "misleading_event",
+        "other",
+      ],
+      report_status: ["created", "under_review", "resolved", "dismissed"],
+    },
   },
 } as const
