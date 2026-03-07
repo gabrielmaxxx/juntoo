@@ -91,6 +91,9 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   if (view === 'about') {
     return <AboutPage onBack={() => setView('main')} />;
   }
+  if (view === 'moderation') {
+    return <ModerationPanel onBack={() => setView('main')} />;
+  }
 
   return (
     <div className="pb-20 bg-background min-h-screen">
