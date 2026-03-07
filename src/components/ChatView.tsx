@@ -17,7 +17,7 @@ interface ChatViewProps {
   onBack: () => void;
 }
 
-export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, onBack }: ChatViewProps) => {
+export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, otherUserId, onBack }: ChatViewProps) => {
   const { user } = useAuth();
   const { messages, loading, sendMessage } = useChat(conversationId);
   const [input, setInput] = useState('');
