@@ -141,7 +141,7 @@ export const ModerationPanel = ({ onBack }: ModerationPanelProps) => {
       const { error } = await supabase
         .from('reports')
         .update({
-          status,
+          status: status as any,
           reviewed_at: new Date().toISOString(),
           reviewed_by: user.id,
           reviewer_notes: reviewerNotes.trim() || null,
