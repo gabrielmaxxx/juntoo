@@ -24,6 +24,7 @@ export const MessagesPage = ({ onBack }: MessagesPageProps) => {
         conversationId={selectedConversation}
         otherUserName={selectedUser.name}
         otherUserAvatar={selectedUser.avatar}
+        otherUserId={selectedUser.userId}
         onBack={() => { setSelectedConversation(null); setSelectedUser(null); }}
       />
     );
