@@ -52,6 +52,14 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           <TabsList className="w-full justify-start rounded-none border-b px-3 sm:px-4">
             <TabsTrigger value="details" className="text-sm sm:text-base">Detalhes</TabsTrigger>
             {isParticipating && <TabsTrigger value="chat" className="text-sm sm:text-base">Chat</TabsTrigger>}
+            <div className="ml-auto">
+              <ReportButton
+                reportedEventId={event.id}
+                reportedUserId={event.createdBy}
+                contextLabel={`Denunciar evento: ${event.title}`}
+                showLabel
+              />
+            </div>
           </TabsList>
 
           <TabsContent value="details" className="flex-1 p-3 sm:p-4 space-y-4 sm:space-y-6 overflow-y-auto mt-0 pb-20">

@@ -54,7 +54,11 @@ export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, other
             {otherUserName.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <span className="font-semibold text-foreground text-sm">{otherUserName}</span>
+        <span className="font-semibold text-foreground text-sm flex-1">{otherUserName}</span>
+        <ReportButton
+          reportedUserId={otherUserId}
+          contextLabel={`Denunciar conversa com ${otherUserName}`}
+        />
       </div>
 
       {/* Messages */}

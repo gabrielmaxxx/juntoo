@@ -83,6 +83,14 @@ export const EventChat = ({
                   }`}>
                     <p className="text-sm">{msg.message}</p>
                   </div>
+                  {msg.user_id !== currentUser?.id && (
+                    <ReportButton
+                      reportedUserId={msg.user_id}
+                      reportedMessageId={msg.id}
+                      contextLabel="Denunciar esta mensagem"
+                      size="icon"
+                    />
+                  )}
                 </div>
               </div>
             ))}

@@ -292,6 +292,12 @@ export default function UserProfilePage() {
                   <MessageCircle className="w-4 h-4" />
                   Enviar Mensagem
                 </Button>
+                <ReportButton
+                  reportedUserId={userId}
+                  contextLabel={`Denunciar perfil: ${profile.full_name}`}
+                  showLabel
+                  variant="outline"
+                />
               </div>
             </div>
           </CardContent>
