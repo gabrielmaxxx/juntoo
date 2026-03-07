@@ -2,6 +2,7 @@ import { Event } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventDetails } from '@/hooks/useEventDetails';
+import { ReportButton } from '@/components/reports';
 import {
   EventHero,
   EventInfo,
