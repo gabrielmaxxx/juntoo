@@ -97,10 +97,10 @@ export const ModerationPanel = ({ onBack }: ModerationPanelProps) => {
       let query = supabase.from('reports').select('*').order('is_urgent', { ascending: false }).order('created_at', { ascending: false });
       
       if (filterCategory !== 'all') {
-        query = query.eq('category', filterCategory);
+        query = query.eq('category', filterCategory as any);
       }
       if (filterStatus !== 'all') {
-        query = query.eq('status', filterStatus);
+        query = query.eq('status', filterStatus as any);
       }
 
       const { data, error } = await query;
