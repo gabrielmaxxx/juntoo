@@ -13,6 +13,7 @@ interface ChatViewProps {
   conversationId: string;
   otherUserName: string;
   otherUserAvatar: string | null;
+  otherUserId?: string;
   onBack: () => void;
 }
 
