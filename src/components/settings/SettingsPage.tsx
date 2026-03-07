@@ -59,6 +59,14 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   const [view, setView] = useState<SettingsView>('main');
   const { signOut, user } = useAuth();
   const { toast } = useToast();
+  const [isModerator, setIsModerator] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('user_roles').select('role').eq('user_id', user.id).in('role', ['moderator', 'admin']).then(({ data }) => {
+      setIsModerator(!!(data && data.length > 0));
+    });
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
