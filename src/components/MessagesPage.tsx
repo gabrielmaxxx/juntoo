@@ -85,7 +85,7 @@ export const MessagesPage = ({ onBack }: MessagesPageProps) => {
               key={conv.id}
               onClick={() => {
                 setSelectedConversation(conv.id);
-                setSelectedUser({ name: conv.other_user.full_name, avatar: conv.other_user.avatar_url });
+                setSelectedUser({ name: conv.other_user.full_name, avatar: conv.other_user.avatar_url, userId: conv.other_user.user_id });
               }}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
             >
