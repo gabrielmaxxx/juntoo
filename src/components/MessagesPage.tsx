@@ -15,7 +15,7 @@ interface MessagesPageProps {
 export const MessagesPage = ({ onBack }: MessagesPageProps) => {
   const { conversations, loading } = useConversations();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<{ name: string; avatar: string | null } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<{ name: string; avatar: string | null; userId: string } | null>(null);
   const [search, setSearch] = useState('');
 
   if (selectedConversation && selectedUser) {
