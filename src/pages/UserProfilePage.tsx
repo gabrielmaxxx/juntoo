@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
+import { ReportButton } from '@/components/reports';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { toast } from 'sonner';
 import { parseISO, addHours, isBefore } from 'date-fns';
