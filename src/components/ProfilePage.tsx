@@ -124,11 +124,7 @@ export const ProfilePage = () => {
             <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
           </TabsContent>
 
-          <TabsContent value="posts" className="p-4">
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Nenhum post ainda</p>
-            </div>
-          </TabsContent>
+
 
           <TabsContent value="events" className="p-4">
             <ProfileEvents events={upcomingEvents} loading={loadingEvents} type="upcoming" />

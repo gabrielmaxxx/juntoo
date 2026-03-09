@@ -306,11 +306,20 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="events" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="reputation" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="reputation">Reputação</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="reputation" className="mt-4">
+            <Card>
+              <CardContent className="p-0">
+                <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="events" className="mt-6">
             {upcomingEvents.length === 0 ? (
