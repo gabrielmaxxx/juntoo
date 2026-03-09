@@ -14,6 +14,8 @@ interface ProfileHeaderProps {
   userNumber: string;
   selectedInterests: string[];
   uploadingAvatar: boolean;
+  averageRating?: number;
+  totalReviews?: number;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onEditClick: () => void;
 }
@@ -25,6 +27,8 @@ export const ProfileHeader = ({
   userNumber,
   selectedInterests,
   uploadingAvatar,
+  averageRating = 0,
+  totalReviews = 0,
   onAvatarUpload,
   onEditClick,
 }: ProfileHeaderProps) => {
@@ -82,9 +86,9 @@ export const ProfileHeader = ({
               </p>
             )}
             <div className="flex items-center mt-1">
-              {renderStars(4.8)}
+              {renderStars(averageRating)}
               <span className="ml-2 text-sm text-muted-foreground whitespace-nowrap">
-                (0 avaliações)
+                ({totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'})
               </span>
             </div>
           </div>

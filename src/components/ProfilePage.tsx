@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CATEGORIES } from '@/constants/categories';
 import { useProfileData } from '@/hooks/useProfileData';
+import { useUserReputation } from '@/hooks/useUserReputation';
+import { ReputationSection } from '@/components/reputation';
 import {
   ProfileHeader,
   ProfileEditDialog,
@@ -11,6 +13,7 @@ import {
 
 export const ProfilePage = () => {
   const {
+    user,
     profile,
     userNumber,
     upcomingEvents,
@@ -21,9 +24,11 @@ export const ProfilePage = () => {
     handleSaveProfile,
   } = useProfileData();
 
+  const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(profile?.user_id);
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState('reputation');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
@@ -88,6 +93,8 @@ export const ProfilePage = () => {
         userNumber={userNumber}
         selectedInterests={selectedInterests}
         uploadingAvatar={uploadingAvatar}
+        averageRating={stats?.average_overall || 0}
+        totalReviews={stats?.total_reviews || 0}
         onAvatarUpload={onAvatarUpload}
         onEditClick={() => setIsEditingProfile(true)}
       />
@@ -109,17 +116,17 @@ export const ProfilePage = () => {
       <div className="bg-background">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full h-12 bg-background border-b border-border rounded-none">
-            <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
+            <TabsTrigger value="reputation" className="flex-1">Reputação</TabsTrigger>
             <TabsTrigger value="events" className="flex-1">Eventos</TabsTrigger>
             <TabsTrigger value="history" className="flex-1">Histórico</TabsTrigger>
             <TabsTrigger value="friends" className="flex-1">Amigos</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="posts" className="p-4">
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Nenhum post ainda</p>
-            </div>
+          <TabsContent value="reputation" className="mt-0">
+            <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
           </TabsContent>
+
+
 
           <TabsContent value="events" className="p-4">
             <ProfileEvents events={upcomingEvents} loading={loadingEvents} type="upcoming" />

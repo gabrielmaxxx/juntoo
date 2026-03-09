@@ -11,6 +11,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
 import { ReportButton } from '@/components/reports';
+import { ReputationSection } from '@/components/reputation';
+import { useUserReputation } from '@/hooks/useUserReputation';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { toast } from 'sonner';
 import { parseISO, addHours, isBefore } from 'date-fns';
@@ -35,6 +37,7 @@ export default function UserProfilePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('none');
   const [loading, setLoading] = useState(true);
+  const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(userId);
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
@@ -303,11 +306,20 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="events" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="reputation" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="reputation">Reputação</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="reputation" className="mt-4">
+            <Card>
+              <CardContent className="p-0">
+                <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="events" className="mt-6">
             {upcomingEvents.length === 0 ? (

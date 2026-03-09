@@ -11,6 +11,7 @@ import {
   EventReviewsSection,
   EventChat,
 } from './event-details';
+import { EventParticipantReview } from './reputation';
 
 interface EventDetailsProps {
   event: Event;
@@ -70,6 +71,18 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
             )}
 
             <EventParticipants participants={participants} currentUser={user} />
+
+            <EventParticipantReview
+              eventId={event.id}
+              eventTitle={event.title}
+              participants={participants.map(p => ({
+                user_id: p.user_id,
+                full_name: p.profiles?.full_name || 'Usuário',
+                avatar_url: p.profiles?.avatar_url || null,
+              }))}
+              isEventCompleted={isEventCompleted}
+              isParticipating={isParticipating}
+            />
 
             <EventReviewsSection
               eventId={event.id}
