@@ -114,11 +114,15 @@ export const ProfilePage = () => {
       <div className="bg-background">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full h-12 bg-background border-b border-border rounded-none">
-            <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
+            <TabsTrigger value="reputation" className="flex-1">Reputação</TabsTrigger>
             <TabsTrigger value="events" className="flex-1">Eventos</TabsTrigger>
             <TabsTrigger value="history" className="flex-1">Histórico</TabsTrigger>
             <TabsTrigger value="friends" className="flex-1">Amigos</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="reputation" className="mt-0">
+            <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
+          </TabsContent>
 
           <TabsContent value="posts" className="p-4">
             <div className="text-center py-8 text-muted-foreground">
