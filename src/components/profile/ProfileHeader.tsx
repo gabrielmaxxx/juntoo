@@ -14,6 +14,8 @@ interface ProfileHeaderProps {
   userNumber: string;
   selectedInterests: string[];
   uploadingAvatar: boolean;
+  averageRating?: number;
+  totalReviews?: number;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onEditClick: () => void;
 }
