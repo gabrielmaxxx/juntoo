@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CATEGORIES } from '@/constants/categories';
 import { useProfileData } from '@/hooks/useProfileData';
+import { useUserReputation } from '@/hooks/useUserReputation';
+import { ReputationSection } from '@/components/reputation';
 import {
   ProfileHeader,
   ProfileEditDialog,
