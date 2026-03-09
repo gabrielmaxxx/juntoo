@@ -655,6 +655,66 @@ export type Database = {
         }
         Relationships: []
       }
+      user_reviews: {
+        Row: {
+          comment: string | null
+          communication_rating: number
+          created_at: string
+          event_id: string
+          id: string
+          overall_rating: number
+          punctuality_rating: number
+          reliability_rating: number
+          respect_rating: number
+          reviewed_user_id: string
+          reviewer_user_id: string
+          safety_rating: number
+        }
+        Insert: {
+          comment?: string | null
+          communication_rating: number
+          created_at?: string
+          event_id: string
+          id?: string
+          overall_rating?: number
+          punctuality_rating: number
+          reliability_rating: number
+          respect_rating: number
+          reviewed_user_id: string
+          reviewer_user_id: string
+          safety_rating: number
+        }
+        Update: {
+          comment?: string | null
+          communication_rating?: number
+          created_at?: string
+          event_id?: string
+          id?: string
+          overall_rating?: number
+          punctuality_rating?: number
+          reliability_rating?: number
+          respect_rating?: number
+          reviewed_user_id?: string
+          reviewer_user_id?: string
+          safety_rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -729,6 +789,7 @@ export type Database = {
       }
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
+      get_user_reputation: { Args: { target_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
