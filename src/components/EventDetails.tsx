@@ -11,6 +11,7 @@ import {
   EventReviewsSection,
   EventChat,
 } from './event-details';
+import { EventParticipantReview } from './reputation';
 
 interface EventDetailsProps {
   event: Event;
