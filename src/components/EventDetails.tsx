@@ -77,8 +77,8 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
               eventTitle={event.title}
               participants={participants.map(p => ({
                 user_id: p.user_id,
-                full_name: p.full_name || 'Usuário',
-                avatar_url: p.avatar_url || null,
+                full_name: p.profiles?.full_name || 'Usuário',
+                avatar_url: p.profiles?.avatar_url || null,
               }))}
               isEventCompleted={isEventCompleted}
               isParticipating={isParticipating}
