@@ -72,6 +72,18 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
             <EventParticipants participants={participants} currentUser={user} />
 
+            <EventParticipantReview
+              eventId={event.id}
+              eventTitle={event.title}
+              participants={participants.map(p => ({
+                user_id: p.user_id,
+                full_name: p.full_name || 'Usuário',
+                avatar_url: p.avatar_url || null,
+              }))}
+              isEventCompleted={isEventCompleted}
+              isParticipating={isParticipating}
+            />
+
             <EventReviewsSection
               eventId={event.id}
               reviews={reviews}
