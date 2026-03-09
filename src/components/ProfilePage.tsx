@@ -93,6 +93,8 @@ export const ProfilePage = () => {
         userNumber={userNumber}
         selectedInterests={selectedInterests}
         uploadingAvatar={uploadingAvatar}
+        averageRating={stats?.average_overall || 0}
+        totalReviews={stats?.total_reviews || 0}
         onAvatarUpload={onAvatarUpload}
         onEditClick={() => setIsEditingProfile(true)}
       />
