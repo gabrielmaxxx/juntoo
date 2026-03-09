@@ -37,6 +37,7 @@ export default function UserProfilePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('none');
   const [loading, setLoading] = useState(true);
+  const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(userId);
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
