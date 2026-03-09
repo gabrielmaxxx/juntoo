@@ -13,6 +13,7 @@ import {
 
 export const ProfilePage = () => {
   const {
+    user,
     profile,
     userNumber,
     upcomingEvents,
@@ -22,6 +23,8 @@ export const ProfilePage = () => {
     handleAvatarUpload,
     handleSaveProfile,
   } = useProfileData();
+
+  const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(profile?.user_id);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
