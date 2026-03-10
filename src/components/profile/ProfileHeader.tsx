@@ -17,6 +17,8 @@ interface ProfileHeaderProps {
   uploadingAvatar: boolean;
   averageRating?: number;
   totalReviews?: number;
+  verified?: boolean;
+  businessVerified?: boolean;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onEditClick: () => void;
 }
