@@ -24,6 +24,8 @@ interface Profile {
   avatar_url: string | null;
   city: string | null;
   interests: string[] | null;
+  verified?: boolean;
+  business_verified?: boolean;
 }
 
 type FriendshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted';
