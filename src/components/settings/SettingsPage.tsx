@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe, Flag } from 'lucide-react';
+import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe, Flag, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
