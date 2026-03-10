@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/verified-badge';
 import { ReportButton } from '@/components/reports';
 import { ReputationSection } from '@/components/reputation';
 import { useUserReputation } from '@/hooks/useUserReputation';
