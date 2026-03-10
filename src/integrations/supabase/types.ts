@@ -625,6 +625,75 @@ export type Database = {
           },
         ]
       }
+      user_penalties: {
+        Row: {
+          blocked_feature: string | null
+          created_at: string
+          duration_days: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          moderator_id: string
+          penalty_type: string
+          reason: string
+          reputation_impact: number | null
+          user_id: string
+        }
+        Insert: {
+          blocked_feature?: string | null
+          created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          moderator_id: string
+          penalty_type: string
+          reason: string
+          reputation_impact?: number | null
+          user_id: string
+        }
+        Update: {
+          blocked_feature?: string | null
+          created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          moderator_id?: string
+          penalty_type?: string
+          reason?: string
+          reputation_impact?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_reputation_log: {
+        Row: {
+          change_amount: number
+          created_at: string
+          id: string
+          moderator_id: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          change_amount: number
+          created_at?: string
+          id?: string
+          moderator_id?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          change_amount?: number
+          created_at?: string
+          id?: string
+          moderator_id?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_restrictions: {
         Row: {
           created_at: string
@@ -733,6 +802,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trust_scores: {
+        Row: {
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       events_with_details: {
@@ -783,12 +870,26 @@ export type Database = {
       }
     }
     Functions: {
+      apply_penalty: {
+        Args: {
+          p_blocked_feature?: string
+          p_duration_days?: number
+          p_moderator_id: string
+          p_penalty_type: string
+          p_reason: string
+          p_reputation_impact?: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       find_or_create_conversation: {
         Args: { other_user_id: string }
         Returns: string
       }
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
+      get_moderation_stats: { Args: never; Returns: Json }
+      get_reported_users: { Args: never; Returns: Json }
       get_user_reputation: { Args: { target_user_id: string }; Returns: Json }
       has_role: {
         Args: {
