@@ -266,7 +266,10 @@ export default function UserProfilePage() {
               </Avatar>
 
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl font-bold mb-2">{profile.full_name}</h1>
+                <h1 className="text-2xl font-bold mb-2 flex items-center justify-center md:justify-start gap-1.5">
+                  {profile.full_name}
+                  <VerifiedBadge verified={profile.verified} businessVerified={profile.business_verified} />
+                </h1>
                 {profile.city && (
                   <p className="text-muted-foreground mb-4">{profile.city}</p>
                 )}
