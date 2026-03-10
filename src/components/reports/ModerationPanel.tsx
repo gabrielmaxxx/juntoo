@@ -8,9 +8,6 @@ import { ReportsList } from '@/components/moderation/ReportsList';
 import { ReportedUsers } from '@/components/moderation/ReportedUsers';
 import { ModerationStats } from '@/components/moderation/ModerationStats';
 import { VerificationReviews } from '@/components/moderation/VerificationReviews';
-import { ReportsList } from '@/components/moderation/ReportsList';
-import { ReportedUsers } from '@/components/moderation/ReportedUsers';
-import { ModerationStats } from '@/components/moderation/ModerationStats';
 
 interface ModerationPanelProps {
   onBack: () => void;
