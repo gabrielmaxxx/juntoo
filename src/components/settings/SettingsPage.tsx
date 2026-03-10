@@ -13,6 +13,7 @@ import { AppearanceSettings } from './AppearanceSettings';
 import { SupportPage } from './SupportPage';
 import { AboutPage } from './AboutPage';
 import { ModerationPanel } from '@/components/reports/ModerationPanel';
+import { VerificationSettings } from './VerificationSettings';
 import { supabase } from '@/integrations/supabase/client';
 
 type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation';
