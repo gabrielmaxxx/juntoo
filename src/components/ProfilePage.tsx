@@ -95,6 +95,8 @@ export const ProfilePage = () => {
         uploadingAvatar={uploadingAvatar}
         averageRating={stats?.average_overall || 0}
         totalReviews={stats?.total_reviews || 0}
+        verified={profile?.verified}
+        businessVerified={profile?.business_verified}
         onAvatarUpload={onAvatarUpload}
         onEditClick={() => setIsEditingProfile(true)}
       />

@@ -3,10 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Shield, FileText, Users, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, Users, BarChart3, BadgeCheck } from 'lucide-react';
 import { ReportsList } from '@/components/moderation/ReportsList';
 import { ReportedUsers } from '@/components/moderation/ReportedUsers';
 import { ModerationStats } from '@/components/moderation/ModerationStats';
+import { VerificationReviews } from '@/components/moderation/VerificationReviews';
 
 interface ModerationPanelProps {
   onBack: () => void;
@@ -51,10 +52,12 @@ export const ModerationPanel = ({ onBack }: ModerationPanelProps) => {
         <TabsList className="w-full">
           <TabsTrigger value="reports" className="flex-1 gap-1 text-xs"><FileText className="w-3.5 h-3.5" />Denúncias</TabsTrigger>
           <TabsTrigger value="users" className="flex-1 gap-1 text-xs"><Users className="w-3.5 h-3.5" />Usuários</TabsTrigger>
-          <TabsTrigger value="stats" className="flex-1 gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />Estatísticas</TabsTrigger>
+          <TabsTrigger value="verifications" className="flex-1 gap-1 text-xs"><BadgeCheck className="w-3.5 h-3.5" />Verificações</TabsTrigger>
+          <TabsTrigger value="stats" className="flex-1 gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />Stats</TabsTrigger>
         </TabsList>
         <TabsContent value="reports"><ReportsList /></TabsContent>
         <TabsContent value="users"><ReportedUsers /></TabsContent>
+        <TabsContent value="verifications"><VerificationReviews /></TabsContent>
         <TabsContent value="stats"><ModerationStats /></TabsContent>
       </Tabs>
     </div>

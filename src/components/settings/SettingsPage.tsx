@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe, Flag } from 'lucide-react';
+import { ArrowLeft, Bell, Shield, HelpCircle, Info, Palette, UserCog, LogOut, ChevronRight, Moon, Sun, Lock, Eye, EyeOff, Users, MapPin, MessageCircle, Bug, FileText, Star, Heart, ExternalLink, Smartphone, Trash2, Download, Globe, Flag, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,9 +13,10 @@ import { AppearanceSettings } from './AppearanceSettings';
 import { SupportPage } from './SupportPage';
 import { AboutPage } from './AboutPage';
 import { ModerationPanel } from '@/components/reports/ModerationPanel';
+import { VerificationSettings } from './VerificationSettings';
 import { supabase } from '@/integrations/supabase/client';
 
-type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation';
+type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation' | 'verification';
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -94,6 +95,9 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   if (view === 'moderation') {
     return <ModerationPanel onBack={() => setView('main')} />;
   }
+  if (view === 'verification') {
+    return <VerificationSettings onBack={() => setView('main')} />;
+  }
 
   return (
     <div className="pb-20 bg-background min-h-screen">
@@ -145,6 +149,12 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
             label="Conta"
             description="E-mail, senha e gerenciamento"
             onClick={() => setView('account')}
+          />
+          <SettingsItem
+            icon={<BadgeCheck className="w-5 h-5" />}
+            label="Verificação de Identidade"
+            description="Verifique sua conta ou empresa"
+            onClick={() => setView('verification')}
           />
         </SettingsGroup>
 

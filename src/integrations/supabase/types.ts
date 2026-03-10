@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_verifications: {
+        Row: {
+          cnpj: string
+          company_document_url: string
+          company_name: string
+          created_at: string
+          id: string
+          owner_document_url: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          trade_name: string | null
+          user_id: string
+        }
+        Insert: {
+          cnpj: string
+          company_document_url: string
+          company_name: string
+          created_at?: string
+          id?: string
+          owner_document_url: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          trade_name?: string | null
+          user_id: string
+        }
+        Update: {
+          cnpj?: string
+          company_document_url?: string
+          company_name?: string
+          created_at?: string
+          id?: string
+          owner_document_url?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          trade_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -495,7 +540,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           avatar_url: string | null
+          business_verified: boolean
           city: string | null
           created_at: string
           full_name: string
@@ -504,9 +551,13 @@ export type Database = {
           updated_at: string
           user_id: string
           user_number: number
+          verification_level: number
+          verified: boolean
         }
         Insert: {
+          account_type?: string
           avatar_url?: string | null
+          business_verified?: boolean
           city?: string | null
           created_at?: string
           full_name: string
@@ -515,9 +566,13 @@ export type Database = {
           updated_at?: string
           user_id: string
           user_number?: number
+          verification_level?: number
+          verified?: boolean
         }
         Update: {
+          account_type?: string
           avatar_url?: string | null
+          business_verified?: boolean
           city?: string | null
           created_at?: string
           full_name?: string
@@ -526,6 +581,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_number?: number
+          verification_level?: number
+          verified?: boolean
         }
         Relationships: []
       }
@@ -820,6 +877,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_verifications: {
+        Row: {
+          created_at: string
+          document_url: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          selfie_url: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_url: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_url: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          selfie_url?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       events_with_details: {
@@ -881,6 +974,14 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      approve_business_verification: {
+        Args: { p_moderator_id: string; p_verification_id: string }
+        Returns: undefined
+      }
+      approve_user_verification: {
+        Args: { p_moderator_id: string; p_verification_id: string }
+        Returns: undefined
       }
       find_or_create_conversation: {
         Args: { other_user_id: string }

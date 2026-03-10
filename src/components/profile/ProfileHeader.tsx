@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star, MapPin, Camera, Edit3, UserPlus } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/verified-badge';
 
 
 interface ProfileHeaderProps {
@@ -16,6 +17,8 @@ interface ProfileHeaderProps {
   uploadingAvatar: boolean;
   averageRating?: number;
   totalReviews?: number;
+  verified?: boolean;
+  businessVerified?: boolean;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onEditClick: () => void;
 }
@@ -29,6 +32,8 @@ export const ProfileHeader = ({
   uploadingAvatar,
   averageRating = 0,
   totalReviews = 0,
+  verified,
+  businessVerified,
   onAvatarUpload,
   onEditClick,
 }: ProfileHeaderProps) => {
@@ -75,7 +80,10 @@ export const ProfileHeader = ({
             />
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-foreground truncate">{displayName}</h1>
+            <h1 className="text-xl font-bold text-foreground truncate flex items-center gap-1.5">
+              {displayName}
+              <VerifiedBadge verified={verified} businessVerified={businessVerified} />
+            </h1>
             {userNumber && (
               <p className="text-sm text-muted-foreground">ID: {userNumber}</p>
             )}
