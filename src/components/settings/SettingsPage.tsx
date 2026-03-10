@@ -150,6 +150,12 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
             description="E-mail, senha e gerenciamento"
             onClick={() => setView('account')}
           />
+          <SettingsItem
+            icon={<BadgeCheck className="w-5 h-5" />}
+            label="Verificação de Identidade"
+            description="Verifique sua conta ou empresa"
+            onClick={() => setView('verification')}
+          />
         </SettingsGroup>
 
         <SettingsGroup title="Suporte">
