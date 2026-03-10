@@ -80,7 +80,10 @@ export const ProfileHeader = ({
             />
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-foreground truncate">{displayName}</h1>
+            <h1 className="text-xl font-bold text-foreground truncate flex items-center gap-1.5">
+              {displayName}
+              <VerifiedBadge verified={verified} businessVerified={businessVerified} />
+            </h1>
             {userNumber && (
               <p className="text-sm text-muted-foreground">ID: {userNumber}</p>
             )}
