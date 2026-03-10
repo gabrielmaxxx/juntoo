@@ -3,3 +3,4 @@ export { ReportedUsers } from './ReportedUsers';
 export { ModerationStats } from './ModerationStats';
 export { UserModerationProfile } from './UserModerationProfile';
 export { PenaltyActions } from './PenaltyActions';
+export { VerificationReviews } from './VerificationReviews';
