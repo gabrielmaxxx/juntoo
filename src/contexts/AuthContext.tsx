@@ -13,6 +13,10 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   user_number?: number;
+  account_type?: string;
+  verified?: boolean;
+  verification_level?: number;
+  business_verified?: boolean;
 }
 
 interface AuthContextType {
