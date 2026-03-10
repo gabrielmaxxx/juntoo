@@ -84,12 +84,12 @@ export const ReportsList = () => {
   const openDetail = async (report: Report) => {
     setSelectedReport(report);
     setReviewerNotes(report.reviewer_notes || '');
-    const promises: Promise<any>[] = [];
     if (report.reported_user_id) {
-      promises.push(supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single().then(r => setReportedProfile(r.data)));
+      const { data } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single();
+      setReportedProfile(data);
     } else { setReportedProfile(null); }
-    promises.push(supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reporter_user_id).single().then(r => setReporterProfile(r.data)));
-    await Promise.all(promises);
+    const { data: reporter } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reporter_user_id).single();
+    setReporterProfile(reporter);
   };
 
   const updateStatus = async (status: string) => {
