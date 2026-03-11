@@ -9,12 +9,15 @@ import {
   PrivateLinkSuccess
 } from './create-event';
 import { useEventForm } from '@/hooks/useEventForm';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { ShieldAlert } from 'lucide-react';
 
 interface CreateEventPageProps {
   onBack: () => void;
 }
 
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
+  const { isFeatureBlocked } = useAuthContext();
   const {
     formData,
     errors,
