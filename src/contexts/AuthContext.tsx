@@ -33,6 +33,7 @@ interface AuthContextType {
   restrictions: UserRestriction[];
   isBanned: boolean;
   isSuspended: boolean;
+  isFeatureBlocked: (feature: string) => boolean;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
