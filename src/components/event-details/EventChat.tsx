@@ -100,22 +100,36 @@ export const EventChat = ({
         )}
       </ScrollArea>
       <div className="p-4 border-t border-border bg-background">
-        <div className="flex gap-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Digite sua mensagem..."
-            className="flex-1"
-          />
-          <Button 
-            onClick={sendMessage} 
-            disabled={!newMessage.trim()}
-            size="icon"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
+        {(() => {
+          const { isFeatureBlocked } = useAuthContext();
+          const blocked = isFeatureBlocked('comments');
+          if (blocked) {
+            return (
+              <div className="flex items-center gap-2 text-sm text-destructive justify-center py-1">
+                <ShieldAlert className="w-4 h-4" />
+                <span>Envio de comentários bloqueado por um moderador.</span>
+              </div>
+            );
+          }
+          return (
+            <div className="flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Digite sua mensagem..."
+                className="flex-1"
+              />
+              <Button 
+                onClick={sendMessage} 
+                disabled={!newMessage.trim()}
+                size="icon"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
