@@ -138,6 +138,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const isBanned = restrictions.some(r => r.restriction_type === 'restricted' && r.expires_at === null);
   const isSuspended = restrictions.some(r => r.restriction_type === 'restricted');
+  const isFeatureBlocked = useCallback((feature: string) => {
+    return restrictions.some(r => r.restriction_type === `feature_block_${feature}`);
+  }, [restrictions]);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
