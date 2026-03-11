@@ -1,10 +1,11 @@
 import { RefObject } from 'react';
-import { Send } from 'lucide-react';
+import { Send, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { User } from '@supabase/supabase-js';
 import { ReportButton } from '@/components/reports';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -35,6 +36,9 @@ export const EventChat = ({
   currentUser,
   messagesEndRef,
 }: EventChatProps) => {
+  const { isFeatureBlocked } = useAuthContext();
+  const commentsBlocked = isFeatureBlocked('comments');
+
   return (
     <div className="flex-1 flex flex-col h-full">
       <ScrollArea className="flex-1 p-4">
@@ -99,22 +103,29 @@ export const EventChat = ({
         )}
       </ScrollArea>
       <div className="p-4 border-t border-border bg-background">
-        <div className="flex gap-2">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Digite sua mensagem..."
-            className="flex-1"
-          />
-          <Button 
-            onClick={sendMessage} 
-            disabled={!newMessage.trim()}
-            size="icon"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
+        {commentsBlocked ? (
+          <div className="flex items-center gap-2 text-sm text-destructive justify-center py-1">
+            <ShieldAlert className="w-4 h-4" />
+            <span>Envio de comentários bloqueado por um moderador.</span>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Digite sua mensagem..."
+              className="flex-1"
+            />
+            <Button 
+              onClick={sendMessage} 
+              disabled={!newMessage.trim()}
+              size="icon"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
