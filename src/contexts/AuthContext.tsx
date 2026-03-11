@@ -187,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       restrictions,
       isBanned,
       isSuspended,
+      isFeatureBlocked,
       signOut,
       updateProfile,
       refreshProfile
