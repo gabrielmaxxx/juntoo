@@ -31,7 +31,7 @@ const TabLoadingFallback = () => (
 );
 
 const Index = () => {
-  const { user, profile, loading } = useAuthContext();
+  const { user, profile, loading, isBanned, isSuspended, restrictions, signOut } = useAuthContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
