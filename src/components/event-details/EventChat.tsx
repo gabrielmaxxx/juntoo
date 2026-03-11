@@ -1,10 +1,11 @@
 import { RefObject } from 'react';
-import { Send } from 'lucide-react';
+import { Send, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { User } from '@supabase/supabase-js';
 import { ReportButton } from '@/components/reports';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface Message {
   id: string;
