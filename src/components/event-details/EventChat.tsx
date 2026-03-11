@@ -36,6 +36,9 @@ export const EventChat = ({
   currentUser,
   messagesEndRef,
 }: EventChatProps) => {
+  const { isFeatureBlocked } = useAuthContext();
+  const commentsBlocked = isFeatureBlocked('comments');
+
   return (
     <div className="flex-1 flex flex-col h-full">
       <ScrollArea className="flex-1 p-4">
