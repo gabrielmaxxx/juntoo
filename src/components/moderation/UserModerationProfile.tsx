@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, User, Shield, Star, Calendar, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, User, Shield, Calendar, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PenaltyActions } from './PenaltyActions';
+import { toast } from 'sonner';
 
 interface Props {
   userId: string;
@@ -43,6 +43,7 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
   const [participationCount, setParticipationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showPenalty, setShowPenalty] = useState(false);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -66,6 +67,24 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
   };
 
   useEffect(() => { fetchAll(); }, [userId]);
+
+  const handleRevoke = async (penaltyId: string) => {
+    if (!user) return;
+    setRevokingId(penaltyId);
+    try {
+      const { error } = await supabase.rpc('revoke_penalty', {
+        p_penalty_id: penaltyId,
+        p_moderator_id: user.id,
+      });
+      if (error) throw error;
+      toast.success('Punição revogada com sucesso');
+      fetchAll();
+    } catch (err: any) {
+      toast.error('Erro ao revogar: ' + (err.message || ''));
+    } finally {
+      setRevokingId(null);
+    }
+  };
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
@@ -143,11 +162,26 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
             <div className="space-y-3">
               {penalties.map(p => (
                 <div key={p.id} className="border-l-2 border-destructive/30 pl-3 py-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant={p.penalty_type === 'ban' ? 'destructive' : 'outline'} className="text-xs">
-                      {PENALTY_LABELS[p.penalty_type] || p.penalty_type}
-                    </Badge>
-                    {p.duration_days && <span className="text-xs text-muted-foreground">{p.duration_days} dia(s)</span>}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={p.penalty_type === 'ban' ? 'destructive' : 'outline'} className="text-xs">
+                        {PENALTY_LABELS[p.penalty_type] || p.penalty_type}
+                      </Badge>
+                      {p.duration_days && <span className="text-xs text-muted-foreground">{p.duration_days} dia(s)</span>}
+                      {!p.is_active && <Badge variant="secondary" className="text-xs">Revogada</Badge>}
+                    </div>
+                    {p.is_active && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive"
+                        onClick={() => handleRevoke(p.id)}
+                        disabled={revokingId === p.id}
+                        title="Revogar punição"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
                   <p className="text-sm text-foreground mt-1">{p.reason}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
