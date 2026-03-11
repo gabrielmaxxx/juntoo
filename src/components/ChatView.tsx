@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Send, Flag } from 'lucide-react';
+import { ArrowLeft, Send, ShieldAlert } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useChat } from '@/hooks/useDirectMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ReportButton } from '@/components/reports';
