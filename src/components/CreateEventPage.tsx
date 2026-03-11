@@ -32,6 +32,25 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     handleSubmit
   } = useEventForm(onBack);
 
+  // Block if feature is restricted
+  if (isFeatureBlocked('create_events')) {
+    return (
+      <div className="min-h-dvh bg-background">
+        <EventFormHeader onBack={onBack} />
+        <div className="flex flex-col items-center justify-center p-8 text-center mt-20 space-y-4">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+            <ShieldAlert className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-lg font-bold text-foreground">Função bloqueada</h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Sua permissão para criar eventos foi temporariamente bloqueada por um moderador.
+          </p>
+          <Button variant="outline" onClick={onBack}>Voltar</Button>
+        </div>
+      </div>
+    );
+  }
+
   // Show success screen for private events
   if (privateLink) {
     return <PrivateLinkSuccess privateLink={privateLink} onBack={onBack} />;
