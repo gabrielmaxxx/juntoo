@@ -126,7 +126,3 @@ export const EventChat = ({
       </div>
     </div>
   );
-};
-    </div>
-  );
-};
