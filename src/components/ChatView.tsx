@@ -20,6 +20,8 @@ interface ChatViewProps {
 
 export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, otherUserId, onBack }: ChatViewProps) => {
   const { user } = useAuth();
+  const { isFeatureBlocked } = useAuthContext();
+  const messagesBlocked = isFeatureBlocked('messages');
   const { messages, loading, sendMessage } = useChat(conversationId);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
