@@ -104,17 +104,26 @@ export const ChatView = ({ conversationId, otherUserName, otherUserAvatar, other
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-border bg-background flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Digite sua mensagem..."
-          className="flex-1"
-        />
-        <Button size="icon" onClick={handleSend} disabled={!input.trim()} aria-label="Enviar mensagem">
-          <Send className="w-4 h-4" />
-        </Button>
+      <div className="p-3 border-t border-border bg-background">
+        {messagesBlocked ? (
+          <div className="flex items-center gap-2 text-sm text-destructive justify-center py-1">
+            <ShieldAlert className="w-4 h-4" />
+            <span>Envio de mensagens bloqueado por um moderador.</span>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Digite sua mensagem..."
+              className="flex-1"
+            />
+            <Button size="icon" onClick={handleSend} disabled={!input.trim()} aria-label="Enviar mensagem">
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
