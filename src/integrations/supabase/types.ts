@@ -992,6 +992,7 @@ export type Database = {
       get_moderation_stats: { Args: never; Returns: Json }
       get_reported_users: { Args: never; Returns: Json }
       get_user_reputation: { Args: { target_user_id: string }; Returns: Json }
+      get_user_restrictions: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1000,6 +1001,10 @@ export type Database = {
         Returns: boolean
       }
       is_service_role: { Args: never; Returns: boolean }
+      revoke_penalty: {
+        Args: { p_moderator_id: string; p_penalty_id: string }
+        Returns: undefined
+      }
       user_wants_notification:
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }

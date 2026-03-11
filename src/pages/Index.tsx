@@ -31,7 +31,7 @@ const TabLoadingFallback = () => (
 );
 
 const Index = () => {
-  const { user, profile, loading } = useAuthContext();
+  const { user, profile, loading, isBanned, isSuspended, restrictions, signOut } = useAuthContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -95,6 +95,58 @@ const Index = () => {
   // Show auth page if user is not authenticated
   if (!user) {
     return <AuthPage />;
+  }
+
+  // Show banned screen
+  if (isBanned) {
+    return (
+      <div className="min-h-dvh bg-background flex items-center justify-center p-6">
+        <div className="text-center max-w-sm space-y-4">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <span className="text-3xl">🚫</span>
+          </div>
+          <h1 className="text-xl font-bold text-foreground">Conta Banida</h1>
+          <p className="text-sm text-muted-foreground">
+            Sua conta foi permanentemente bloqueada por violação dos termos de uso da plataforma.
+          </p>
+          {restrictions.find(r => r.restriction_type === 'restricted')?.reason && (
+            <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
+              Motivo: {restrictions.find(r => r.restriction_type === 'restricted')?.reason}
+            </p>
+          )}
+          <button onClick={signOut} className="text-sm text-primary underline">Sair da conta</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show suspended screen
+  if (isSuspended) {
+    const suspension = restrictions.find(r => r.restriction_type === 'restricted');
+    return (
+      <div className="min-h-dvh bg-background flex items-center justify-center p-6">
+        <div className="text-center max-w-sm space-y-4">
+          <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto">
+            <span className="text-3xl">⏸️</span>
+          </div>
+          <h1 className="text-xl font-bold text-foreground">Conta Suspensa</h1>
+          <p className="text-sm text-muted-foreground">
+            Sua conta está temporariamente suspensa.
+          </p>
+          {suspension?.reason && (
+            <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
+              Motivo: {suspension.reason}
+            </p>
+          )}
+          {suspension?.expires_at && (
+            <p className="text-xs text-muted-foreground">
+              Suspensão expira em: {new Date(suspension.expires_at).toLocaleDateString('pt-BR')}
+            </p>
+          )}
+          <button onClick={signOut} className="text-sm text-primary underline">Sair da conta</button>
+        </div>
+      </div>
+    );
   }
 
   if (showSplash) {

@@ -19,11 +19,20 @@ export interface UserProfile {
   business_verified?: boolean;
 }
 
+export interface UserRestriction {
+  restriction_type: string;
+  reason: string | null;
+  expires_at: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
+  restrictions: UserRestriction[];
+  isBanned: boolean;
+  isSuspended: boolean;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -36,7 +45,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [restrictions, setRestrictions] = useState<UserRestriction[]>([]);
   const queryClient = useQueryClient();
+
+  const fetchRestrictions = useCallback(async (userId: string) => {
+    try {
+      const { data } = await supabase.rpc('get_user_restrictions', { p_user_id: userId });
+      const parsed = (data as unknown as UserRestriction[]) || [];
+      setRestrictions(parsed);
+    } catch {
+      setRestrictions([]);
+    }
+  }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -54,7 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data) {
         setProfile(data);
       } else {
-        // Se não há perfil, criar um básico
         const { data: authUser } = await supabase.auth.getUser();
         if (authUser.user) {
           const basicProfile = {
@@ -82,7 +101,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -91,36 +109,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
+            fetchRestrictions(session.user.id);
           }, 0);
         } else {
           setProfile(null);
+          setRestrictions([]);
         }
         
         setLoading(false);
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         fetchProfile(session.user.id);
+        fetchRestrictions(session.user.id);
       }
       
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, [fetchProfile, fetchRestrictions]);
+
+  const isBanned = restrictions.some(r => r.restriction_type === 'restricted' && r.expires_at === null);
+  const isSuspended = restrictions.some(r => r.restriction_type === 'restricted');
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error signing out:', error);
     }
-    // Clear all queries on sign out
     queryClient.clear();
   };
 
@@ -135,10 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      // Update local profile state immediately for optimistic update
       setProfile(prev => prev ? { ...prev, ...updates } : null);
-      
-      // Invalidate related queries to refresh data across components
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
     } catch (error) {
@@ -150,10 +169,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshProfile = useCallback(async () => {
     if (user) {
       await fetchProfile(user.id);
-      // Invalidate related queries
+      await fetchRestrictions(user.id);
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     }
-  }, [user, fetchProfile, queryClient]);
+  }, [user, fetchProfile, fetchRestrictions, queryClient]);
 
   return (
     <AuthContext.Provider value={{
@@ -161,6 +180,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       profile,
       loading,
+      restrictions,
+      isBanned,
+      isSuspended,
       signOut,
       updateProfile,
       refreshProfile
