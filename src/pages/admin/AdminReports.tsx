@@ -80,7 +80,7 @@ export default function AdminReports() {
   const updateStatus = async (status: string) => {
     if (!selected) return;
     const { error } = await supabase.from('reports').update({
-      status, reviewer_notes: notes, reviewed_at: new Date().toISOString(),
+      status: status as any, reviewer_notes: notes, reviewed_at: new Date().toISOString(),
     }).eq('id', selected.id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     await logAction(`report_${status}`, 'report', selected.id, notes);

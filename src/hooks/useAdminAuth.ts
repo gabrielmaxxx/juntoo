@@ -54,14 +54,14 @@ export const useAdminAuth = (): AdminAuth => {
     metadata?: Record<string, unknown>
   ) => {
     if (!user) return;
-    await supabase.from('moderation_logs').insert({
+    await supabase.from('moderation_logs' as any).insert({
       admin_id: user.id,
       action,
       target_type: targetType,
       target_id: targetId || null,
       reason: reason || null,
       metadata: metadata || {},
-    });
+    } as any);
   }, [user]);
 
   return {

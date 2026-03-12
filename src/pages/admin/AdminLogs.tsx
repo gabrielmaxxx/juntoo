@@ -46,7 +46,7 @@ export default function AdminLogs() {
 
   const fetchLogs = async () => {
     setLoading(true);
-    let q = supabase.from('moderation_logs').select('*').order('created_at', { ascending: false }).limit(200);
+    let q = supabase.from('moderation_logs' as any).select('*').order('created_at', { ascending: false }).limit(200);
     if (actionFilter !== 'all') q = q.eq('action', actionFilter);
     if (search) q = q.or(`target_id.eq.${search},admin_id.eq.${search}`);
     const { data } = await q;
