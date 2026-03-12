@@ -56,8 +56,8 @@ export default function AdminReports() {
   const fetchReports = async () => {
     setLoading(true);
     let q = supabase.from('reports').select('*').order('is_urgent', { ascending: false }).order('created_at', { ascending: false }).limit(200);
-    if (statusFilter !== 'all') q = q.eq('status', statusFilter);
-    if (categoryFilter !== 'all') q = q.eq('category', categoryFilter);
+    if (statusFilter !== 'all') q = q.eq('status', statusFilter as any);
+    if (categoryFilter !== 'all') q = q.eq('category', categoryFilter as any);
     if (search) q = q.or(`reported_user_id.eq.${search},reporter_user_id.eq.${search}`);
     const { data } = await q;
     setReports((data as Report[]) || []);
