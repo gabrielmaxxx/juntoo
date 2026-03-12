@@ -50,7 +50,7 @@ export default function AdminLogs() {
     if (actionFilter !== 'all') q = q.eq('action', actionFilter);
     if (search) q = q.or(`target_id.eq.${search},admin_id.eq.${search}`);
     const { data } = await q;
-    const entries = (data as LogEntry[]) || [];
+    const entries = ((data as unknown) as LogEntry[]) || [];
     setLogs(entries);
 
     // Fetch admin names
