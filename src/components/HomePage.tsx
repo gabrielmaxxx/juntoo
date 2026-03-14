@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Sparkles, Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
+import { Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
-import { useTrendingEvents, useFriendsEvents, useRecommendedEvents, useNearbyEvents } from '@/hooks/useEvents';
+import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -22,11 +22,6 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const { data: trendingEvents = [], isLoading: loadingTrending } = useTrendingEvents(5);
   const { data: friendsEvents = [], isLoading: loadingFriends } = useFriendsEvents(user?.id, 3);
-  const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
-    user?.id,
-    profile?.interests || null,
-    10
-  );
 
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
   const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
@@ -47,7 +42,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     prevGeoState.current = { latitude, geoError, geoLoading };
   }, [latitude, geoCity, geoError, geoLoading]);
 
-  const loading = loadingTrending || loadingFriends || loadingRecommended;
+  const loading = loadingTrending || loadingFriends;
 
   const getDailyMission = () => {
     const missions = [
@@ -273,54 +268,6 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </section>
       )}
 
-      {/* Recommended Events */}
-      <section className="px-5" aria-label="Eventos recomendados">
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            Recomendado para você
-            <Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">Com base nos seus interesses</p>
-        </div>
-        {recommendedEvents.length > 0 ? (
-          <div className="space-y-3">
-            {recommendedEvents.map((event) => (
-              <article 
-                key={event.id}
-                onClick={() => onEventClick(event)}
-                className="flex gap-4 cursor-pointer group bg-card rounded-2xl p-3 transition-all duration-200 hover:shadow-md"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && onEventClick(event)}
-                aria-label={`${event.title} em ${event.location} às ${event.time}`}
-              >
-                <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden">
-                  <LazyImage 
-                    src={event.imageUrl}
-                    alt={event.title}
-                    className="w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    aspectRatio="square"
-                  />
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <h3 className="font-semibold text-sm text-foreground line-clamp-1">{event.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{event.location}</p>
-                  <p className="text-xs text-primary font-medium mt-1">{event.time}</p>
-                </div>
-                <ChevronRight className="flex-shrink-0 w-4 h-4 text-muted-foreground/50 self-center group-hover:text-primary transition-colors" aria-hidden="true" />
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-muted-foreground">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-muted-foreground/50" aria-hidden="true" />
-            </div>
-            <p className="text-base font-semibold mb-1">Nenhum evento ainda</p>
-            <p className="text-sm text-muted-foreground">Seja o primeiro a criar um evento incrível!</p>
-          </div>
-        )}
-      </section>
     </div>
   );
 };
