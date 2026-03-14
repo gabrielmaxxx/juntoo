@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -18,11 +18,12 @@ export function useEventConversations() {
   const [conversations, setConversations] = useState<EventConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalUnread, setTotalUnread] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchConversations = useCallback(async () => {
     if (!user) { setConversations([]); setLoading(false); return; }
 
-    // Get events the user participates in
+    // 1. Get events the user participates in
     const { data: participations } = await supabase
       .from('event_participants')
       .select('event_id')
@@ -37,59 +38,57 @@ export function useEventConversations() {
 
     const eventIds = participations.map(p => p.event_id);
 
-    // Fetch event details
-    const { data: events } = await supabase
-      .from('events')
-      .select('id, title, image_url')
-      .in('id', eventIds);
-
-    // Fetch read states
-    const { data: readStates } = await supabase
-      .from('event_message_reads')
-      .select('event_id, last_read_at')
-      .eq('user_id', user.id)
-      .in('event_id', eventIds);
-
-    const readMap = new Map(readStates?.map(r => [r.event_id, r.last_read_at]) || []);
-
-    const results: EventConversation[] = [];
-
-    // For each event, get last message and unread count
-    for (const event of events || []) {
-      // Last message
-      const { data: lastMsg } = await supabase
+    // 2. Batch: fetch events, read states, and ALL messages in parallel
+    const [eventsRes, readStatesRes, allMessagesRes] = await Promise.all([
+      supabase
+        .from('events')
+        .select('id, title, image_url')
+        .in('id', eventIds),
+      supabase
+        .from('event_message_reads')
+        .select('event_id, last_read_at')
+        .eq('user_id', user.id)
+        .in('event_id', eventIds),
+      supabase
         .from('event_messages')
-        .select('message, created_at, user_id, profiles:user_id(full_name)')
-        .eq('event_id', event.id)
+        .select('event_id, message, created_at, user_id, profiles:user_id(full_name)')
+        .in('event_id', eventIds)
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(500),
+    ]);
 
-      if (!lastMsg) continue; // Skip events with no messages
+    const events = eventsRes.data || [];
+    const readMap = new Map(readStatesRes.data?.map(r => [r.event_id, r.last_read_at]) || []);
+    const allMessages = allMessagesRes.data || [];
 
-      const lastReadAt = readMap.get(event.id);
+    // 3. Client-side: pick last message per event and compute unread counts
+    const lastMsgMap = new Map<string, typeof allMessages[0]>();
+    const unreadMap = new Map<string, number>();
 
-      // Unread count
-      let unreadCount = 0;
-      if (lastReadAt) {
-        const { count } = await supabase
-          .from('event_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', event.id)
-          .gt('created_at', lastReadAt)
-          .neq('user_id', user.id);
-        unreadCount = count || 0;
-      } else {
-        // Never read — count all messages from others
-        const { count } = await supabase
-          .from('event_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('event_id', event.id)
-          .neq('user_id', user.id);
-        unreadCount = count || 0;
+    for (const msg of allMessages) {
+      // Track last message per event
+      if (!lastMsgMap.has(msg.event_id)) {
+        lastMsgMap.set(msg.event_id, msg);
       }
 
+      // Count unreads: messages from others after last_read_at
+      if (msg.user_id !== user.id) {
+        const lastReadAt = readMap.get(msg.event_id);
+        if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
+          unreadMap.set(msg.event_id, (unreadMap.get(msg.event_id) || 0) + 1);
+        }
+      }
+    }
+
+    // 4. Build results (only events with messages)
+    const results: EventConversation[] = [];
+
+    for (const event of events) {
+      const lastMsg = lastMsgMap.get(event.id);
+      if (!lastMsg) continue;
+
       const senderProfile = lastMsg.profiles as any;
+      const unreadCount = unreadMap.get(event.id) || 0;
 
       results.push({
         type: 'event',
@@ -118,7 +117,7 @@ export function useEventConversations() {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Subscribe to new event messages for realtime updates
+  // Debounced realtime subscription
   useEffect(() => {
     if (!user) return;
 
@@ -129,11 +128,18 @@ export function useEventConversations() {
         schema: 'public',
         table: 'event_messages',
       }, () => {
-        fetchConversations();
+        // Debounce: wait 2s before refetching
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+          fetchConversations();
+        }, 2000);
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      supabase.removeChannel(channel);
+    };
   }, [user, fetchConversations]);
 
   return { conversations, loading, totalUnread, refresh: fetchConversations };
