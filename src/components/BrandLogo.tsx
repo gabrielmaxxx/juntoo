@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import juntooLogo from '@/assets/juntoo-logo.jpg';
 import { cn } from '@/lib/utils';
 
