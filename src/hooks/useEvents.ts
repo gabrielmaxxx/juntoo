@@ -69,7 +69,8 @@ export const usePublicEvents = () => {
         .from('events_with_details')
         .select('*')
         .eq('is_private', false)
-        .order('date', { ascending: true });
+        .order('date', { ascending: true })
+        .limit(500);
 
       if (error) throw error;
 
