@@ -22,11 +22,6 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const { data: trendingEvents = [], isLoading: loadingTrending } = useTrendingEvents(5);
   const { data: friendsEvents = [], isLoading: loadingFriends } = useFriendsEvents(user?.id, 3);
-  const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
-    user?.id,
-    profile?.interests || null,
-    10
-  );
 
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
   const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
