@@ -64,6 +64,7 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
       .from('notifications')
       .select('*')
       .eq('user_id', user.id)
+      .neq('type', 'new_message')
       .order('created_at', { ascending: false })
       .limit(50);
 
