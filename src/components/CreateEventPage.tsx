@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, PartyPopper, Share2, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -11,6 +11,8 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { ShieldAlert } from 'lucide-react';
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { Confetti } from '@/components/ui/confetti';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 
 interface CreateEventPageProps {
   onBack: () => void;
@@ -45,6 +47,26 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     handleSubmit: originalHandleSubmit,
     validateForm
   } = useEventForm(handleSuccess);
+
+  // Auto-fill state/city from geolocation
+  const { stateCode: geoState, city: geoCity, requestLocation } = useGeolocation();
+  const geoApplied = useRef(false);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  useEffect(() => {
+    if (geoApplied.current || !geoState) return;
+    // Only pre-fill if user hasn't manually set state yet
+    if (!formData.state) {
+      handleInputChange('state', geoState);
+      if (geoCity && BRAZIL_STATES_AND_CITIES[geoState]?.includes(geoCity)) {
+        handleInputChange('city', geoCity);
+      }
+      geoApplied.current = true;
+    }
+  }, [geoState, geoCity, formData.state, handleInputChange]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     await originalHandleSubmit(e);
