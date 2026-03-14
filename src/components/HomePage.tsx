@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
+import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
+import { Separator } from './ui/separator';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
@@ -100,6 +101,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </div>
       </section>
 
+      {/* Divider */}
+      <div className="px-5"><Separator className="bg-border/60" /></div>
+
       {/* Trending Events */}
       {trendingEvents.length > 0 && (
         <section aria-label="Eventos em Alta">
@@ -143,42 +147,58 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </section>
       )}
 
-      {/* Friends' Events */}
+      {/* Divider before Friends */}
+      {friendsEvents.length > 0 && trendingEvents.length > 0 && (
+        <div className="px-5"><Separator className="bg-border/60" /></div>
+      )}
+
+      {/* Friends' Events - compact layout */}
       {friendsEvents.length > 0 && (
         <section className="px-5" aria-label="Eventos dos seus amigos">
           <h2 className="text-lg font-bold text-foreground mb-4">
             Seus amigos vão
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {friendsEvents.map((event) => (
               <article 
                 key={event.id}
                 onClick={() => onEventClick(event)}
-                className="cursor-pointer group"
+                className="flex gap-4 cursor-pointer group bg-card rounded-2xl p-3 transition-all duration-200 hover:shadow-md"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && onEventClick(event)}
                 aria-label={`${event.title} em ${event.location}`}
+                style={{ boxShadow: 'var(--shadow-card)' }}
               >
-                <div className="relative rounded-2xl overflow-hidden h-44" style={{ boxShadow: 'var(--shadow-card)' }}>
+                <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden">
                   <LazyImage 
                     src={event.imageUrl}
                     alt={event.title}
                     className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    aspectRatio="square"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" aria-hidden="true" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between">
-                    <div className="text-primary-foreground">
-                      <h3 className="font-bold text-base line-clamp-1">{event.title}</h3>
-                      <p className="text-xs text-white/80 mt-0.5">{event.location}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-white/70 flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-                  </div>
                 </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <h3 className="font-semibold text-sm text-foreground line-clamp-1">{event.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1 flex items-center gap-1">
+                    <MapPinned className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                    {event.location}
+                  </p>
+                  <p className="text-xs text-primary font-medium mt-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                    {event.time}
+                  </p>
+                </div>
+                <ChevronRight className="flex-shrink-0 w-4 h-4 text-muted-foreground/50 self-center group-hover:text-primary transition-colors" aria-hidden="true" />
               </article>
             ))}
           </div>
         </section>
+      )}
+
+      {/* Divider before Nearby */}
+      {(trendingEvents.length > 0 || friendsEvents.length > 0) && (
+        <div className="px-5"><Separator className="bg-border/60" /></div>
       )}
 
       {/* Geolocation CTA or Nearby Events */}
