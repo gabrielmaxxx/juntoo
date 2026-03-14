@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { useEventUnreadCount } from '@/hooks/useEventUnreadCount';
-import { BrandLogo } from './BrandLogo';
+import logoTextWhite from '@/assets/logo-text-white.png';
+import { useNavigate } from 'react-router-dom';
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
