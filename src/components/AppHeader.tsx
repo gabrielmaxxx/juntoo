@@ -4,7 +4,7 @@ import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
-import { useEventConversations } from '@/hooks/useEventConversations';
+import { useEventUnreadCount } from '@/hooks/useEventUnreadCount';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
@@ -18,7 +18,7 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
-  const { totalUnread: eventUnread } = useEventConversations();
+  const { totalUnread: eventUnread } = useEventUnreadCount();
   const combinedUnread = totalUnread + eventUnread;
 
   useEffect(() => {
