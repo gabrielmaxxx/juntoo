@@ -123,6 +123,8 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
     filters.priceRange !== 'all'
   ].filter(Boolean).length;
 
+  const hasNoFilters = activeFiltersCount === 0 && !filters.text;
+
   if (isLoading) {
     return (
       <div className="p-4">
