@@ -360,7 +360,7 @@ export const useEventDetails = (event: Event) => {
         haptic('medium');
         toast({
           title: "Você saiu do evento",
-          description: "Sua participação foi cancelada.",
+          description: "Esperamos te ver em outro evento em breve! 👋",
           action: (
             <ToastAction
               altText="Desfazer saída do evento"
@@ -370,13 +370,13 @@ export const useEventDetails = (event: Event) => {
                   setIsParticipating(true);
                   haptic('success');
                   fetchParticipants();
-                  toast({ title: 'Participação restaurada!' });
+                  toast({ title: 'Participação restaurada! 🎉' });
                 } catch {
                   toast({ title: 'Erro ao restaurar', variant: 'destructive' });
                 }
               }}
             >
-              Desfazer
+              Entrar novamente
             </ToastAction>
           ),
         });
@@ -391,7 +391,7 @@ export const useEventDetails = (event: Event) => {
         if (existing) {
           setIsParticipating(true);
           toast({
-            title: "Você já participa",
+            title: "Você já participa! ✌️",
             description: "Você já está inscrito neste evento.",
           });
           return;
@@ -408,9 +408,26 @@ export const useEventDetails = (event: Event) => {
 
         setIsParticipating(true);
         haptic('success');
+        
+        // Fetch updated participants to show count
+        const { count } = await supabase
+          .from('event_participants')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id);
+        
+        const participantCount = count || 1;
+        const messages = [
+          "Você está dentro! Nos vemos lá! 🎉",
+          "Presença confirmada! Vai ser incrível! 🚀",
+          "Tudo certo! Você está na lista! ✅",
+        ];
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        
         toast({
-          title: "Parabéns!",
-          description: "Você confirmou sua participação no evento.",
+          title: randomMsg,
+          description: participantCount > 1 
+            ? `${participantCount} pessoas já confirmaram presença` 
+            : "Você é o primeiro! Convide seus amigos.",
         });
       }
       

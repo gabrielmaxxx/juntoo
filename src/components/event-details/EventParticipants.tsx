@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
-import { Users } from 'lucide-react';
+import { Users, TrendingUp } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface Participant {
   user_id: string;
@@ -13,16 +14,41 @@ interface Participant {
 interface EventParticipantsProps {
   participants: Participant[];
   currentUser: User | null;
+  createdBy?: string;
 }
 
-export const EventParticipants = ({ participants, currentUser }: EventParticipantsProps) => {
+export const EventParticipants = ({ participants, currentUser, createdBy }: EventParticipantsProps) => {
   const navigate = useNavigate();
+
+  const socialProof = useMemo(() => {
+    const count = participants.length;
+    if (count === 0) return null;
+    
+    // Find named participants (not current user)
+    const others = participants.filter(p => p.user_id !== currentUser?.id);
+    const firstName = others[0]?.profiles?.full_name?.split(' ')[0];
+    
+    if (count === 1 && firstName) return `${firstName} confirmou presença`;
+    if (count <= 3 && firstName) return `${firstName} e mais ${count - 1} ${count - 1 === 1 ? 'pessoa' : 'pessoas'} vão`;
+    if (firstName) return `${firstName} e mais ${count - 1} pessoas confirmaram`;
+    return `${count} ${count === 1 ? 'pessoa confirmou' : 'pessoas confirmaram'} presença`;
+  }, [participants, currentUser]);
+
+  const milestoneMessage = useMemo(() => {
+    const count = participants.length;
+    if (count >= 50) return '🔥 Evento lotado! Mais de 50 pessoas vão!';
+    if (count >= 25) return '🚀 Evento popular! 25+ pessoas confirmaram!';
+    if (count >= 10) return '✨ Esse evento está ganhando destaque!';
+    return null;
+  }, [participants.length]);
+
+  const isCreator = currentUser?.id === createdBy;
 
   if (participants.length === 0) return null;
 
   return (
-    <div className="bg-card rounded-2xl p-4" style={{ boxShadow: 'var(--shadow-card)' }}>
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-card rounded-2xl p-4 space-y-3" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="flex items-center justify-between">
         <h3 className="font-bold text-foreground flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" aria-hidden="true" />
           Participantes
@@ -31,6 +57,14 @@ export const EventParticipants = ({ participants, currentUser }: EventParticipan
           {participants.length}
         </span>
       </div>
+
+      {/* Social proof message */}
+      {socialProof && (
+        <p className="text-xs text-muted-foreground">
+          {socialProof}
+        </p>
+      )}
+
       <div className="flex items-center -space-x-2.5">
         {participants.slice(0, 6).map((participant, index) => (
           <div 
@@ -64,6 +98,14 @@ export const EventParticipants = ({ participants, currentUser }: EventParticipan
           </div>
         )}
       </div>
+
+      {/* Milestone message for creator */}
+      {isCreator && milestoneMessage && (
+        <div className="flex items-center gap-2 bg-primary/5 rounded-xl px-3 py-2 mt-1">
+          <TrendingUp className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+          <p className="text-xs font-medium text-primary">{milestoneMessage}</p>
+        </div>
+      )}
     </div>
   );
 };
