@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
+import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
+import { Separator } from './ui/separator';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
