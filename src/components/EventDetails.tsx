@@ -71,13 +71,23 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           </TabsList>
 
           <TabsContent value="details" className="flex-1 p-4 sm:p-5 space-y-5 overflow-y-auto mt-0 pb-24">
+            {/* Creator badge */}
+            {isCreator && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs font-semibold gap-1.5 px-3 py-1 border-primary/30 text-primary bg-primary/5">
+                  <Crown className="w-3.5 h-3.5" aria-hidden="true" />
+                  Você é o organizador
+                </Badge>
+              </div>
+            )}
+
             <EventInfo event={event} />
 
             {creator && (
               <EventCreator creator={creator} currentUser={user} />
             )}
 
-            <EventParticipants participants={participants} currentUser={user} />
+            <EventParticipants participants={participants} currentUser={user} createdBy={event.createdBy} />
 
             <EventParticipantReview
               eventId={event.id}
