@@ -102,7 +102,7 @@ export const EventChat = ({
           </div>
         )}
       </ScrollArea>
-      <div className="p-4 pb-20 border-t border-border bg-background">
+      <div className="p-4 border-t border-border bg-background">
         {commentsBlocked ? (
           <div className="flex items-center gap-2 text-sm text-destructive justify-center py-1">
             <ShieldAlert className="w-4 h-4" />

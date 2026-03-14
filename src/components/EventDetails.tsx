@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Event } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +45,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   } = useEventDetails(event);
 
   const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
+  const [activeTab, setActiveTab] = useState('details');
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -56,7 +57,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
       {/* Content */}
       <div className="flex-1 overflow-hidden bg-background rounded-t-3xl -mt-5 z-10 relative">
-        <Tabs defaultValue="details" className="h-full flex flex-col">
+        <Tabs defaultValue="details" className="h-full flex flex-col" onValueChange={(v) => setActiveTab(v)}>
           <TabsList className="w-full justify-start rounded-none border-b border-border/50 px-4 pt-2">
             <TabsTrigger value="details" className="text-sm font-semibold">Detalhes</TabsTrigger>
             {isParticipating && <TabsTrigger value="chat" className="text-sm font-semibold">Chat</TabsTrigger>}
@@ -115,7 +116,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           </TabsContent>
 
           {isParticipating && (
-            <TabsContent value="chat" className="flex-1 flex flex-col mt-0 h-full">
+            <TabsContent value="chat" className="flex-1 flex flex-col mt-0 h-full pb-0">
               <EventChat
                 messages={messages}
                 newMessage={newMessage}
@@ -129,34 +130,36 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
         </Tabs>
       </div>
 
-      {/* Action Button */}
-      <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
-        {(() => {
-          const eventDateTime = new Date(`${event.date}T${event.time}`);
-          const isPast = !event.isRecurring && new Date() >= eventDateTime;
-          if (isPast) {
+      {/* Action Button - hidden on chat tab */}
+      {activeTab !== 'chat' && (
+        <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
+          {(() => {
+            const eventDateTime = new Date(`${event.date}T${event.time}`);
+            const isPast = !event.isRecurring && new Date() >= eventDateTime;
+            if (isPast) {
+              return (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
+                  disabled
+                >
+                  Evento encerrado
+                </Button>
+              );
+            }
             return (
               <Button 
-                variant="outline" 
-                className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
-                disabled
+                variant={isParticipating ? "outline" : "hero"} 
+                className="w-full h-12 text-sm font-semibold rounded-2xl" 
+                onClick={handleParticipate}
+                disabled={loading}
               >
-                Evento encerrado
+                {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
               </Button>
             );
-          }
-          return (
-            <Button 
-              variant={isParticipating ? "outline" : "hero"} 
-              className="w-full h-12 text-sm font-semibold rounded-2xl" 
-              onClick={handleParticipate}
-              disabled={loading}
-            >
-              {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
-            </Button>
-          );
-        })()}
-      </div>
+          })()}
+        </div>
+      )}
     </div>
   );
 };
