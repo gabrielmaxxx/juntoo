@@ -16,6 +16,7 @@ interface AppHeaderProps {
 
 export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: AppHeaderProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
