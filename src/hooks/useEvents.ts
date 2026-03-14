@@ -189,3 +189,30 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
     gcTime: 10 * 60 * 1000,
   });
 };
+
+export const useNearbyEvents = (city: string | null, limit = 10) => {
+  return useQuery({
+    queryKey: ['nearby-events', city],
+    queryFn: async () => {
+      if (!city) return [];
+
+      const { data, error } = await supabase
+        .from('events_with_details')
+        .select('*')
+        .eq('is_private', false)
+        .ilike('city', `%${city}%`)
+        .order('date', { ascending: true })
+        .limit(50);
+
+      if (error) throw error;
+
+      return (data as EventWithDetails[])
+        .filter(isEventUpcoming)
+        .slice(0, limit)
+        .map(transformEvent);
+    },
+    enabled: !!city,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
