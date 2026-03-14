@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 interface GeolocationState {
   latitude: number | null;
   longitude: number | null;
+  city: string | null;
   error: string | null;
   loading: boolean;
 }
@@ -11,6 +12,7 @@ export const useGeolocation = () => {
   const [state, setState] = useState<GeolocationState>({
     latitude: null,
     longitude: null,
+    city: null,
     error: null,
     loading: false,
   });
@@ -24,10 +26,26 @@ export const useGeolocation = () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Reverse geocode to get city name
+        let city: string | null = null;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=pt-BR`,
+            { headers: { 'User-Agent': 'Juntoo/1.0' } }
+          );
+          const data = await res.json();
+          city = data?.address?.city || data?.address?.town || data?.address?.municipality || null;
+        } catch {
+          // Ignore reverse geocoding errors
+        }
+
         setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
+          city,
           error: null,
           loading: false,
         });
