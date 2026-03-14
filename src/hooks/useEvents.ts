@@ -199,11 +199,13 @@ export const useNearbyEvents = (city: string | null, limit = 10) => {
     queryFn: async () => {
       if (!city) return [];
 
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
         .select('*')
         .eq('is_private', false)
         .ilike('city', `%${city}%`)
+        .or(`date.gte.${today},is_recurring.eq.true`)
         .order('date', { ascending: true })
         .limit(50);
 
