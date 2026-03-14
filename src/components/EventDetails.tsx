@@ -23,6 +23,7 @@ interface EventDetailsProps {
 }
 
 export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
+  const { user: authUser } = useAuthContext();
   const {
     user,
     isParticipating,
@@ -42,6 +43,8 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
     handleDeleteReview,
     fetchReviews,
   } = useEventDetails(event);
+
+  const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
 
   return (
     <div className="h-full flex flex-col bg-background">
