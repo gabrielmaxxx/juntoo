@@ -60,6 +60,29 @@ export const VerificationSettings = ({ onBack }: VerificationSettingsProps) => {
       setLoading(false);
     };
     fetchStatus();
+
+    // Subscribe to changes so approval/rejection reflects in real-time
+    const channel = supabase
+      .channel('verification-status')
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'user_verifications', 
+        filter: `user_id=eq.${user.id}` 
+      }, (payload) => {
+        setStatus((payload.new as any).status);
+      })
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'business_verifications', 
+        filter: `user_id=eq.${user.id}` 
+      }, (payload) => {
+        setBusinessStatus((payload.new as any).status);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const uploadFile = async (file: File, folder: string) => {
