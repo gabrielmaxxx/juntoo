@@ -196,6 +196,8 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         return <RefreshCw className="w-5 h-5 text-amber-500" />;
       case 'event_reminder':
         return <Bell className="w-5 h-5 text-red-500" />;
+      case 'event_review_reminder':
+        return <Star className="w-5 h-5 text-yellow-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
