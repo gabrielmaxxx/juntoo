@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -7,16 +7,44 @@ import { ChatView } from '@/components/ChatView';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MessagesPageProps {
   onBack?: () => void;
+  initialConversationId?: string;
+  initialUserId?: string;
 }
 
-export const MessagesPage = ({ onBack }: MessagesPageProps) => {
+export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: MessagesPageProps) => {
   const { conversations, loading } = useConversations();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<{ name: string; avatar: string | null; userId: string } | null>(null);
   const [search, setSearch] = useState('');
+
+  // Auto-open conversation when navigated with params
+  useEffect(() => {
+    if (initialConversationId && initialUserId && !selectedConversation) {
+      // Try to find user info from conversations list
+      const conv = conversations.find(c => c.id === initialConversationId);
+      if (conv) {
+        setSelectedConversation(initialConversationId);
+        setSelectedUser({ name: conv.other_user.full_name, avatar: conv.other_user.avatar_url, userId: conv.other_user.user_id });
+      } else if (!loading) {
+        // Conversations loaded but not found — fetch profile directly
+        supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('user_id', initialUserId)
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              setSelectedConversation(initialConversationId);
+              setSelectedUser({ name: data.full_name, avatar: data.avatar_url, userId: initialUserId });
+            }
+          });
+      }
+    }
+  }, [initialConversationId, initialUserId, conversations, loading, selectedConversation]);
 
   if (selectedConversation && selectedUser) {
     return (
