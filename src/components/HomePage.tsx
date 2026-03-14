@@ -241,13 +241,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       ) : (
         <section className="px-5" aria-label="Eventos perto de você">
           <div className="mb-4">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              Perto de você
-              <MapPinned className="w-5 h-5 text-primary" aria-hidden="true" />
-            </h2>
-            {geoCity && (
-              <p className="text-xs text-muted-foreground mt-1">Eventos em {geoCity}</p>
-            )}
+            <SectionHeader 
+              title="Perto de você"
+              subtitle={geoCity ? `Eventos em ${geoCity}` : "Eventos na sua região"}
+              icon={<MapPinned className="w-5 h-5 text-primary" aria-hidden="true" />}
+            />
           </div>
           {loadingNearby ? (
             <div className="space-y-3">
