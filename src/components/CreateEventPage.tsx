@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, PartyPopper, Share2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PartyPopper, Share2, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PrivateLinkSuccess } from './create-event';
@@ -10,6 +10,7 @@ import { useEventForm } from '@/hooks/useEventForm';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { ShieldAlert } from 'lucide-react';
 import { EventFormData } from '@/lib/validations/eventSchema';
+import { Confetti } from '@/components/ui/confetti';
 
 interface CreateEventPageProps {
   onBack: () => void;
@@ -22,10 +23,12 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
   const [step, setStep] = useState<Step>(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const totalFormSteps = 2;
 
   const handleSuccess = useCallback(() => {
     setShowSuccess(true);
+    setShowConfetti(true);
   }, []);
 
   const {
@@ -116,34 +119,43 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
 
   if (showSuccess) {
     return (
-      <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-6">
-        <div className="text-center space-y-4 max-w-sm">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-            <PartyPopper className="w-10 h-10 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Seu evento foi criado! 🎉</h1>
-          <p className="text-sm text-muted-foreground">
-            O evento já está visível para todos. Compartilhe com seus amigos para reunir mais pessoas!
-          </p>
-          <div className="space-y-2 pt-4">
-            <Button className="w-full h-12" onClick={() => {
-              if (navigator.share) {
-                navigator.share({ title: formData.title, text: `Vem pro evento "${formData.title}"!`, url: window.location.origin }).catch(() => {});
-              } else {
-                const text = encodeURIComponent(`Vem pro evento "${formData.title}"! ${window.location.origin}`);
-                window.open(`https://wa.me/?text=${text}`, '_blank');
-              }
-            }}>
-              <Share2 className="w-4 h-4 mr-2" />
-              Compartilhar evento
-            </Button>
-            <Button variant="outline" className="w-full h-12" onClick={onBack}>
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Ir para o início
-            </Button>
+      <>
+        <Confetti active={showConfetti} />
+        <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-6">
+          <div className="text-center space-y-5 max-w-sm animate-scale-in">
+            <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto animate-[bounce_0.6s_ease-out]">
+              <PartyPopper className="w-12 h-12 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-foreground">Seu evento foi criado! 🎉</h1>
+              <p className="text-sm text-muted-foreground">
+                O evento já está visível para todos. Compartilhe com seus amigos para reunir mais pessoas!
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-xl px-4 py-2.5">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>Eventos compartilhados têm <strong className="text-primary">3x mais</strong> participantes</span>
+            </div>
+            <div className="space-y-2 pt-2">
+              <Button className="w-full h-12" onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: formData.title, text: `Vem pro evento "${formData.title}"!`, url: window.location.origin }).catch(() => {});
+                } else {
+                  const text = encodeURIComponent(`Vem pro evento "${formData.title}"! ${window.location.origin}`);
+                  window.open(`https://wa.me/?text=${text}`, '_blank');
+                }
+              }}>
+                <Share2 className="w-4 h-4 mr-2" />
+                Compartilhar evento
+              </Button>
+              <Button variant="outline" className="w-full h-12" onClick={onBack}>
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Ir para o início
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
