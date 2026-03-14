@@ -338,7 +338,7 @@ export default function UserProfilePage() {
                   <Card 
                     key={event.id}
                     className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(`/event/${event.id}`)}
+                    onClick={() => navigate(`/?tab=home&event=${event.id}`)}
                   >
                     <CardContent className="p-4">
                       <div className="flex gap-4">
