@@ -32,12 +32,11 @@ interface EventWithDetails {
   review_count: number;
 }
 
-const isEventActive = (event: { date: string; time: string; is_recurring: boolean | null }) => {
+const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null }) => {
   if (event.is_recurring) return true;
   const now = new Date();
   const eventDateTime = new Date(`${event.date}T${event.time}`);
-  const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
-  return now < twentyFourHoursAfter;
+  return now < eventDateTime;
 };
 
 const transformEvent = (event: EventWithDetails): Event => ({
