@@ -149,7 +149,7 @@ export const useFriendsEvents = (userId: string | undefined, limit = 3) => {
       if (error) throw error;
 
       return (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .slice(0, limit)
         .map(transformEvent);
     },
