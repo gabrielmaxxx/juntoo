@@ -148,9 +148,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </section>
       )}
 
-      {/* Divider before Friends */}
+      {/* Editorial Divider before Friends */}
       {friendsEvents.length > 0 && trendingEvents.length > 0 && (
-        <div className="px-5"><Separator className="bg-border/60" /></div>
+        <SectionDivider label="Para você" className="py-8" />
       )}
 
       {/* Friends' Events - compact layout */}
