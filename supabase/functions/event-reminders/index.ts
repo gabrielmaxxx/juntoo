@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -12,29 +12,39 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authorization - only allow service_role or cron calls
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // Only allow service_role key or anon key (for cron)
+    const token = authHeader.replace('Bearer ', '');
+    if (token !== supabaseServiceKey && token !== supabaseAnonKey) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const now = new Date();
     console.log(`Running event reminders check at ${now.toISOString()}`);
 
-    // Define reminder windows (in hours before event)
     const reminderWindows = [
       { hours: 24, label: '24 horas' },
       { hours: 1, label: '1 hora' },
     ];
 
     for (const window of reminderWindows) {
-      // Calculate the time range for this reminder window
-      // We check for events starting within a 15-minute window around the target time
       const targetTime = new Date(now.getTime() + window.hours * 60 * 60 * 1000);
-      const windowStart = new Date(targetTime.getTime() - 7.5 * 60 * 1000); // 7.5 minutes before
-      const windowEnd = new Date(targetTime.getTime() + 7.5 * 60 * 1000); // 7.5 minutes after
+      const windowStart = new Date(targetTime.getTime() - 7.5 * 60 * 1000);
+      const windowEnd = new Date(targetTime.getTime() + 7.5 * 60 * 1000);
 
       console.log(`Checking for events ${window.hours}h away (${windowStart.toISOString()} to ${windowEnd.toISOString()})`);
 
-      // Get events that fall within this reminder window
       const { data: events, error: eventsError } = await supabase
         .from('events')
         .select('id, title, date, time')
@@ -51,7 +61,6 @@ serve(async (req) => {
         continue;
       }
 
-      // Filter events by exact datetime
       const matchingEvents = events.filter(event => {
         const eventDateTime = new Date(`${event.date}T${event.time}`);
         return eventDateTime >= windowStart && eventDateTime <= windowEnd;
@@ -60,7 +69,6 @@ serve(async (req) => {
       console.log(`Found ${matchingEvents.length} events for ${window.label} reminder`);
 
       for (const event of matchingEvents) {
-        // Get all participants for this event
         const { data: participants, error: participantsError } = await supabase
           .from('event_participants')
           .select('user_id')
@@ -71,18 +79,13 @@ serve(async (req) => {
           continue;
         }
 
-        if (!participants || participants.length === 0) {
-          console.log(`No participants for event ${event.id}`);
-          continue;
-        }
+        if (!participants || participants.length === 0) continue;
 
         console.log(`Sending ${window.label} reminders to ${participants.length} participants for event "${event.title}"`);
 
-        // Check for existing reminders to avoid duplicates
         const notificationType = `event_reminder_${window.hours}h`;
         
         for (const participant of participants) {
-          // Check if reminder already sent
           const { data: existingNotification } = await supabase
             .from('notifications')
             .select('id')
@@ -91,12 +94,8 @@ serve(async (req) => {
             .eq('type', notificationType)
             .single();
 
-          if (existingNotification) {
-            console.log(`Reminder already sent to user ${participant.user_id} for event ${event.id}`);
-            continue;
-          }
+          if (existingNotification) continue;
 
-          // Create reminder notification
           const { error: notificationError } = await supabase
             .from('notifications')
             .insert({
@@ -110,8 +109,6 @@ serve(async (req) => {
 
           if (notificationError) {
             console.error(`Error creating notification for user ${participant.user_id}:`, notificationError);
-          } else {
-            console.log(`Reminder sent to user ${participant.user_id}`);
           }
         }
       }
@@ -119,20 +116,14 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, message: 'Event reminders processed' }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: unknown) {
     console.error('Error in event-reminders function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

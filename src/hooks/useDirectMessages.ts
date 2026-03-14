@@ -175,7 +175,7 @@ export function useChat(conversationId: string | null) {
       .then();
   }, [conversationId, user, messages]);
 
-  // Realtime
+  // Realtime - only add messages from other users (sender uses optimistic update)
   useEffect(() => {
     if (!conversationId) return;
     const channel = supabase
@@ -187,8 +187,14 @@ export function useChat(conversationId: string | null) {
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const newMsg = payload.new as DirectMessage;
-        setMessages(prev => [...prev, newMsg]);
-        // Mark as read if from other user
+        // Only add if from another user (our own messages are added optimistically)
+        if (user && newMsg.sender_id === user.id) return;
+        setMessages(prev => {
+          // Deduplicate by id
+          if (prev.some(m => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
+        // Mark as read
         if (user && newMsg.sender_id !== user.id) {
           supabase.from('direct_messages').update({ read: true }).eq('id', newMsg.id).then();
         }

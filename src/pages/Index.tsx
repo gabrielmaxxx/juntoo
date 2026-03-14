@@ -1,9 +1,10 @@
-import { useState, lazy, Suspense } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { SplashScreen } from '@/components/SplashScreen';
 import { AppHeader } from '@/components/AppHeader';
 import { Navigation } from '@/components/Navigation';
 import { EventDetails } from '@/components/EventDetails';
+import { JoinPrivateEvent } from '@/components/JoinPrivateEvent';
 import { AuthPage } from '@/pages/AuthPage';
 import { SkipLink } from '@/components/SkipLink';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -33,10 +34,23 @@ const TabLoadingFallback = () => (
 const Index = () => {
   const { user, profile, loading, isBanned, isSuspended, restrictions, signOut } = useAuthContext();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { privateCode } = useParams<{ privateCode: string }>();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const activeTab = searchParams.get('tab') || 'home';
+
+  // Handle ?event=ID query param (from shared links)
+  useEffect(() => {
+    const eventId = searchParams.get('event');
+    if (eventId && user) {
+      handleEventClickById(eventId);
+      // Remove the param after processing
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('event');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [user, searchParams]);
 
   const setActiveTab = (tab: string) => {
     if (tab === 'home') {
@@ -151,6 +165,11 @@ const Index = () => {
 
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
+  // Handle private event join route
+  if (privateCode) {
+    return <JoinPrivateEvent privateCode={privateCode} onBack={() => window.location.href = '/'} />;
   }
 
   const tabLabels: Record<string, string> = {
