@@ -3,6 +3,7 @@ import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { SectionDivider } from './ui/section-divider';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
@@ -147,9 +148,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </section>
       )}
 
-      {/* Divider before Friends */}
+      {/* Editorial Divider before Friends */}
       {friendsEvents.length > 0 && trendingEvents.length > 0 && (
-        <div className="px-5"><Separator className="bg-border/60" /></div>
+        <SectionDivider label="Para você" className="py-8" />
       )}
 
       {/* Friends' Events - compact layout */}
