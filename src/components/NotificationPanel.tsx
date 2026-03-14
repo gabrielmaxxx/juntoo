@@ -43,6 +43,8 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         },
         (payload) => {
           const newNotification = payload.new as Notification;
+          // Skip message notifications — those show in the messages icon
+          if (newNotification.type === 'new_message') return;
           setNotifications(prev => [newNotification, ...prev]);
           toast({
             title: newNotification.title,
@@ -64,6 +66,7 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
       .from('notifications')
       .select('*')
       .eq('user_id', user.id)
+      .neq('type', 'new_message')
       .order('created_at', { ascending: false })
       .limit(50);
 

@@ -32,7 +32,8 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .eq('read', false);
+      .eq('read', false)
+      .neq('type', 'new_message');
     if (!error && count !== null) {
       setUnreadCount(count);
     }
