@@ -28,10 +28,33 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      loadNotifications();
-      subscribeToNotifications();
-    }
+    if (!user) return;
+    loadNotifications();
+
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
+          setNotifications(prev => [newNotification, ...prev]);
+          toast({
+            title: newNotification.title,
+            description: newNotification.message,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const loadNotifications = async () => {
