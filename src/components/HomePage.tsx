@@ -100,6 +100,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         </div>
       </section>
 
+      {/* Divider */}
+      <div className="px-5"><Separator className="bg-border/60" /></div>
+
       {/* Trending Events */}
       {trendingEvents.length > 0 && (
         <section aria-label="Eventos em Alta">
