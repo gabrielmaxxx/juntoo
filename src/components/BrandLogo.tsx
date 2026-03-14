@@ -29,8 +29,14 @@ export const BrandLogo = ({
   showLabel = false,
   size = 'md',
 }: BrandLogoProps) => {
+  const navigate = useNavigate();
+
   return (
-    <div className={cn('flex items-center gap-3', className)}>
+    <button
+      onClick={() => navigate('/')}
+      className={cn('flex items-center gap-3 cursor-pointer', className)}
+      aria-label="Ir para o início"
+    >
       <div className={cn('overflow-hidden bg-primary/10 shadow-sm', sizeMap[size])}>
         <img
           src={juntooLogo}
@@ -44,6 +50,6 @@ export const BrandLogo = ({
           Juntoo
         </span>
       ) : null}
-    </div>
+    </button>
   );
 };
