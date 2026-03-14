@@ -44,7 +44,7 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (!userId || userId === user?.id) {
-      navigate('/profile');
+      navigate('/?tab=profile');
       return;
     }
     fetchUserProfile();
