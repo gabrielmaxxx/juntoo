@@ -77,11 +77,11 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         <div className="flex items-center gap-1" role="toolbar" aria-label="Ações do usuário">
           <button 
             className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 focus-highlight relative"
-            aria-label={`Mensagens${totalUnread > 0 ? `, ${totalUnread} não lidas` : ''}`}
+            aria-label={`Mensagens${combinedUnread > 0 ? `, ${combinedUnread} não lidas` : ''}`}
             onClick={onMessagesClick}
           >
             <MessageCircle size={20} aria-hidden="true" />
-            <Badge count={totalUnread} />
+            <Badge count={combinedUnread} />
           </button>
           <button 
             onClick={() => setShowNotifications(true)}
