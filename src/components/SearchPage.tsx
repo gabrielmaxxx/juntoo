@@ -35,6 +35,13 @@ interface SearchFilters {
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
+  const { user, profile } = useAuth();
+  const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
+    user?.id,
+    profile?.interests || null,
+    10
+  );
+
   const [filters, setFilters] = useState<SearchFilters>({
     text: '',
     category: 'Todos',
