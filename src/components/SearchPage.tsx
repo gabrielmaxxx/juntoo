@@ -335,6 +335,47 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
         }
       />
 
+      {/* Recommended - only when no filters active */}
+      {hasNoFilters && recommendedEvents.length > 0 && (
+        <section aria-label="Eventos recomendados">
+          <div className="mb-3">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+              Recomendado para você
+              <Sparkles className="w-4 h-4 text-primary" aria-hidden="true" />
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Com base nos seus interesses</p>
+          </div>
+          <div className="space-y-2.5">
+            {recommendedEvents.map((event) => (
+              <article
+                key={event.id}
+                onClick={() => onEventClick(event)}
+                className="flex gap-3 cursor-pointer group bg-card rounded-2xl p-3 transition-all duration-200 hover:shadow-md"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && onEventClick(event)}
+                aria-label={`${event.title} em ${event.location} às ${event.time}`}
+              >
+                <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden">
+                  <LazyImage
+                    src={event.imageUrl}
+                    alt={event.title}
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    aspectRatio="square"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <h3 className="font-semibold text-sm text-foreground line-clamp-1">{event.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{event.location}</p>
+                  <p className="text-xs text-primary font-medium mt-0.5">{event.time}</p>
+                </div>
+                <ChevronRight className="flex-shrink-0 w-4 h-4 text-muted-foreground/50 self-center group-hover:text-primary transition-colors" aria-hidden="true" />
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Results */}
       <section className="space-y-3" aria-label="Resultados da busca">
         {isError ? (
