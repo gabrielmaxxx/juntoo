@@ -172,7 +172,7 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
 
       if (error) throw error;
 
-      const activeEvents = (data as EventWithDetails[]).filter(isEventActive);
+      const activeEvents = (data as EventWithDetails[]).filter(isEventUpcoming);
 
       // Filter by user interests
       const recommended = activeEvents.filter(event => {
