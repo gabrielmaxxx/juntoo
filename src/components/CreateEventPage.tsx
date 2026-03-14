@@ -5,23 +5,26 @@ import { Progress } from '@/components/ui/progress';
 import { PrivateLinkSuccess } from './create-event';
 import { StepEssentials } from './create-event/StepEssentials';
 import { StepDetails } from './create-event/StepDetails';
+import { TemplatePicker } from './create-event/TemplatePicker';
 import { useEventForm } from '@/hooks/useEventForm';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { ShieldAlert } from 'lucide-react';
+import { EventFormData } from '@/lib/validations/eventSchema';
 
 interface CreateEventPageProps {
   onBack: () => void;
 }
 
+// step 0 = template picker, 1 = essentials, 2 = details
+type Step = 0 | 1 | 2;
+
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<Step>(0);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
-  const totalSteps = 2;
+  const totalFormSteps = 2;
 
   const handleSuccess = useCallback(() => {
-    // Instead of navigating away immediately, show success screen
     setShowSuccess(true);
   }, []);
 
@@ -40,34 +43,41 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     validateForm
   } = useEventForm(handleSuccess);
 
-  // Wrap submit to capture event ID from toast / success
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     await originalHandleSubmit(e);
   }, [originalHandleSubmit]);
 
+  const handleTemplateSelect = useCallback((prefill: Partial<EventFormData>) => {
+    Object.entries(prefill).forEach(([key, value]) => {
+      if (value !== undefined) {
+        handleInputChange(key as keyof EventFormData, value as string | boolean);
+      }
+    });
+    setStep(1);
+  }, [handleInputChange]);
+
   const handleContinue = useCallback(() => {
     const step1Fields = ['title', 'category', 'date', 'time', 'state', 'city', 'location'] as const;
     let hasError = false;
-
     for (const field of step1Fields) {
       if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
         hasError = true;
         break;
       }
     }
-
     if (hasError) {
       validateForm();
       return;
     }
-
     setStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [formData, validateForm]);
 
   const handleBack = useCallback(() => {
-    if (step === 1) {
+    if (step === 0) {
       onBack();
+    } else if (step === 1) {
+      setStep(0);
     } else {
       setStep(1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -104,7 +114,6 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     return <PrivateLinkSuccess privateLink={privateLink} onBack={onBack} />;
   }
 
-  // Success screen for public events
   if (showSuccess) {
     return (
       <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-6">
@@ -119,11 +128,7 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
           <div className="space-y-2 pt-4">
             <Button className="w-full h-12" onClick={() => {
               if (navigator.share) {
-                navigator.share({
-                  title: formData.title,
-                  text: `Vem pro evento "${formData.title}"!`,
-                  url: window.location.origin,
-                }).catch(() => {});
+                navigator.share({ title: formData.title, text: `Vem pro evento "${formData.title}"!`, url: window.location.origin }).catch(() => {});
               } else {
                 const text = encodeURIComponent(`Vem pro evento "${formData.title}"! ${window.location.origin}`);
                 window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -142,6 +147,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     );
   }
 
+  const formStep = step as 1 | 2;
+
   return (
     <div className="min-h-dvh bg-background">
       {/* Header */}
@@ -152,63 +159,64 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
           </Button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Criar Evento</h1>
-            <p className="text-xs text-primary-foreground/70">Etapa {step} de {totalSteps}</p>
+            {step > 0 && (
+              <p className="text-xs text-primary-foreground/70">Etapa {step} de {totalFormSteps}</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="max-w-lg mx-auto px-4 pt-3">
-        <Progress value={(step / totalSteps) * 100} className="h-1.5" />
-      </div>
+      {/* Progress — only on form steps */}
+      {step > 0 && (
+        <div className="max-w-lg mx-auto px-4 pt-3">
+          <Progress value={(step / totalFormSteps) * 100} className="h-1.5" />
+        </div>
+      )}
 
-      {/* Form */}
+      {/* Content */}
       <div className="max-w-lg mx-auto px-4 pt-6 pb-24">
-        <form onSubmit={handleSubmit} noValidate>
-          {step === 1 && (
-            <>
-              <StepEssentials
-                formData={formData}
-                errors={errors}
-                onInputChange={handleInputChange}
-              />
-              <div className="mt-8">
-                <Button
-                  type="button"
-                  className="w-full h-12"
-                  onClick={handleContinue}
-                >
-                  Continuar
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </>
-          )}
+        {step === 0 && (
+          <TemplatePicker
+            onSelect={handleTemplateSelect}
+            onSkip={() => setStep(1)}
+          />
+        )}
 
-          {step === 2 && (
-            <>
-              <StepDetails
-                formData={formData}
-                errors={errors}
-                uploadingImage={uploadingImage}
-                generatingImage={generatingImage}
-                onInputChange={handleInputChange}
-                onImageUpload={handleImageUpload}
-                onRemoveImage={removeImage}
-                onGenerateCover={generateCoverImage}
-              />
-              <div className="mt-8">
-                <Button
-                  type="submit"
-                  className="w-full h-12"
-                  disabled={isSubmitting || generatingImage}
-                >
-                  {generatingImage ? 'Gerando capa...' : isSubmitting ? 'Criando...' : 'Criar Evento'}
-                </Button>
-              </div>
-            </>
-          )}
-        </form>
+        {step > 0 && (
+          <form onSubmit={handleSubmit} noValidate>
+            {step === 1 && (
+              <>
+                <StepEssentials formData={formData} errors={errors} onInputChange={handleInputChange} />
+                <div className="mt-8">
+                  <Button type="button" className="w-full h-12" onClick={handleContinue}>
+                    Continuar
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <StepDetails
+                  formData={formData}
+                  errors={errors}
+                  uploadingImage={uploadingImage}
+                  generatingImage={generatingImage}
+                  onInputChange={handleInputChange}
+                  onImageUpload={handleImageUpload}
+                  onRemoveImage={removeImage}
+                  onGenerateCover={generateCoverImage}
+                />
+                <div className="mt-8">
+                  <Button type="submit" className="w-full h-12" disabled={isSubmitting || generatingImage}>
+                    {generatingImage ? 'Gerando capa...' : isSubmitting ? 'Criando...' : 'Criar Evento'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </form>
+        )}
       </div>
     </div>
   );
