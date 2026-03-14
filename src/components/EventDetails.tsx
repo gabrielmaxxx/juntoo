@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import { Event } from '@/types';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventDetails } from '@/hooks/useEventDetails';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { ReportButton } from '@/components/reports';
+import { Crown } from 'lucide-react';
 import {
   EventHero,
   EventInfo,
