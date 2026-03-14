@@ -76,12 +76,16 @@ export default function AdminVerifications() {
   const approveUser = async () => {
     if (!selectedUser || !user) return;
     try {
-      await supabase.rpc('approve_user_verification', { p_verification_id: selectedUser.id, p_moderator_id: user.id });
+      const { error } = await supabase.rpc('approve_user_verification', { p_verification_id: selectedUser.id, p_moderator_id: user.id });
+      if (error) throw error;
       await logAction('approve_user_verification', 'verification', selectedUser.id, notes);
       toast.success('Verificação aprovada');
       setSelectedUser(null);
       fetchAll();
-    } catch { toast.error('Erro ao aprovar'); }
+    } catch (e: any) { 
+      console.error('Approve error:', e);
+      toast.error(e.message || 'Erro ao aprovar'); 
+    }
   };
 
   const rejectUser = async () => {
@@ -96,12 +100,16 @@ export default function AdminVerifications() {
   const approveBiz = async () => {
     if (!selectedBiz || !user) return;
     try {
-      await supabase.rpc('approve_business_verification', { p_verification_id: selectedBiz.id, p_moderator_id: user.id });
+      const { error } = await supabase.rpc('approve_business_verification', { p_verification_id: selectedBiz.id, p_moderator_id: user.id });
+      if (error) throw error;
       await logAction('approve_business_verification', 'verification', selectedBiz.id, notes);
       toast.success('Verificação empresarial aprovada');
       setSelectedBiz(null);
       fetchAll();
-    } catch { toast.error('Erro ao aprovar'); }
+    } catch (e: any) { 
+      console.error('Approve biz error:', e);
+      toast.error(e.message || 'Erro ao aprovar'); 
+    }
   };
 
   const rejectBiz = async () => {
