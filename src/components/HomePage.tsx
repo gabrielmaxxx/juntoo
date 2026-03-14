@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
@@ -6,6 +7,7 @@ import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useRecommendedEvents, useNearbyEvents } from '@/hooks/useEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
