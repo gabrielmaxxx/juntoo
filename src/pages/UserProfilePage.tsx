@@ -311,7 +311,9 @@ export default function UserProfilePage() {
                     if (!userId) return;
                     const convId = await startConversation(userId);
                     if (convId) {
-                      navigate('/?tab=messages');
+                      navigate(`/?tab=messages&conv=${convId}&userId=${userId}`);
+                    } else {
+                      toast.error('Erro ao iniciar conversa');
                     }
                   }}
                 >

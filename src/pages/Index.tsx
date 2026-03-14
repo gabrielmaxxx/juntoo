@@ -225,7 +225,11 @@ const Index = () => {
                     <CreateEventPage onBack={() => setActiveTab('home')} />
                   )}
                   {activeTab === 'messages' && (
-                    <MessagesPage onBack={() => setActiveTab('home')} />
+                    <MessagesPage 
+                      onBack={() => setActiveTab('home')}
+                      initialConversationId={searchParams.get('conv') || undefined}
+                      initialUserId={searchParams.get('userId') || undefined}
+                    />
                   )}
                   {activeTab === 'settings' && (
                     <SettingsPage onBack={() => setActiveTab('home')} />
