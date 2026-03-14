@@ -1,3 +1,4 @@
+import { useMemo, memo } from 'react';
 import { Upload, X, RefreshCw, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EventFormData } from '@/lib/validations/eventSchema';
+import { EventCard } from '@/components/EventCard';
+import { Event } from '@/types';
 
 interface StepDetailsProps {
   formData: EventFormData;
@@ -17,6 +20,45 @@ interface StepDetailsProps {
   onRemoveImage: () => void;
   onGenerateCover: () => void;
 }
+
+const EventPreview = memo(({ formData }: { formData: EventFormData }) => {
+  const hasEnoughData = formData.title.trim().length >= 3 && formData.date && formData.location.trim().length >= 3;
+
+  const previewEvent: Event | null = useMemo(() => {
+    if (!hasEnoughData) return null;
+    return {
+      id: 'preview',
+      title: formData.title,
+      description: formData.description || '',
+      category: formData.category || 'Outro',
+      location: formData.location,
+      city: formData.city,
+      state: formData.state,
+      date: formData.date,
+      time: formData.time || '00:00',
+      imageUrl: formData.imageUrl || '',
+      createdBy: '',
+      creatorName: 'Você',
+      creatorAvatar: '',
+      attendees: [],
+      price: formData.price ? `R$ ${formData.price}` : undefined,
+      maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+      isPrivate: formData.isPrivate,
+    };
+  }, [formData.title, formData.description, formData.category, formData.location, formData.city, formData.state, formData.date, formData.time, formData.imageUrl, formData.price, formData.maxParticipants, formData.isPrivate]);
+
+  if (!previewEvent) return null;
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium text-muted-foreground">Como vai aparecer no feed</Label>
+      <div className="pointer-events-none opacity-90 scale-[0.92] origin-top-left">
+        <EventCard event={previewEvent} variant="default" />
+      </div>
+    </div>
+  );
+});
+EventPreview.displayName = 'EventPreview';
 
 export const StepDetails = ({
   formData,
@@ -35,7 +77,7 @@ export const StepDetails = ({
         <Label htmlFor="description" className="text-sm font-medium text-foreground">Descrição</Label>
         <Textarea
           id="description"
-          placeholder="Descreva seu evento..."
+          placeholder="Conte o que vai acontecer no evento, quem pode participar e o que esperar."
           value={formData.description}
           onChange={(e) => onInputChange('description', e.target.value)}
           rows={3}
@@ -108,7 +150,7 @@ export const StepDetails = ({
           <Input
             id="price"
             type="number"
-            placeholder="0.00"
+            placeholder="Grátis"
             min="0"
             step="0.01"
             value={formData.price}
@@ -176,6 +218,9 @@ export const StepDetails = ({
           onCheckedChange={(checked) => onInputChange('isPrivate', checked)}
         />
       </div>
+
+      {/* Live Preview */}
+      <EventPreview formData={formData} />
     </div>
   );
 };
