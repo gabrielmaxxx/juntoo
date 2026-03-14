@@ -3,6 +3,7 @@ import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { SectionDivider } from './ui/section-divider';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
