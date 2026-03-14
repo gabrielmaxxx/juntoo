@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import juntooLogo from '@/assets/juntoo-logo.jpg';
+import juntooLogo from '@/assets/juntoo-logo.png';
 import { cn } from '@/lib/utils';
 
 interface BrandLogoProps {
