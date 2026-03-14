@@ -48,9 +48,25 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     validateForm
   } = useEventForm(handleSuccess);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    await originalHandleSubmit(e);
-  }, [originalHandleSubmit]);
+  // Auto-fill state/city from geolocation
+  const { stateCode: geoState, city: geoCity, requestLocation } = useGeolocation();
+  const geoApplied = useRef(false);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  useEffect(() => {
+    if (geoApplied.current || !geoState) return;
+    // Only pre-fill if user hasn't manually set state yet
+    if (!formData.state) {
+      handleInputChange('state', geoState);
+      if (geoCity && BRAZIL_STATES_AND_CITIES[geoState]?.includes(geoCity)) {
+        handleInputChange('city', geoCity);
+      }
+      geoApplied.current = true;
+    }
+  }, [geoState, geoCity, formData.state, handleInputChange]);
 
   const handleTemplateSelect = useCallback((prefill: Partial<EventFormData>) => {
     Object.entries(prefill).forEach(([key, value]) => {
