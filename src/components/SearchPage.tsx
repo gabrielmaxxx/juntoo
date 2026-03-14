@@ -12,9 +12,12 @@ import { ptBR } from 'date-fns/locale';
 import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
 import { CATEGORIES } from '@/constants/categories';
 import { useInfiniteEvents } from '@/hooks/useInfiniteEvents';
+import { useRecommendedEvents } from '@/hooks/useEvents';
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LiveRegion } from '@/components/ui/live-region';
+import { LazyImage } from '@/components/ui/lazy-image';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
