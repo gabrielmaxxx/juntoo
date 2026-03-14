@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { SectionDivider } from './ui/section-divider';
+import { SectionHeader } from './ui/section-header';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
@@ -108,11 +109,12 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Trending Events */}
       {trendingEvents.length > 0 && (
         <section aria-label="Eventos em Alta">
-          <div className="px-5 mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              Em Alta
-              <Flame className="w-5 h-5 text-destructive" aria-hidden="true" />
-            </h2>
+          <div className="px-5 mb-4">
+            <SectionHeader 
+              title="Em Alta"
+              subtitle="Eventos populares agora"
+              icon={<Flame className="w-5 h-5 text-destructive" aria-hidden="true" />}
+            />
           </div>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-4 px-5 pb-2">
@@ -156,9 +158,12 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Friends' Events - compact layout */}
       {friendsEvents.length > 0 && (
         <section className="px-5" aria-label="Eventos dos seus amigos">
-          <h2 className="text-lg font-bold text-foreground mb-4">
-            Seus amigos vão
-          </h2>
+          <div className="mb-4">
+            <SectionHeader 
+              title="Seus amigos vão"
+              subtitle="Veja onde sua rede está indo"
+            />
+          </div>
           <div className="space-y-3">
             {friendsEvents.map((event) => (
               <article 
@@ -236,13 +241,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       ) : (
         <section className="px-5" aria-label="Eventos perto de você">
           <div className="mb-4">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              Perto de você
-              <MapPinned className="w-5 h-5 text-primary" aria-hidden="true" />
-            </h2>
-            {geoCity && (
-              <p className="text-xs text-muted-foreground mt-1">Eventos em {geoCity}</p>
-            )}
+            <SectionHeader 
+              title="Perto de você"
+              subtitle={geoCity ? `Eventos em ${geoCity}` : "Eventos na sua região"}
+              icon={<MapPinned className="w-5 h-5 text-primary" aria-hidden="true" />}
+            />
           </div>
           {loadingNearby ? (
             <div className="space-y-3">
