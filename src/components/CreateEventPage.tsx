@@ -68,6 +68,10 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     }
   }, [geoState, geoCity, formData.state, handleInputChange]);
 
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    await originalHandleSubmit(e);
+  }, [originalHandleSubmit]);
+
   const handleTemplateSelect = useCallback((prefill: Partial<EventFormData>) => {
     Object.entries(prefill).forEach(([key, value]) => {
       if (value !== undefined) {
