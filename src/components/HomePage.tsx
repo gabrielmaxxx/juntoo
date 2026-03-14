@@ -26,7 +26,8 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     10
   );
 
-  const { latitude, longitude, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
+  const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
+  const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
 
   const loading = loadingTrending || loadingFriends || loadingRecommended;
 
