@@ -32,9 +32,13 @@ interface EventWithDetails {
   review_count: number;
 }
 
-const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null }) => {
-  if (event.is_recurring) return true;
+const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null; recurrence_end_date: string | null }) => {
   const now = new Date();
+  if (event.is_recurring) {
+    // Recurring events are upcoming if they have no end date or end date is in the future
+    if (!event.recurrence_end_date) return true;
+    return new Date(event.recurrence_end_date) >= now;
+  }
   const eventDateTime = new Date(`${event.date}T${event.time}`);
   return now < eventDateTime;
 };
