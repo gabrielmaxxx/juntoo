@@ -4,7 +4,7 @@ import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
-import { useEventConversations } from '@/hooks/useEventConversations';
+import { useEventUnreadCount } from '@/hooks/useEventUnreadCount';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
