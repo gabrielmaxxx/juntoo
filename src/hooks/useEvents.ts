@@ -164,10 +164,12 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
   return useQuery({
     queryKey: queryKeys.events.recommended(userId || ''),
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
         .select('*')
         .eq('is_private', false)
+        .or(`date.gte.${today},is_recurring.eq.true`)
         .order('created_at', { ascending: false })
         .limit(50);
 
