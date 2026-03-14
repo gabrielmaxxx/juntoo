@@ -113,7 +113,7 @@ export const EventChat = ({
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               placeholder="Digite sua mensagem..."
               className="flex-1"
             />

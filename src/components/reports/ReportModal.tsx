@@ -92,10 +92,7 @@ export const ReportModal = ({
           .upload(path, evidenceFile);
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
-          .from('report-evidence')
-          .getPublicUrl(path);
-        evidenceUrl = urlData.publicUrl;
+        evidenceUrl = path;
       }
 
       const { error } = await supabase.from('reports').insert({

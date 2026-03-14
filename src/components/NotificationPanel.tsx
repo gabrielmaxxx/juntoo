@@ -75,36 +75,6 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
     setNotifications((data || []) as Notification[]);
   };
 
-  const subscribeToNotifications = () => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          
-          // Show toast for new notification
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
