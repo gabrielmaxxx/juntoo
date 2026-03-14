@@ -75,7 +75,7 @@ export const usePublicEvents = () => {
 
       // Filter active events and transform
       const activeEvents = (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .map(transformEvent);
 
       return activeEvents;
