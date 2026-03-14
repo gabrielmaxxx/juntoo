@@ -113,6 +113,23 @@ export const FriendSuggestionsPage = () => {
 
     setSendingRequest(friendId);
     try {
+      // Check if friendship already exists
+      const { data: existing } = await supabase
+        .from('friendships')
+        .select('id, status')
+        .or(`and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: "Solicitação já existe",
+          description: existing.status === 'pending' ? "Já existe uma solicitação pendente." : "Vocês já são amigos!",
+        });
+        setSuggestions(prev => prev.filter(s => s.user_id !== friendId));
+        setSendingRequest(null);
+        return;
+      }
+
       const { error } = await supabase
         .from('friendships')
         .insert({
@@ -121,7 +138,10 @@ export const FriendSuggestionsPage = () => {
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Friend request insert error:', JSON.stringify(error));
+        throw error;
+      }
 
       toast({
         title: "Solicitação enviada!",
@@ -130,11 +150,11 @@ export const FriendSuggestionsPage = () => {
 
       // Remove from suggestions
       setSuggestions(prev => prev.filter(s => s.user_id !== friendId));
-    } catch (error) {
-      console.error('Error sending friend request:', error);
+    } catch (error: any) {
+      console.error('Error sending friend request:', JSON.stringify(error));
       toast({
         title: "Erro",
-        description: "Não foi possível enviar a solicitação de amizade.",
+        description: error?.message || "Não foi possível enviar a solicitação de amizade.",
         variant: "destructive"
       });
     } finally {
