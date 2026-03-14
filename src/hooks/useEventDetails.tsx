@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { markEventMessagesRead } from '@/hooks/useEventConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
