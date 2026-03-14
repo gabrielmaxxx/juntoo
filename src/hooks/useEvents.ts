@@ -139,11 +139,13 @@ export const useFriendsEvents = (userId: string | undefined, limit = 3) => {
       if (friendEventIds.length === 0) return [];
 
       // Get event details
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
         .select('*')
         .in('id', friendEventIds)
-        .eq('is_private', false);
+        .eq('is_private', false)
+        .or(`date.gte.${today},is_recurring.eq.true`);
 
       if (error) throw error;
 
