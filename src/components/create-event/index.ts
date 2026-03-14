@@ -5,3 +5,5 @@ export { LocationSection } from './LocationSection';
 export { AdditionalDetailsSection } from './AdditionalDetailsSection';
 export { PrivacySection } from './PrivacySection';
 export { PrivateLinkSuccess } from './PrivateLinkSuccess';
+export { StepEssentials } from './StepEssentials';
+export { StepDetails } from './StepDetails';
