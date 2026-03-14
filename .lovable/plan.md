@@ -1,79 +1,50 @@
 
 
-## Analysis
+## Google Login e Verificação de Site
 
-Currently, event chat messages (`event_messages` table) live entirely within the EventDetails page. When someone sends a message in an event chat, other participants get a notification via the `notify_new_message()` trigger, which creates a `new_message` notification in the bell panel (though these are now filtered out of the bell).
+### Análise do arquivo enviado
 
-The user wants event chat conversations to appear in the **Messages tab** (alongside direct messages), so participants can see and respond to event chat activity from one unified inbox.
+O arquivo `googlec9b3e1aa20186102.html` é um arquivo de verificação de propriedade do Google. Ele precisa ser acessível na raiz do site (ex: `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`). Para isso, basta copiá-lo para a pasta `public/` do projeto.
 
-## Approach
+### Seu procedimento está correto
 
-This is a significant architectural change. There are two viable approaches:
+O fluxo é:
+1. Colocar o arquivo de verificação na raiz do site — **é isso que vamos fazer agora**
+2. Verificar a propriedade no Google Cloud Console
+3. Configurar o OAuth Consent Screen e criar as credenciais OAuth
+4. Adicionar Client ID e Client Secret no Supabase Dashboard
 
-### Option A: Unified display (show event chats as conversation items in Messages list)
-- Add a section or mixed list in MessagesPage that shows event conversations alongside DMs
-- Each event chat would appear as a "conversation" with the event name/image as the avatar
-- Clicking opens the event chat (either inline or navigates to EventDetails)
-- Requires tracking unread `event_messages` per user (currently no read tracking for event messages)
+### Plano de implementação
 
-### Option B: Keep event chat separate but route notifications to Messages icon
-- Event chat notifications already use type `new_message` and are filtered from the bell
-- But the badge count on the Messages icon only counts `direct_messages` unreads
-- This option would just add event message notification counts to the Messages icon badge
+**Etapa 1 — Arquivo de verificação (implementação imediata)**
+- Copiar `googlec9b3e1aa20186102.html` para `public/googlec9b3e1aa20186102.html`
+- Isso torna o arquivo acessível em `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`
 
-**Recommendation: Option A** -- it provides the best UX by giving a single place to see all conversations.
+**Etapa 2 — Após verificação (configuração manual no Google Cloud)**
 
-## Plan
+Depois que o site for verificado, você precisará:
 
-### 1. Database: Add read tracking for event messages
-- Create an `event_message_reads` table with columns: `user_id`, `event_id`, `last_read_at`
-- Add RLS policies so users can manage their own read state
-- Add table to `supabase_realtime` publication
+1. No **Google Cloud Console** → APIs & Services → **OAuth Consent Screen**:
+   - Adicionar `hspfyakugditkxrvngrc.supabase.co` em **Authorized domains**
+   - Configurar escopos: `email`, `profile`, `openid`
 
-### 2. Hook: Create `useEventConversations` 
-- Fetch events the user participates in that have recent messages
-- Compute unread count per event (messages after `last_read_at`)
-- Return event conversations in a format compatible with the Messages list
+2. Em **Credentials** → Create OAuth Client ID (Web application):
+   - **Authorized JavaScript origins**: `https://juntoo.lovable.app`
+   - **Authorized redirect URLs**: `https://hspfyakugditkxrvngrc.supabase.co/auth/v1/callback`
 
-### 3. Update `MessagesPage`
-- Import and use `useEventConversations` alongside `useConversations`
-- Merge both lists sorted by last message time
-- Event conversations show event title + image as avatar, with a group icon indicator
-- Clicking an event conversation opens the event chat (navigate to EventDetails chat tab)
+3. No **Supabase Dashboard** → Authentication → Providers → Google:
+   - Colar o **Client ID** e **Client Secret** obtidos no passo anterior
+   - Habilitar o provider
 
-### 4. Update `useConversations` / `AppHeader`
-- Include event message unread counts in the `totalUnread` badge on the Messages icon
-- Or expose a separate count and sum them in AppHeader
+4. No **Supabase Dashboard** → Authentication → URL Configuration:
+   - **Site URL**: `https://juntoo.lovable.app`
+   - **Redirect URLs**: adicionar `https://juntoo.lovable.app`
 
-### 5. Update event chat notification trigger
-- The existing `notify_new_message()` trigger on `event_messages` can be removed or converted to only handle push notifications, since the unread state will now be tracked via `event_message_reads`
+**Etapa 3 — Código (após configuração acima)**
 
-### 6. Mark event messages as read
-- When user opens the event chat tab, update `event_message_reads.last_read_at` to now
+O botão de login com Google já existe em `AuthPage.tsx` (função `handleGoogleSignIn`). Após a configuração do provider no Supabase, ele funcionará automaticamente.
 
-## Technical details
+### Resumo
 
-**New table:**
-```sql
-CREATE TABLE public.event_message_reads (
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  event_id uuid NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-  last_read_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (user_id, event_id)
-);
-ALTER TABLE public.event_message_reads ENABLE ROW LEVEL SECURITY;
--- Users can upsert their own read state
-```
-
-**MessagesPage changes:**
-- Show two types of items in the list: DM conversations (person avatar) and event chats (event image + group icon badge)
-- Event items show event title, last message content, and unread count
-- Clicking an event item navigates back to home with `?event=ID&tab=chat`
-
-**Files to create/edit:**
-- New migration for `event_message_reads` table
-- New hook `src/hooks/useEventConversations.ts`
-- Edit `src/components/MessagesPage.tsx` (merge lists)
-- Edit `src/components/AppHeader.tsx` (combine unread counts)
-- Edit `src/hooks/useEventDetails.tsx` (mark messages read on chat open)
+A única alteração de código necessária agora é copiar o arquivo de verificação para `public/`. O restante é configuração nos dashboards do Google Cloud e Supabase.
 

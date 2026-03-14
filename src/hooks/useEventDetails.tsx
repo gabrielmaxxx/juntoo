@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { markEventMessagesRead } from '@/hooks/useEventConversations';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -455,10 +456,14 @@ export const useEventDetails = (event: Event) => {
     checkIfEventCompleted();
   }, [user, event.id]);
 
-  // Real-time messages subscription
+  // Real-time messages subscription + mark read
   useEffect(() => {
     if (isParticipating) {
       fetchMessages();
+      // Mark event messages as read when chat is open
+      if (user) {
+        markEventMessagesRead(user.id, event.id);
+      }
       
       const channel = supabase
         .channel(`event-${event.id}-messages`)
@@ -472,6 +477,10 @@ export const useEventDetails = (event: Event) => {
           },
           () => {
             fetchMessages();
+            // Mark as read immediately since user is viewing the chat
+            if (user) {
+              markEventMessagesRead(user.id, event.id);
+            }
           }
         )
         .subscribe();
@@ -480,7 +489,7 @@ export const useEventDetails = (event: Event) => {
         supabase.removeChannel(channel);
       };
     }
-  }, [isParticipating, event.id]);
+  }, [isParticipating, event.id, user]);
 
   // Scroll to latest message
   useEffect(() => {

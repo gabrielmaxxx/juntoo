@@ -4,6 +4,7 @@ import { NotificationPanel } from './NotificationPanel';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
+import { useEventConversations } from '@/hooks/useEventConversations';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
@@ -17,6 +18,8 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
+  const { totalUnread: eventUnread } = useEventConversations();
+  const combinedUnread = totalUnread + eventUnread;
 
   useEffect(() => {
     if (user) {
@@ -74,11 +77,11 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         <div className="flex items-center gap-1" role="toolbar" aria-label="Ações do usuário">
           <button 
             className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 focus-highlight relative"
-            aria-label={`Mensagens${totalUnread > 0 ? `, ${totalUnread} não lidas` : ''}`}
+            aria-label={`Mensagens${combinedUnread > 0 ? `, ${combinedUnread} não lidas` : ''}`}
             onClick={onMessagesClick}
           >
             <MessageCircle size={20} aria-hidden="true" />
-            <Badge count={totalUnread} />
+            <Badge count={combinedUnread} />
           </button>
           <button 
             onClick={() => setShowNotifications(true)}

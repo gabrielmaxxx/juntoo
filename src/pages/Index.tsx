@@ -229,6 +229,7 @@ const Index = () => {
                       onBack={() => setActiveTab('home')}
                       initialConversationId={searchParams.get('conv') || undefined}
                       initialUserId={searchParams.get('userId') || undefined}
+                      onOpenEventChat={(eventId) => handleEventClickById(eventId)}
                     />
                   )}
                   {activeTab === 'settings' && (

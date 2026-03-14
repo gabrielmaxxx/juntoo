@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Search, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Search, MessageCircle, Users } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useConversations } from '@/hooks/useDirectMessages';
+import { useEventConversations, EventConversation } from '@/hooks/useEventConversations';
 import { ChatView } from '@/components/ChatView';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,10 +14,16 @@ interface MessagesPageProps {
   onBack?: () => void;
   initialConversationId?: string;
   initialUserId?: string;
+  onOpenEventChat?: (eventId: string) => void;
 }
 
-export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: MessagesPageProps) => {
-  const { conversations, loading } = useConversations();
+type UnifiedConversation =
+  | { type: 'dm'; id: string; name: string; avatar: string | null; userId: string; lastMessage: string | null; lastMessageAt: string | null; unreadCount: number }
+  | { type: 'event'; eventId: string; title: string; image: string | null; lastMessage: string | null; lastMessageAt: string | null; lastMessageSender: string | null; unreadCount: number };
+
+export const MessagesPage = ({ onBack, initialConversationId, initialUserId, onOpenEventChat }: MessagesPageProps) => {
+  const { conversations, loading: dmLoading } = useConversations();
+  const { conversations: eventConvs, loading: eventLoading } = useEventConversations();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<{ name: string; avatar: string | null; userId: string } | null>(null);
   const [search, setSearch] = useState('');
@@ -24,13 +31,11 @@ export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: M
   // Auto-open conversation when navigated with params
   useEffect(() => {
     if (initialConversationId && initialUserId && !selectedConversation) {
-      // Try to find user info from conversations list
       const conv = conversations.find(c => c.id === initialConversationId);
       if (conv) {
         setSelectedConversation(initialConversationId);
         setSelectedUser({ name: conv.other_user.full_name, avatar: conv.other_user.avatar_url, userId: conv.other_user.user_id });
-      } else if (!loading) {
-        // Conversations loaded but not found — fetch profile directly
+      } else if (!dmLoading) {
         supabase
           .from('profiles')
           .select('full_name, avatar_url')
@@ -44,7 +49,7 @@ export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: M
           });
       }
     }
-  }, [initialConversationId, initialUserId, conversations, loading, selectedConversation]);
+  }, [initialConversationId, initialUserId, conversations, dmLoading, selectedConversation]);
 
   if (selectedConversation && selectedUser) {
     return (
@@ -58,9 +63,43 @@ export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: M
     );
   }
 
-  const filtered = conversations.filter(c =>
-    c.other_user.full_name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Build unified list
+  const unified: UnifiedConversation[] = [
+    ...conversations.map(c => ({
+      type: 'dm' as const,
+      id: c.id,
+      name: c.other_user.full_name,
+      avatar: c.other_user.avatar_url,
+      userId: c.other_user.user_id,
+      lastMessage: c.last_message,
+      lastMessageAt: c.last_message_at,
+      unreadCount: c.unread_count,
+    })),
+    ...eventConvs.map(e => ({
+      type: 'event' as const,
+      eventId: e.event_id,
+      title: e.event_title,
+      image: e.event_image,
+      lastMessage: e.last_message_sender ? `${e.last_message_sender}: ${e.last_message}` : e.last_message,
+      lastMessageAt: e.last_message_at,
+      lastMessageSender: e.last_message_sender,
+      unreadCount: e.unread_count,
+    })),
+  ];
+
+  // Sort by last message time
+  unified.sort((a, b) => {
+    const ta = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+    const tb = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+    return tb - ta;
+  });
+
+  const filtered = unified.filter(c => {
+    const label = c.type === 'dm' ? c.name : c.title;
+    return label.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const loading = dmLoading || eventLoading;
 
   return (
     <div className="flex flex-col h-full">
@@ -108,47 +147,95 @@ export const MessagesPage = ({ onBack, initialConversationId, initialUserId }: M
             <p className="text-xs mt-1">Acesse o perfil de um usuário para iniciar uma conversa</p>
           </div>
         ) : (
-          filtered.map(conv => (
-            <button
-              key={conv.id}
-              onClick={() => {
-                setSelectedConversation(conv.id);
-                setSelectedUser({ name: conv.other_user.full_name, avatar: conv.other_user.avatar_url, userId: conv.other_user.user_id });
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
-            >
-              <div className="relative">
-                <Avatar className="w-12 h-12">
-                  <AvatarImage src={conv.other_user.avatar_url || ''} alt={conv.other_user.full_name} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                    {conv.other_user.full_name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {conv.unread_count > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                    {conv.unread_count > 9 ? '9+' : conv.unread_count}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm truncate ${conv.unread_count > 0 ? 'font-bold text-foreground' : 'font-medium text-foreground'}`}>
-                    {conv.other_user.full_name}
-                  </span>
-                  {conv.last_message_at && (
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
-                      {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true, locale: ptBR })}
+          filtered.map(conv => {
+            if (conv.type === 'dm') {
+              return (
+                <button
+                  key={`dm-${conv.id}`}
+                  onClick={() => {
+                    setSelectedConversation(conv.id);
+                    setSelectedUser({ name: conv.name, avatar: conv.avatar, userId: conv.userId });
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+                >
+                  <div className="relative">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={conv.avatar || ''} alt={conv.name} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                        {conv.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {conv.unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm truncate ${conv.unreadCount > 0 ? 'font-bold text-foreground' : 'font-medium text-foreground'}`}>
+                        {conv.name}
+                      </span>
+                      {conv.lastMessageAt && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
+                          {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true, locale: ptBR })}
+                        </span>
+                      )}
+                    </div>
+                    {conv.lastMessage && (
+                      <p className={`text-xs truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                        {conv.lastMessage}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              );
+            }
+
+            // Event conversation
+            return (
+              <button
+                key={`event-${conv.eventId}`}
+                onClick={() => onOpenEventChat?.(conv.eventId)}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+              >
+                <div className="relative">
+                  <Avatar className="w-12 h-12 rounded-xl">
+                    <AvatarImage src={conv.image || ''} alt={conv.title} className="rounded-xl" />
+                    <AvatarFallback className="bg-accent/20 text-accent-foreground font-medium rounded-xl">
+                      <Users className="w-5 h-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {conv.unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                     </span>
                   )}
+                  {/* Group indicator */}
+                  <span className="absolute -bottom-0.5 -right-0.5 bg-muted border border-border rounded-full p-0.5">
+                    <Users className="w-2.5 h-2.5 text-muted-foreground" />
+                  </span>
                 </div>
-                {conv.last_message && (
-                  <p className={`text-xs truncate mt-0.5 ${conv.unread_count > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                    {conv.last_message}
-                  </p>
-                )}
-              </div>
-            </button>
-          ))
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm truncate ${conv.unreadCount > 0 ? 'font-bold text-foreground' : 'font-medium text-foreground'}`}>
+                      {conv.title}
+                    </span>
+                    {conv.lastMessageAt && (
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
+                        {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true, locale: ptBR })}
+                      </span>
+                    )}
+                  </div>
+                  {conv.lastMessage && (
+                    <p className={`text-xs truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                      {conv.lastMessage}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })
         )}
       </div>
     </div>
