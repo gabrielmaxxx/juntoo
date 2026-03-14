@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface Notification {
   id: string;
-  type: 'event_join' | 'new_message' | 'new_event' | 'friend_request' | 'friend_request_accepted' | 'participant_joined' | 'event_updated' | 'event_reminder';
+  type: 'event_join' | 'new_message' | 'new_event' | 'friend_request' | 'friend_request_accepted' | 'participant_joined' | 'event_updated' | 'event_reminder' | 'event_review_reminder';
   title: string;
   message: string;
   read: boolean;
