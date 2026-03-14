@@ -158,9 +158,12 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Friends' Events - compact layout */}
       {friendsEvents.length > 0 && (
         <section className="px-5" aria-label="Eventos dos seus amigos">
-          <h2 className="text-lg font-bold text-foreground mb-4">
-            Seus amigos vão
-          </h2>
+          <div className="mb-4">
+            <SectionHeader 
+              title="Seus amigos vão"
+              subtitle="Veja onde sua rede está indo"
+            />
+          </div>
           <div className="space-y-3">
             {friendsEvents.map((event) => (
               <article 
