@@ -136,6 +136,20 @@ export default function UserProfilePage() {
 
     try {
       if (friendshipStatus === 'none') {
+        // Check for existing friendship first
+        const { data: existing } = await supabase
+          .from('friendships')
+          .select('id, status')
+          .or(`and(user_id.eq.${user.id},friend_id.eq.${userId}),and(user_id.eq.${userId},friend_id.eq.${user.id})`)
+          .maybeSingle();
+
+        if (existing) {
+          // Refresh status instead of inserting duplicate
+          await fetchFriendshipStatus();
+          toast.info('Solicitação já existe');
+          return;
+        }
+
         // Send friend request
         const { error } = await supabase
           .from('friendships')
@@ -145,7 +159,10 @@ export default function UserProfilePage() {
             status: 'pending'
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Friend request insert error:', JSON.stringify(error));
+          throw error;
+        }
         setFriendshipStatus('pending_sent');
         toast.success('Solicitação de amizade enviada!');
       } else if (friendshipStatus === 'pending_received') {
@@ -170,9 +187,9 @@ export default function UserProfilePage() {
         setFriendshipStatus('none');
         toast.success('Amizade removida');
       }
-    } catch (error) {
-      console.error('Error handling friendship:', error);
-      toast.error('Erro ao processar solicitação');
+    } catch (error: any) {
+      console.error('Error handling friendship:', JSON.stringify(error));
+      toast.error(error?.message || 'Erro ao processar solicitação');
     }
   };
 
