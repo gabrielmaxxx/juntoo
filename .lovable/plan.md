@@ -1,50 +1,21 @@
 
 
-## Google Login e Verificação de Site
+## Problem
 
-### Análise do arquivo enviado
+Both "Em Alta" and "Seus amigos vão" use identical card styles (full-width rounded image with gradient overlay), creating visual monotony. There's no breathing room or visual cue separating them.
 
-O arquivo `googlec9b3e1aa20186102.html` é um arquivo de verificação de propriedade do Google. Ele precisa ser acessível na raiz do site (ex: `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`). Para isso, basta copiá-lo para a pasta `public/` do projeto.
+## Solution
 
-### Seu procedimento está correto
+Add subtle but effective visual separators between homepage sections:
 
-O fluxo é:
-1. Colocar o arquivo de verificação na raiz do site — **é isso que vamos fazer agora**
-2. Verificar a propriedade no Google Cloud Console
-3. Configurar o OAuth Consent Screen e criar as credenciais OAuth
-4. Adicionar Client ID e Client Secret no Supabase Dashboard
+1. **Section dividers**: Add a thin horizontal line or decorative divider between major sections (a `<Separator />` or a custom styled `<hr>` with muted color and margin).
 
-### Plano de implementação
+2. **Differentiate card styles**: Keep "Em Alta" as the horizontal carousel with large image cards, but give "Seus amigos vão" a slightly different treatment -- e.g., a card with a left-side thumbnail + text on the right (similar to the "Perto de você" nearby events style), or add a subtle background tint to the section.
 
-**Etapa 1 — Arquivo de verificação (implementação imediata)**
-- Copiar `googlec9b3e1aa20186102.html` para `public/googlec9b3e1aa20186102.html`
-- Isso torna o arquivo acessível em `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`
+3. **Add section spacing + subtle background contrast**: Wrap alternating sections in a light tinted background (`bg-muted/30` or similar) to create visual rhythm, similar to how premium apps alternate section backgrounds.
 
-**Etapa 2 — Após verificação (configuração manual no Google Cloud)**
+**Recommended approach**: Combine options 1 and 2 -- add a separator line between sections AND change "Seus amigos vão" to use the compact horizontal layout (thumbnail + text) instead of full-bleed images, creating clear visual contrast with the "Em Alta" carousel.
 
-Depois que o site for verificado, você precisará:
-
-1. No **Google Cloud Console** → APIs & Services → **OAuth Consent Screen**:
-   - Adicionar `hspfyakugditkxrvngrc.supabase.co` em **Authorized domains**
-   - Configurar escopos: `email`, `profile`, `openid`
-
-2. Em **Credentials** → Create OAuth Client ID (Web application):
-   - **Authorized JavaScript origins**: `https://juntoo.lovable.app`
-   - **Authorized redirect URLs**: `https://hspfyakugditkxrvngrc.supabase.co/auth/v1/callback`
-
-3. No **Supabase Dashboard** → Authentication → Providers → Google:
-   - Colar o **Client ID** e **Client Secret** obtidos no passo anterior
-   - Habilitar o provider
-
-4. No **Supabase Dashboard** → Authentication → URL Configuration:
-   - **Site URL**: `https://juntoo.lovable.app`
-   - **Redirect URLs**: adicionar `https://juntoo.lovable.app`
-
-**Etapa 3 — Código (após configuração acima)**
-
-O botão de login com Google já existe em `AuthPage.tsx` (função `handleGoogleSignIn`). Após a configuração do provider no Supabase, ele funcionará automaticamente.
-
-### Resumo
-
-A única alteração de código necessária agora é copiar o arquivo de verificação para `public/`. O restante é configuração nos dashboards do Google Cloud e Supabase.
+### Files to edit
+- `src/components/HomePage.tsx` -- add separators between sections and restyle the "Seus amigos vão" cards to use a compact list layout (thumbnail on left, event info on right) instead of the same full-image overlay style used by "Em Alta"
 
