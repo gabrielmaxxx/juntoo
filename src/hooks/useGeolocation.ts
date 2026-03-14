@@ -43,7 +43,7 @@ export const useGeolocation = () => {
         
         // Reverse geocode to get city name
         let city: string | null = null;
-        try {
+        let stateCode: string | null = null;
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=pt-BR`,
             { headers: { 'User-Agent': 'Juntoo/1.0' } }
