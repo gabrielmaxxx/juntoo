@@ -64,24 +64,23 @@ export const usePublicEvents = () => {
   return useQuery({
     queryKey: queryKeys.events.publicWithDetails(),
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
         .select('*')
         .eq('is_private', false)
+        .or(`date.gte.${today},is_recurring.eq.true`)
         .order('date', { ascending: true })
         .limit(500);
 
       if (error) throw error;
 
-      // Filter active events and transform
-      const activeEvents = (data as EventWithDetails[])
+      return (data as EventWithDetails[])
         .filter(isEventUpcoming)
         .map(transformEvent);
-
-      return activeEvents;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
