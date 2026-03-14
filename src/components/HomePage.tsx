@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
-import { useTrendingEvents, useFriendsEvents, useRecommendedEvents } from '@/hooks/useEvents';
+import { useTrendingEvents, useFriendsEvents, useRecommendedEvents, useNearbyEvents } from '@/hooks/useEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 
