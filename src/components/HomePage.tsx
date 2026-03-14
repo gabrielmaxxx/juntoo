@@ -109,11 +109,12 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Trending Events */}
       {trendingEvents.length > 0 && (
         <section aria-label="Eventos em Alta">
-          <div className="px-5 mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              Em Alta
-              <Flame className="w-5 h-5 text-destructive" aria-hidden="true" />
-            </h2>
+          <div className="px-5 mb-4">
+            <SectionHeader 
+              title="Em Alta"
+              subtitle="Eventos populares agora"
+              icon={<Flame className="w-5 h-5 text-destructive" aria-hidden="true" />}
+            />
           </div>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-4 px-5 pb-2">
