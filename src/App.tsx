@@ -58,6 +58,7 @@ const App = () => (
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/user/:userId" element={<UserProfilePage />} />
                   <Route path="/friend-suggestions" element={<FriendSuggestionsPage />} />
+                  <Route path="/events/join/:privateCode" element={<Index />} />
 
                   {/* Admin Backoffice */}
                   <Route path="/admin" element={<Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>}>
