@@ -56,7 +56,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
       {/* Content */}
       <div className="flex-1 overflow-hidden bg-background rounded-t-3xl -mt-5 z-10 relative">
-        <Tabs defaultValue="details" className="h-full flex flex-col">
+        <Tabs defaultValue="details" className="h-full flex flex-col" onValueChange={(v) => setActiveTab(v)}>
           <TabsList className="w-full justify-start rounded-none border-b border-border/50 px-4 pt-2">
             <TabsTrigger value="details" className="text-sm font-semibold">Detalhes</TabsTrigger>
             {isParticipating && <TabsTrigger value="chat" className="text-sm font-semibold">Chat</TabsTrigger>}
