@@ -204,7 +204,10 @@ export function useChat(conversationId: string | null) {
   }, [conversationId, user]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !user || !content.trim()) return;
+    if (!conversationId || !user || !content.trim()) {
+      console.error('sendMessage blocked:', { conversationId, userId: user?.id, content: content?.trim() });
+      return;
+    }
     // Optimistic update
     const optimisticMsg: DirectMessage = {
       id: crypto.randomUUID(),
@@ -223,7 +226,7 @@ export function useChat(conversationId: string | null) {
     });
     if (error) {
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
-      console.error(error);
+      console.error('sendMessage error:', JSON.stringify(error));
     }
   };
 
