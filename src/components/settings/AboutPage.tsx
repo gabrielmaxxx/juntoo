@@ -2,7 +2,8 @@ import { ArrowLeft, FileText, Shield, Heart, ExternalLink, Globe } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BrandLogo } from '@/components/BrandLogo';
+import juntooLogo from '@/assets/juntoo-logo.png';
+import logoText from '@/assets/logo-text-white.png';
 
 interface AboutPageProps {
   onBack: () => void;
