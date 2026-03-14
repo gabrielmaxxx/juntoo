@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PartyPopper, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PrivateLinkSuccess } from './create-event';
@@ -16,7 +16,14 @@ interface CreateEventPageProps {
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
   const [step, setStep] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const totalSteps = 2;
+
+  const handleSuccess = useCallback(() => {
+    // Instead of navigating away immediately, show success screen
+    setShowSuccess(true);
+  }, []);
 
   const {
     formData,
@@ -29,16 +36,19 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     handleImageUpload,
     removeImage,
     generateCoverImage,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     validateForm
-  } = useEventForm(onBack);
+  } = useEventForm(handleSuccess);
+
+  // Wrap submit to capture event ID from toast / success
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    await originalHandleSubmit(e);
+  }, [originalHandleSubmit]);
 
   const handleContinue = useCallback(() => {
-    // Validate step 1 essential fields only
     const step1Fields = ['title', 'category', 'date', 'time', 'state', 'city', 'location'] as const;
     let hasError = false;
 
-    // Quick client-side check for empty required fields
     for (const field of step1Fields) {
       if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
         hasError = true;
@@ -47,7 +57,6 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     }
 
     if (hasError) {
-      // Run full validation to show errors
       validateForm();
       return;
     }
@@ -93,6 +102,44 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
 
   if (privateLink) {
     return <PrivateLinkSuccess privateLink={privateLink} onBack={onBack} />;
+  }
+
+  // Success screen for public events
+  if (showSuccess) {
+    return (
+      <div className="min-h-dvh bg-background flex flex-col items-center justify-center px-6">
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+            <PartyPopper className="w-10 h-10 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Seu evento foi criado! 🎉</h1>
+          <p className="text-sm text-muted-foreground">
+            O evento já está visível para todos. Compartilhe com seus amigos para reunir mais pessoas!
+          </p>
+          <div className="space-y-2 pt-4">
+            <Button className="w-full h-12" onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: formData.title,
+                  text: `Vem pro evento "${formData.title}"!`,
+                  url: window.location.origin,
+                }).catch(() => {});
+              } else {
+                const text = encodeURIComponent(`Vem pro evento "${formData.title}"! ${window.location.origin}`);
+                window.open(`https://wa.me/?text=${text}`, '_blank');
+              }
+            }}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Compartilhar evento
+            </Button>
+            <Button variant="outline" className="w-full h-12" onClick={onBack}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Ir para o início
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
