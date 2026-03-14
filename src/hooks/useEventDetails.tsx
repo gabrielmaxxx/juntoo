@@ -415,15 +415,11 @@ export const useEventDetails = (event: Event) => {
       }
       
       fetchParticipants();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error with participation:', error);
-      console.error('Event ID:', event.id);
-      console.error('User ID:', user.id);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      const errorMessage = error?.message || error?.details || 'Erro desconhecido';
       toast({
         title: "Erro",
-        description: `Não foi possível processar sua solicitação: ${errorMessage}`,
+        description: "Não foi possível processar sua solicitação. Tente novamente.",
         variant: "destructive"
       });
     } finally {
