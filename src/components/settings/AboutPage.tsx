@@ -2,7 +2,8 @@ import { ArrowLeft, FileText, Shield, Heart, ExternalLink, Globe } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { BrandLogo } from '@/components/BrandLogo';
+import juntooLogo from '@/assets/juntoo-logo.png';
+import logoText from '@/assets/logo-text-white.png';
 
 interface AboutPageProps {
   onBack: () => void;
@@ -21,8 +22,18 @@ export const AboutPage = ({ onBack }: AboutPageProps) => {
       <div className="p-4 space-y-4">
         {/* App Info */}
         <div className="flex flex-col items-center py-6">
-          <BrandLogo size="lg" />
-          <h2 className="text-2xl font-bold text-foreground mt-4 tracking-wide">Juntoo</h2>
+          <div className="flex flex-col items-center gap-3">
+            <img 
+              src={juntooLogo} 
+              alt="Juntoo" 
+              className="w-20 h-20 object-contain rounded-[1.5rem]"
+            />
+            <img 
+              src={logoText} 
+              alt="Juntoo" 
+              className="h-8 w-auto object-contain"
+            />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">Versão 1.0.0</p>
           <p className="text-sm text-muted-foreground text-center mt-3 max-w-xs">
             Conectando pessoas através de eventos e experiências compartilhadas.

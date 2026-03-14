@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { useEventUnreadCount } from '@/hooks/useEventUnreadCount';
-import { BrandLogo } from './BrandLogo';
+import logoTextWhite from '@/assets/logo-text-white.png';
+import { useNavigate } from 'react-router-dom';
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
@@ -15,6 +16,7 @@ interface AppHeaderProps {
 
 export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: AppHeaderProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
@@ -72,7 +74,17 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         className="juntoo-gradient px-5 flex items-center justify-between h-14 text-primary-foreground sticky top-0 z-20 safe-area-inset-top"
         role="banner"
       >
-        <BrandLogo size="sm" showLabel labelClassName="text-lg tracking-[0.22em]" />
+        <button 
+          onClick={() => navigate('/')}
+          className="flex items-center cursor-pointer focus-highlight"
+          aria-label="Ir para o início"
+        >
+          <img 
+            src={logoTextWhite} 
+            alt="Juntoo" 
+            className="h-6 w-auto object-contain"
+          />
+        </button>
         
         <div className="flex items-center gap-1" role="toolbar" aria-label="Ações do usuário">
           <button 
