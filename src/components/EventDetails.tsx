@@ -115,7 +115,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           </TabsContent>
 
           {isParticipating && (
-            <TabsContent value="chat" className="flex-1 flex flex-col mt-0 h-full">
+            <TabsContent value="chat" className="flex-1 flex flex-col mt-0 h-full pb-0">
               <EventChat
                 messages={messages}
                 newMessage={newMessage}
