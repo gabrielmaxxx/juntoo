@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Sparkles, Flame, ChevronRight, ShieldCheck, MapPinned } from 'lucide-react';
@@ -6,6 +7,7 @@ import { LazyImage } from './ui/lazy-image';
 import { useTrendingEvents, useFriendsEvents, useRecommendedEvents, useNearbyEvents } from '@/hooks/useEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
@@ -28,6 +30,22 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
 
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
   const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
+
+  // Show toast feedback when geolocation state changes
+  const prevGeoState = useRef({ latitude, geoError, geoLoading });
+  useEffect(() => {
+    const prev = prevGeoState.current;
+    if (prev.geoLoading && !geoLoading) {
+      if (latitude && geoCity) {
+        toast.success(`Localização ativada: ${geoCity}`);
+      } else if (latitude && !geoCity) {
+        toast.success('Localização ativada! Buscando eventos...');
+      } else if (geoError) {
+        toast.error(geoError);
+      }
+    }
+    prevGeoState.current = { latitude, geoError, geoLoading };
+  }, [latitude, geoCity, geoError, geoLoading]);
 
   const loading = loadingTrending || loadingFriends || loadingRecommended;
 
@@ -169,7 +187,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       )}
 
       {/* Geolocation CTA or Nearby Events */}
-      {!latitude ? (
+      {!latitude && !geoError ? (
         <section className="px-5" aria-label="Ativar localização">
           <div className="bg-card rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: 'var(--shadow-card)' }}>
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -181,6 +199,21 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
             </div>
             <Button size="sm" variant="outline" onClick={requestLocation} disabled={geoLoading} className="flex-shrink-0">
               {geoLoading ? 'Buscando...' : 'Ativar'}
+            </Button>
+          </div>
+        </section>
+      ) : geoError ? (
+        <section className="px-5" aria-label="Erro de localização">
+          <div className="bg-card rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center flex-shrink-0">
+              <MapPinned className="w-5 h-5 text-destructive" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Localização indisponível</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{geoError}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={requestLocation} disabled={geoLoading} className="flex-shrink-0">
+              Tentar novamente
             </Button>
           </div>
         </section>
