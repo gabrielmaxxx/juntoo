@@ -45,6 +45,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   } = useEventDetails(event);
 
   const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
+  const [activeTab, setActiveTab] = useState('details');
 
   return (
     <div className="h-full flex flex-col bg-background">
