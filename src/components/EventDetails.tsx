@@ -130,34 +130,36 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
         </Tabs>
       </div>
 
-      {/* Action Button */}
-      <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
-        {(() => {
-          const eventDateTime = new Date(`${event.date}T${event.time}`);
-          const isPast = !event.isRecurring && new Date() >= eventDateTime;
-          if (isPast) {
+      {/* Action Button - hidden on chat tab */}
+      {activeTab !== 'chat' && (
+        <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
+          {(() => {
+            const eventDateTime = new Date(`${event.date}T${event.time}`);
+            const isPast = !event.isRecurring && new Date() >= eventDateTime;
+            if (isPast) {
+              return (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
+                  disabled
+                >
+                  Evento encerrado
+                </Button>
+              );
+            }
             return (
               <Button 
-                variant="outline" 
-                className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
-                disabled
+                variant={isParticipating ? "outline" : "hero"} 
+                className="w-full h-12 text-sm font-semibold rounded-2xl" 
+                onClick={handleParticipate}
+                disabled={loading}
               >
-                Evento encerrado
+                {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
               </Button>
             );
-          }
-          return (
-            <Button 
-              variant={isParticipating ? "outline" : "hero"} 
-              className="w-full h-12 text-sm font-semibold rounded-2xl" 
-              onClick={handleParticipate}
-              disabled={loading}
-            >
-              {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
-            </Button>
-          );
-        })()}
-      </div>
+          })()}
+        </div>
+      )}
     </div>
   );
 };
