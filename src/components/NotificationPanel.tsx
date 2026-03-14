@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, X, Calendar, MessageCircle, Sparkles, UserPlus, UserCheck, Users, RefreshCw } from 'lucide-react';
+import { Bell, X, Calendar, MessageCircle, Sparkles, UserPlus, UserCheck, Users, RefreshCw, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface Notification {
   id: string;
-  type: 'event_join' | 'new_message' | 'new_event' | 'friend_request' | 'friend_request_accepted' | 'participant_joined' | 'event_updated' | 'event_reminder';
+  type: 'event_join' | 'new_message' | 'new_event' | 'friend_request' | 'friend_request_accepted' | 'participant_joined' | 'event_updated' | 'event_reminder' | 'event_review_reminder';
   title: string;
   message: string;
   read: boolean;
@@ -196,6 +196,8 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         return <RefreshCw className="w-5 h-5 text-amber-500" />;
       case 'event_reminder':
         return <Bell className="w-5 h-5 text-red-500" />;
+      case 'event_review_reminder':
+        return <Star className="w-5 h-5 text-yellow-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }

@@ -114,6 +114,66 @@ serve(async (req) => {
       }
     }
 
+    // === Post-event review reminders ===
+    // Send notification to participants of events that ended ~24h ago
+    {
+      const reviewWindowCenter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const reviewWindowStart = new Date(reviewWindowCenter.getTime() - 30 * 60 * 1000);
+      const reviewWindowEnd = new Date(reviewWindowCenter.getTime() + 30 * 60 * 1000);
+
+      console.log(`Checking for completed events to send review reminders (${reviewWindowStart.toISOString()} to ${reviewWindowEnd.toISOString()})`);
+
+      const { data: completedEvents, error: completedError } = await supabase
+        .from('events')
+        .select('id, title, date, time')
+        .gte('date', reviewWindowStart.toISOString().split('T')[0])
+        .lte('date', reviewWindowEnd.toISOString().split('T')[0])
+        .eq('is_recurring', false);
+
+      if (completedError) {
+        console.error('Error fetching completed events:', completedError);
+      } else if (completedEvents && completedEvents.length > 0) {
+        const matchingCompleted = completedEvents.filter(event => {
+          const eventDateTime = new Date(`${event.date}T${event.time}`);
+          return eventDateTime >= reviewWindowStart && eventDateTime <= reviewWindowEnd;
+        });
+
+        console.log(`Found ${matchingCompleted.length} completed events for review reminders`);
+
+        for (const event of matchingCompleted) {
+          const { data: participants } = await supabase
+            .from('event_participants')
+            .select('user_id')
+            .eq('event_id', event.id);
+
+          if (!participants || participants.length === 0) continue;
+
+          const notificationType = 'event_review_reminder';
+
+          for (const participant of participants) {
+            const { data: existing } = await supabase
+              .from('notifications')
+              .select('id')
+              .eq('user_id', participant.user_id)
+              .eq('event_id', event.id)
+              .eq('type', notificationType)
+              .single();
+
+            if (existing) continue;
+
+            await supabase.from('notifications').insert({
+              user_id: participant.user_id,
+              type: notificationType,
+              title: 'Como foi o evento? ⭐',
+              message: `O evento "${event.title}" já acabou! Avalie sua experiência e os participantes.`,
+              event_id: event.id,
+              read: false,
+            });
+          }
+        }
+      }
+    }
+
     return new Response(
       JSON.stringify({ success: true, message: 'Event reminders processed' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
