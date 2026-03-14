@@ -88,21 +88,21 @@ export const useTrendingEvents = (limit = 5) => {
   return useQuery({
     queryKey: queryKeys.events.trending(),
     queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
         .select('*')
         .eq('is_private', false)
+        .or(`date.gte.${today},is_recurring.eq.true`)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
-      const activeEvents = (data as EventWithDetails[])
+      return (data as EventWithDetails[])
         .filter(isEventUpcoming)
         .slice(0, limit)
         .map(transformEvent);
-
-      return activeEvents;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
