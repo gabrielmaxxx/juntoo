@@ -18,6 +18,8 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { totalUnread } = useConversations();
+  const { totalUnread: eventUnread } = useEventConversations();
+  const combinedUnread = totalUnread + eventUnread;
 
   useEffect(() => {
     if (user) {
