@@ -99,7 +99,7 @@ export const useTrendingEvents = (limit = 5) => {
       if (error) throw error;
 
       const activeEvents = (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .slice(0, limit)
         .map(transformEvent);
 
