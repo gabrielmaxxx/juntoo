@@ -80,10 +80,10 @@ export const useEventDetails = (event: Event) => {
     try {
       const { data } = await supabase
         .from('event_participants')
-        .select('*')
+        .select('id')
         .eq('event_id', event.id)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       setIsParticipating(!!data);
     } catch {
