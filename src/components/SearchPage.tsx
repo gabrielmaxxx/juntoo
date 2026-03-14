@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useRef, useCallback } from 'react';
-import { Search, Calendar, MapPin, Tag, Filter, X, Loader2 } from 'lucide-react';
+import { Search, Calendar, MapPin, Tag, Filter, X, Loader2, Sparkles, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { EventCard } from '@/components/EventCard';
