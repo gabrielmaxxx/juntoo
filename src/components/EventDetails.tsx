@@ -114,14 +114,31 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
       {/* Action Button */}
       <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
-        <Button 
-          variant={isParticipating ? "outline" : "hero"} 
-          className="w-full h-12 text-sm font-semibold rounded-2xl" 
-          onClick={handleParticipate}
-          disabled={loading}
-        >
-          {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
-        </Button>
+        {(() => {
+          const eventDateTime = new Date(`${event.date}T${event.time}`);
+          const isPast = !event.isRecurring && new Date() >= eventDateTime;
+          if (isPast) {
+            return (
+              <Button 
+                variant="outline" 
+                className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
+                disabled
+              >
+                Evento encerrado
+              </Button>
+            );
+          }
+          return (
+            <Button 
+              variant={isParticipating ? "outline" : "hero"} 
+              className="w-full h-12 text-sm font-semibold rounded-2xl" 
+              onClick={handleParticipate}
+              disabled={loading}
+            >
+              {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
+            </Button>
+          );
+        })()}
       </div>
     </div>
   );

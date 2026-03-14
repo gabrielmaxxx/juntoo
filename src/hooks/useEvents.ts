@@ -32,12 +32,11 @@ interface EventWithDetails {
   review_count: number;
 }
 
-const isEventActive = (event: { date: string; time: string; is_recurring: boolean | null }) => {
+const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null }) => {
   if (event.is_recurring) return true;
   const now = new Date();
   const eventDateTime = new Date(`${event.date}T${event.time}`);
-  const twentyFourHoursAfter = new Date(eventDateTime.getTime() + 24 * 60 * 60 * 1000);
-  return now < twentyFourHoursAfter;
+  return now < eventDateTime;
 };
 
 const transformEvent = (event: EventWithDetails): Event => ({
@@ -76,7 +75,7 @@ export const usePublicEvents = () => {
 
       // Filter active events and transform
       const activeEvents = (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .map(transformEvent);
 
       return activeEvents;
@@ -100,7 +99,7 @@ export const useTrendingEvents = (limit = 5) => {
       if (error) throw error;
 
       const activeEvents = (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .slice(0, limit)
         .map(transformEvent);
 
@@ -150,7 +149,7 @@ export const useFriendsEvents = (userId: string | undefined, limit = 3) => {
       if (error) throw error;
 
       return (data as EventWithDetails[])
-        .filter(isEventActive)
+        .filter(isEventUpcoming)
         .slice(0, limit)
         .map(transformEvent);
     },
@@ -173,7 +172,7 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
 
       if (error) throw error;
 
-      const activeEvents = (data as EventWithDetails[]).filter(isEventActive);
+      const activeEvents = (data as EventWithDetails[]).filter(isEventUpcoming);
 
       // Filter by user interests
       const recommended = activeEvents.filter(event => {
