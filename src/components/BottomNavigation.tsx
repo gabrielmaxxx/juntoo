@@ -45,11 +45,11 @@ export const BottomNavigation = ({ onCreateClick }: BottomNavigationProps) => {
   return (
     <>
       <nav 
-        className="bg-background/95 backdrop-blur-sm border-t border-border fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom"
+        className="bg-background/95 backdrop-blur-md border-t border-border/50 fixed bottom-0 left-0 right-0 z-30 safe-area-inset-bottom"
         role="navigation"
         aria-label="Navegação principal"
       >
-        <div className="flex justify-around items-center h-14 sm:h-16 relative mx-auto max-w-lg">
+        <div className="flex justify-around items-center h-16 relative mx-auto max-w-lg">
           {navItems.map((item) => {
             if (item.id === 'placeholder') {
               return <div key={item.id} className="w-1/5" aria-hidden="true" />;
@@ -65,11 +65,14 @@ export const BottomNavigation = ({ onCreateClick }: BottomNavigationProps) => {
                 aria-label={item.label}
                 aria-current={active ? 'page' : undefined}
                 className={`flex flex-col items-center justify-center w-1/5 h-full transition-all duration-200 focus-highlight rounded-lg ${
-                  active ? 'text-primary scale-105' : 'text-muted-foreground'
+                  active ? 'text-primary' : 'text-muted-foreground'
                 }`}
               >
-                <Icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 ${active ? 'scale-110' : ''}`} aria-hidden="true" />
-                <span className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium">{item.label}</span>
+                <Icon className={`w-5 h-5 transition-all duration-200 ${active ? 'scale-110' : ''}`} aria-hidden="true" />
+                <span className={`text-[10px] mt-1 transition-all duration-200 ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+                {active && (
+                  <div className="absolute bottom-1 w-1 h-1 rounded-full bg-primary" aria-hidden="true" />
+                )}
               </button>
             );
           })}
@@ -77,15 +80,15 @@ export const BottomNavigation = ({ onCreateClick }: BottomNavigationProps) => {
       </nav>
       
       {/* Floating Action Button */}
-      <div className="fixed bottom-7 sm:bottom-8 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
         <Button 
           variant="fab" 
           size="fab"
           onClick={handleCreateClick}
           aria-label="Criar novo evento"
-          className="shadow-lg w-12 h-12 sm:w-14 sm:h-14"
+          className="w-14 h-14 shadow-lg"
         >
-          <Plus className="w-6 h-6 sm:w-8 sm:h-8" aria-hidden="true" />
+          <Plus className="w-7 h-7" aria-hidden="true" />
         </Button>
       </div>
     </>
