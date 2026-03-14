@@ -31,6 +31,22 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
   const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
 
+  // Show toast feedback when geolocation state changes
+  const prevGeoState = useRef({ latitude, geoError, geoLoading });
+  useEffect(() => {
+    const prev = prevGeoState.current;
+    if (prev.geoLoading && !geoLoading) {
+      if (latitude && geoCity) {
+        toast.success(`Localização ativada: ${geoCity}`);
+      } else if (latitude && !geoCity) {
+        toast.success('Localização ativada! Buscando eventos...');
+      } else if (geoError) {
+        toast.error(geoError);
+      }
+    }
+    prevGeoState.current = { latitude, geoError, geoLoading };
+  }, [latitude, geoCity, geoError, geoLoading]);
+
   const loading = loadingTrending || loadingFriends || loadingRecommended;
 
   const getDailyMission = () => {
