@@ -50,6 +50,10 @@ export const useGeolocation = () => {
           );
           const data = await res.json();
           city = data?.address?.city || data?.address?.town || data?.address?.municipality || null;
+          const stateName = data?.address?.state || null;
+          if (stateName) {
+            stateCode = STATE_NAME_TO_CODE[stateName] || null;
+          }
         } catch {
           // Ignore reverse geocoding errors
         }
@@ -58,6 +62,7 @@ export const useGeolocation = () => {
           latitude,
           longitude,
           city,
+          stateCode,
           error: null,
           loading: false,
         });
