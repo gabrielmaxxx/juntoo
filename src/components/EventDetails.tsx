@@ -48,11 +48,11 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       />
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden bg-background rounded-t-2xl -mt-4 z-10 relative">
+      <div className="flex-1 overflow-hidden bg-background rounded-t-3xl -mt-5 z-10 relative">
         <Tabs defaultValue="details" className="h-full flex flex-col">
-          <TabsList className="w-full justify-start rounded-none border-b px-3 sm:px-4">
-            <TabsTrigger value="details" className="text-sm sm:text-base">Detalhes</TabsTrigger>
-            {isParticipating && <TabsTrigger value="chat" className="text-sm sm:text-base">Chat</TabsTrigger>}
+          <TabsList className="w-full justify-start rounded-none border-b border-border/50 px-4 pt-2">
+            <TabsTrigger value="details" className="text-sm font-semibold">Detalhes</TabsTrigger>
+            {isParticipating && <TabsTrigger value="chat" className="text-sm font-semibold">Chat</TabsTrigger>}
             <div className="ml-auto">
               <ReportButton
                 reportedEventId={event.id}
@@ -63,7 +63,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
             </div>
           </TabsList>
 
-          <TabsContent value="details" className="flex-1 p-3 sm:p-4 space-y-4 sm:space-y-6 overflow-y-auto mt-0 pb-20">
+          <TabsContent value="details" className="flex-1 p-4 sm:p-5 space-y-5 overflow-y-auto mt-0 pb-24">
             <EventInfo event={event} />
 
             {creator && (
@@ -113,10 +113,10 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
       </div>
 
       {/* Action Button */}
-      <div className="p-3 sm:p-4 bg-background border-t border-border fixed bottom-0 left-0 right-0 z-20">
+      <div className="p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 fixed bottom-0 left-0 right-0 z-20 safe-area-inset-bottom">
         <Button 
           variant={isParticipating ? "outline" : "hero"} 
-          className="w-full h-11 sm:h-12 text-sm sm:text-base" 
+          className="w-full h-12 text-sm font-semibold rounded-2xl" 
           onClick={handleParticipate}
           disabled={loading}
         >

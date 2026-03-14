@@ -1,61 +1,56 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { EventCardSkeleton } from "./EventCardSkeleton";
 
 export const HomePageSkeleton = () => {
   return (
-    <div className="space-y-6 pb-24">
-      {/* Greeting skeleton */}
-      <header className="px-4 pt-6 text-center space-y-2">
-        <Skeleton className="h-8 w-48 mx-auto" />
-        <Skeleton className="h-5 w-56 mx-auto" />
+    <div className="space-y-8 pb-28">
+      {/* Greeting */}
+      <header className="px-5 pt-8 text-center space-y-2">
+        <Skeleton className="h-7 w-44 mx-auto rounded-lg" />
+        <Skeleton className="h-4 w-48 mx-auto rounded-lg" />
       </header>
 
-      {/* Daily mission skeleton */}
-      <section className="px-4">
-        <div className="rounded-2xl p-6 bg-muted">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 space-y-3">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-            <Skeleton className="w-14 h-14 rounded-full" />
-          </div>
-        </div>
+      {/* Daily mission */}
+      <section className="px-5">
+        <Skeleton className="rounded-2xl h-24 w-full" />
       </section>
 
-      {/* Trending events skeleton */}
+      {/* Trending */}
       <section>
-        <div className="px-4 mb-3">
-          <Skeleton className="h-6 w-40" />
+        <div className="px-5 mb-4">
+          <Skeleton className="h-6 w-28 rounded-lg" />
         </div>
         <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-3 px-4 pb-2">
+          <div className="flex gap-4 px-5 pb-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-64">
-                <Skeleton className="w-full h-36 rounded-xl" />
-              </div>
+              <Skeleton key={i} className="flex-shrink-0 w-72 h-44 rounded-2xl" />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Friends events skeleton */}
-      <section className="px-4 space-y-3">
-        <Skeleton className="h-6 w-36" />
+      {/* Friends */}
+      <section className="px-5 space-y-4">
+        <Skeleton className="h-6 w-36 rounded-lg" />
         {[...Array(2)].map((_, i) => (
-          <Skeleton key={i} className="w-full h-40 rounded-xl" />
+          <Skeleton key={i} className="w-full h-44 rounded-2xl" />
         ))}
       </section>
 
-      {/* Recommended events skeleton */}
-      <section className="px-4 space-y-3">
-        <div className="space-y-1">
-          <Skeleton className="h-6 w-44" />
-          <Skeleton className="h-4 w-36" />
+      {/* Recommended */}
+      <section className="px-5 space-y-3">
+        <div className="space-y-1.5">
+          <Skeleton className="h-6 w-48 rounded-lg" />
+          <Skeleton className="h-3 w-36 rounded-lg" />
         </div>
         {[...Array(3)].map((_, i) => (
-          <EventCardSkeleton key={i} variant="compact" />
+          <div key={i} className="flex gap-4 bg-card rounded-2xl p-3">
+            <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+            <div className="flex-1 space-y-2 py-1">
+              <Skeleton className="h-4 w-3/4 rounded-lg" />
+              <Skeleton className="h-3 w-1/2 rounded-lg" />
+              <Skeleton className="h-3 w-16 rounded-lg" />
+            </div>
+          </div>
         ))}
       </section>
     </div>

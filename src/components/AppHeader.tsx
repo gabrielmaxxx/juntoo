@@ -21,7 +21,8 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   useEffect(() => {
     if (user) {
       loadUnreadCount();
-      subscribeToNotifications();
+      const cleanup = subscribeToNotifications();
+      return cleanup;
     }
   }, [user]);
 
@@ -38,7 +39,7 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   };
 
   const subscribeToNotifications = () => {
-    if (!user) return;
+    if (!user) return () => {};
     const channel = supabase
       .channel('notification-count')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
@@ -52,45 +53,46 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
     if (onEventClick) onEventClick(eventId);
   };
 
+  const Badge = ({ count }: { count: number }) => {
+    if (count <= 0) return null;
+    return (
+      <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1" aria-hidden="true">
+        {count > 9 ? '9+' : count}
+      </span>
+    );
+  };
+
   return (
     <>
       <header 
-        className="juntoo-gradient px-4 flex items-center justify-between h-16 sm:h-20 text-primary-foreground sticky top-0 z-20 safe-area-inset-top"
+        className="juntoo-gradient px-5 flex items-center justify-between h-14 text-primary-foreground sticky top-0 z-20 safe-area-inset-top"
         role="banner"
       >
-        <BrandLogo size="sm" showLabel labelClassName="text-lg sm:text-xl tracking-[0.22em]" />
+        <BrandLogo size="sm" showLabel labelClassName="text-lg tracking-[0.22em]" />
         
-        <div className="flex items-center space-x-4" role="toolbar" aria-label="Ações do usuário">
+        <div className="flex items-center gap-1" role="toolbar" aria-label="Ações do usuário">
           <button 
-            className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight relative"
+            className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 focus-highlight relative"
             aria-label={`Mensagens${totalUnread > 0 ? `, ${totalUnread} não lidas` : ''}`}
             onClick={onMessagesClick}
           >
-            <MessageCircle size={20} className="text-white" aria-hidden="true" />
-            {totalUnread > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
-                {totalUnread > 9 ? '9+' : totalUnread}
-              </span>
-            )}
+            <MessageCircle size={20} aria-hidden="true" />
+            <Badge count={totalUnread} />
           </button>
           <button 
             onClick={() => setShowNotifications(true)}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors relative focus-highlight"
+            className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 relative focus-highlight"
             aria-label={`Notificações${unreadCount > 0 ? `, ${unreadCount} não lidas` : ''}`}
           >
-            <Bell size={20} className="text-white" aria-hidden="true" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
+            <Bell size={20} aria-hidden="true" />
+            <Badge count={unreadCount} />
           </button>
           <button
             onClick={onSettingsClick}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors focus-highlight"
+            className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 focus-highlight"
             aria-label="Configurações"
           >
-            <Settings size={20} className="text-white" aria-hidden="true" />
+            <Settings size={20} aria-hidden="true" />
           </button>
         </div>
       </header>
