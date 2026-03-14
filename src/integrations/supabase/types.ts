@@ -1033,6 +1033,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_conversation_member: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_service_role: { Args: never; Returns: boolean }
       revoke_penalty: {
         Args: { p_moderator_id: string; p_penalty_id: string }
