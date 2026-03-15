@@ -1055,8 +1055,46 @@ export type Database = {
       }
       generate_private_code: { Args: never; Returns: string }
       get_complete_schema: { Args: never; Returns: Json }
+      get_friends_events: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: {
+          average_rating: number | null
+          category: string | null
+          city: string | null
+          created_at: string | null
+          created_by: string | null
+          creator_avatar: string | null
+          creator_name: string | null
+          date: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          is_private: boolean | null
+          is_recurring: boolean | null
+          location: string | null
+          max_participants: number | null
+          parent_event_id: string | null
+          participants_count: number | null
+          price: number | null
+          private_code: string | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
+          review_count: number | null
+          state: string | null
+          time: string | null
+          title: string | null
+          updated_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events_with_details"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_moderation_stats: { Args: never; Returns: Json }
       get_reported_users: { Args: never; Returns: Json }
+      get_unread_counts: { Args: { p_user_id: string }; Returns: Json }
       get_user_reputation: { Args: { target_user_id: string }; Returns: Json }
       get_user_restrictions: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
