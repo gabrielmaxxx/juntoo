@@ -13,7 +13,6 @@ import { EventFormData } from '@/lib/validations/eventSchema';
 import { Confetti } from '@/components/ui/confetti';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { loadCities, getCitiesSync } from '@/data/brazilStatesAndCities';
-import { useEffect as useEffectImport } from 'react';
 
 interface CreateEventPageProps {
   onBack: () => void;
