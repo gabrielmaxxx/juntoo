@@ -94,10 +94,10 @@ export const useOfflineStorage = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        for (const key of OFFLINE_KEYS) {
-          const data = queryClient.getQueryData([key]);
+        for (const entry of OFFLINE_KEYS) {
+          const data = queryClient.getQueryData([...entry.key]);
           if (data) {
-            saveToIDB(key, data);
+            saveToIDB(entry.storageKey, data);
           }
         }
       }
