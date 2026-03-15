@@ -1,50 +1,66 @@
 
 
-## Google Login e Verificação de Site
+## Diagnóstico Adicional de Performance
 
-### Análise do arquivo enviado
+Após a otimização anterior, identifiquei mais 6 problemas que ainda causam lentidão significativa:
 
-O arquivo `googlec9b3e1aa20186102.html` é um arquivo de verificação de propriedade do Google. Ele precisa ser acessível na raiz do site (ex: `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`). Para isso, basta copiá-lo para a pasta `public/` do projeto.
+### Problemas Encontrados
 
-### Seu procedimento está correto
+**1. Splash Screen bloqueia por 2 segundos fixos (ALTO IMPACTO)**
+O `SplashScreen.tsx` força um `setTimeout` de 2000ms antes de mostrar qualquer conteúdo. Isso é tempo morto — o app já carregou mas fica parado.
 
-O fluxo é:
-1. Colocar o arquivo de verificação na raiz do site — **é isso que vamos fazer agora**
-2. Verificar a propriedade no Google Cloud Console
-3. Configurar o OAuth Consent Screen e criar as credenciais OAuth
-4. Adicionar Client ID e Client Secret no Supabase Dashboard
+**2. Canais Realtime duplicados ainda ativos**
+- `useEventConversations.ts` abre canal `event-messages-inbox` (duplica CacheManager)
+- `useEventDetails.tsx` abre canal `event-{id}-messages` por evento aberto
+- `useDirectMessages.ts` (chat) abre canal `chat-{conversationId}` por conversa
 
-### Plano de implementação
+**3. `useProfileData` faz 3 waterfalls sequenciais sem React Query**
+Usa `useState`/`useEffect` raw em vez de React Query, sem cache. Busca: user_number → events → friends — tudo sequencial, tudo sem cache.
 
-**Etapa 1 — Arquivo de verificação (implementação imediata)**
-- Copiar `googlec9b3e1aa20186102.html` para `public/googlec9b3e1aa20186102.html`
-- Isso torna o arquivo acessível em `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`
+**4. `attendees: Array(participants_count).fill('participant')` cria arrays gigantes**
+Em `transformEvent`, o código cria um array de N elementos apenas para usar `.length` na UI. Com 500 participantes, são 500 strings alocadas por evento.
 
-**Etapa 2 — Após verificação (configuração manual no Google Cloud)**
+**5. Splash Screen pode ser reduzido ou eliminado**
+Após o primeiro acesso, mostrar splash de 2s a cada reload é frustrante.
 
-Depois que o site for verificado, você precisará:
+**6. `useEventDetails` faz 5 queries sequenciais ao abrir um evento**
+`checkParticipation` → `fetchParticipants` → `fetchCreator` → `fetchReviews` → `fetchMessages` — todas sequenciais, sem cache.
 
-1. No **Google Cloud Console** → APIs & Services → **OAuth Consent Screen**:
-   - Adicionar `hspfyakugditkxrvngrc.supabase.co` em **Authorized domains**
-   - Configurar escopos: `email`, `profile`, `openid`
+---
 
-2. Em **Credentials** → Create OAuth Client ID (Web application):
-   - **Authorized JavaScript origins**: `https://juntoo.lovable.app`
-   - **Authorized redirect URLs**: `https://hspfyakugditkxrvngrc.supabase.co/auth/v1/callback`
+### Plano de Otimização (Fase 2)
 
-3. No **Supabase Dashboard** → Authentication → Providers → Google:
-   - Colar o **Client ID** e **Client Secret** obtidos no passo anterior
-   - Habilitar o provider
+**Etapa 1: Eliminar Splash Screen de 2s**
+- Reduzir para 500ms ou usar `sessionStorage` para pular splash após primeiro acesso na sessão.
 
-4. No **Supabase Dashboard** → Authentication → URL Configuration:
-   - **Site URL**: `https://juntoo.lovable.app`
-   - **Redirect URLs**: adicionar `https://juntoo.lovable.app`
+**Etapa 2: Remover canal Realtime de `useEventConversations`**
+- O CacheManager já escuta `event_messages`. Remover o canal `event-messages-inbox` e usar invalidação via query key.
 
-**Etapa 3 — Código (após configuração acima)**
+**Etapa 3: Substituir arrays de attendees por contagem numérica**
+- Mudar `attendees: Array(N).fill('participant')` para `participantsCount: N` no tipo `Event` e atualizar a UI para usar o número diretamente.
 
-O botão de login com Google já existe em `AuthPage.tsx` (função `handleGoogleSignIn`). Após a configuração do provider no Supabase, ele funcionará automaticamente.
+**Etapa 4: Paralelizar queries do `useEventDetails`**
+- Executar `checkParticipation`, `fetchParticipants`, `fetchCreator`, `fetchReviews` em `Promise.all` em vez de sequencialmente.
 
-### Resumo
+**Etapa 5: Migrar `useProfileData` para React Query**
+- Substituir `useState`/`useEffect` por `useQuery` para aproveitar cache existente e evitar re-fetches.
 
-A única alteração de código necessária agora é copiar o arquivo de verificação para `public/`. O restante é configuração nos dashboards do Google Cloud e Supabase.
+### Impacto Esperado
+
+| Otimização | Ganho |
+|---|---|
+| Splash 2s → 0.5s/skip | -1.5s tempo percebido |
+| Remover canal duplicado | -1 canal Realtime |
+| Array → número | Menos alocações de memória |
+| Promise.all no EventDetails | -2s ao abrir evento |
+| ProfileData com cache | Navegação instantânea no perfil |
+
+### Arquivos Afetados
+- `src/components/SplashScreen.tsx`
+- `src/hooks/useEventConversations.ts`
+- `src/hooks/useEventDetails.tsx`
+- `src/hooks/useEvents.ts` + `src/hooks/useUserEvents.ts` (transformEvent)
+- `src/types/index.ts` (tipo Event)
+- `src/components/EventCard.tsx` e outros que usam `event.attendees.length`
+- `src/hooks/useProfileData.ts`
 
