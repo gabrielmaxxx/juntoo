@@ -30,7 +30,7 @@ export function useUnreadCounts() {
         return { dm_unread: 0, event_unread: 0, notif_unread: 0 };
       }
 
-      return data as UnreadCounts;
+      return data as unknown as UnreadCounts;
     },
     enabled: !!user,
     staleTime: 30 * 1000, // 30s - refreshed by realtime invalidation
