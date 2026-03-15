@@ -1,50 +1,69 @@
 
 
-## Google Login e Verificação de Site
+## Diagnóstico de Performance
 
-### Análise do arquivo enviado
+Identifiquei vários problemas graves de performance no app. Aqui está o que encontrei e o plano para resolver:
 
-O arquivo `googlec9b3e1aa20186102.html` é um arquivo de verificação de propriedade do Google. Ele precisa ser acessível na raiz do site (ex: `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`). Para isso, basta copiá-lo para a pasta `public/` do projeto.
+### Problemas Encontrados
 
-### Seu procedimento está correto
+**1. `useConversations` faz N+1 queries no Supabase (CRÍTICO)**
+O hook `useDirectMessages.ts` é chamado no `AppHeader` (presente em TODAS as páginas). Ele faz um loop `for` com uma query individual para cada conversa (linhas 80-93) — buscando última mensagem + contagem de não lidas separadamente para CADA conversa. Com 10 conversas, são 20+ queries extras no carregamento de qualquer página.
 
-O fluxo é:
-1. Colocar o arquivo de verificação na raiz do site — **é isso que vamos fazer agora**
-2. Verificar a propriedade no Google Cloud Console
-3. Configurar o OAuth Consent Screen e criar as credenciais OAuth
-4. Adicionar Client ID e Client Secret no Supabase Dashboard
+**2. Excesso de canais Realtime simultâneos (CRÍTICO)**
+O app abre ~13+ canais Supabase Realtime ao mesmo tempo:
+- CacheManager: 8 canais (um por tabela) + 2 canais por usuário = 10
+- AppHeader: 1 canal (notification-count)
+- useEventUnreadCount: 1 canal (event-unread-count) 
+- NotificationPanel: 1 canal (notifications-changes)
+- useDirectMessages: 1 canal (dm-updates)
 
-### Plano de implementação
+Isso sobrecarrega a conexão WebSocket e o processamento de eventos.
 
-**Etapa 1 — Arquivo de verificação (implementação imediata)**
-- Copiar `googlec9b3e1aa20186102.html` para `public/googlec9b3e1aa20186102.html`
-- Isso torna o arquivo acessível em `https://juntoo.lovable.app/googlec9b3e1aa20186102.html`
+**3. Duplicação de listeners Realtime**
+O CacheManager já escuta `notifications` e `event_messages`, mas `AppHeader`, `NotificationPanel`, e `useEventUnreadCount` criam canais adicionais para as mesmas tabelas — gerando invalidações e re-fetches redundantes.
 
-**Etapa 2 — Após verificação (configuração manual no Google Cloud)**
+**4. `useConversations` carrega em TODAS as páginas**
+O `AppHeader` chama `useConversations()` que carrega TODAS as conversas com mensagens apenas para mostrar um badge de contagem. Isso deveria ser uma query leve (apenas contagem).
 
-Depois que o site for verificado, você precisará:
+**5. `useFriendsEvents` faz 3 queries sequenciais**
+Friendships → participations → events — 3 round-trips ao Supabase só para a home page.
 
-1. No **Google Cloud Console** → APIs & Services → **OAuth Consent Screen**:
-   - Adicionar `hspfyakugditkxrvngrc.supabase.co` em **Authorized domains**
-   - Configurar escopos: `email`, `profile`, `openid`
+---
 
-2. Em **Credentials** → Create OAuth Client ID (Web application):
-   - **Authorized JavaScript origins**: `https://juntoo.lovable.app`
-   - **Authorized redirect URLs**: `https://hspfyakugditkxrvngrc.supabase.co/auth/v1/callback`
+### Plano de Otimização
 
-3. No **Supabase Dashboard** → Authentication → Providers → Google:
-   - Colar o **Client ID** e **Client Secret** obtidos no passo anterior
-   - Habilitar o provider
+**Etapa 1: Substituir N+1 queries no `useConversations` por query única**
+- Criar uma query única que busca conversas com última mensagem e contagem de não-lidas de uma vez, em vez de um loop por conversa.
+- Alternativa: criar um hook separado `useUnreadDMCount` que faz apenas `SELECT count(*)` para o badge do header.
 
-4. No **Supabase Dashboard** → Authentication → URL Configuration:
-   - **Site URL**: `https://juntoo.lovable.app`
-   - **Redirect URLs**: adicionar `https://juntoo.lovable.app`
+**Etapa 2: Reduzir canais Realtime**
+- Remover canais duplicados: o CacheManager já cobre `notifications` e `event_messages`. Remover os canais extras do `AppHeader`, `NotificationPanel` e `useEventUnreadCount`.
+- Consolidar o CacheManager para usar menos canais (agrupar tabelas em 2-3 canais em vez de 8 separados).
 
-**Etapa 3 — Código (após configuração acima)**
+**Etapa 3: Criar hook leve `useUnreadCounts` para o AppHeader**
+- Em vez de `useConversations()` (que carrega tudo), criar um hook que faz apenas uma query de contagem para DMs não lidas e notificações, com invalidação via CacheManager.
 
-O botão de login com Google já existe em `AuthPage.tsx` (função `handleGoogleSignIn`). Após a configuração do provider no Supabase, ele funcionará automaticamente.
+**Etapa 4: Otimizar `useFriendsEvents` com RPC**
+- Criar uma função SQL `get_friends_events(p_user_id, p_limit)` que faz os 3 JOINs em uma única query no banco, eliminando 3 round-trips.
 
-### Resumo
+**Etapa 5: Lazy-load do `useConversations` completo**
+- Mover a carga completa de conversas para quando o usuário realmente acessa a aba de mensagens, não no header global.
 
-A única alteração de código necessária agora é copiar o arquivo de verificação para `public/`. O restante é configuração nos dashboards do Google Cloud e Supabase.
+### Resumo de Impacto Esperado
+
+| Otimização | Queries eliminadas | Canais eliminados |
+|---|---|---|
+| Fix N+1 conversas | ~20 queries/page load | — |
+| Consolidar Realtime | — | ~8 canais |
+| Hook leve no header | ~5 queries/page load | — |
+| RPC friends events | 2 queries/home load | — |
+
+### Arquivos Afetados
+- `src/hooks/useDirectMessages.ts` — refatorar para eliminar N+1
+- `src/components/AppHeader.tsx` — usar hook leve
+- `src/hooks/useEventUnreadCount.ts` — simplificar ou eliminar
+- `src/lib/cacheManager.ts` — consolidar canais
+- `src/components/NotificationPanel.tsx` — remover canal duplicado
+- `src/hooks/useEvents.ts` — RPC para friends events
+- Nova migration SQL — criar `get_friends_events` e `get_unread_counts`
 
