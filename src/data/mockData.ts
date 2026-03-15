@@ -14,6 +14,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
     isTrending: true,
     isFeatured: true,
+    participantsCount: 3,
     attendees: ['Juliana', 'Rafael', 'Beatriz']
   },
   {
@@ -27,6 +28,7 @@ export const EVENTS: Event[] = [
     description: 'Comece seu domingo de forma relaxante com uma aula de yoga ao ar livre. Todos os níveis são bem-vindos. Traga seu tapete e água.',
     imageUrl: 'https://images.pexels.com/photos/3822725/pexels-photo-3822725.jpeg',
     distance: '500m',
+    participantsCount: 1,
     attendees: ['Lucas']
   },
   {
@@ -41,6 +43,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/3747490/pexels-photo-3747490.jpeg',
     distance: '1.2km',
     friendsGoing: ['Juliana', 'Rafael'],
+    participantsCount: 3,
     attendees: ['Juliana', 'Rafael', 'Gabriel']
   },
   {
@@ -53,6 +56,7 @@ export const EVENTS: Event[] = [
     price: 'R$ 5',
     description: 'Jogo de basquete amistoso. Times serão formados na hora. Ótima oportunidade para praticar e conhecer novas pessoas.',
     imageUrl: 'https://images.pexels.com/photos/163452/basketball-dunk-blue-game-163452.jpeg',
+    participantsCount: 3,
     attendees: ['Lucas', 'Gabriel', 'Anne']
   },
   {
@@ -65,6 +69,7 @@ export const EVENTS: Event[] = [
     price: 'Gratuito',
     description: 'Vamos mergulhar nos hooks avançados do React e construir um mini-projeto juntos. Traga seu notebook!',
     imageUrl: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg',
+    participantsCount: 1,
     attendees: ['Mariana']
   },
   {
@@ -80,6 +85,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/1181622/pexels-photo-1181622.jpeg',
     isFeatured: true,
     createdBy: 'Anne',
+    participantsCount: 3,
     attendees: ['Anne', 'Gabriel', 'Mariana']
   }
 ];

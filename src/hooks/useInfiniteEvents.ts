@@ -66,7 +66,7 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     price: event.price?.toString() || 'Gratuito',
     description: event.description || '',
     imageUrl: event.image_url || '/placeholder.svg',
-    attendees: [],
+    participantsCount: 0,
     createdBy: event.created_by || '',
     creatorName: event.creator_name || '',
     creatorAvatar: event.creator_avatar || '',

@@ -54,7 +54,7 @@ const transformEvent = (event: EventWithDetails): Event => ({
   price: event.price?.toString() || 'Gratuito',
   description: event.description || '',
   imageUrl: event.image_url || 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
-  attendees: Array(event.participants_count).fill('participant'),
+  participantsCount: event.participants_count || 0,
   createdBy: event.created_by,
   creatorAvatar: event.creator_avatar || undefined,
   creatorName: event.creator_name || undefined,

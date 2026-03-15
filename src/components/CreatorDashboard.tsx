@@ -171,7 +171,7 @@ export const CreatorDashboard = ({ onBack, onEventDashboardClick }: CreatorDashb
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{event.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(event.date), "dd 'de' MMM", { locale: ptBR })} • {event.attendees?.length || 0} participantes
+                        {format(new Date(event.date), "dd 'de' MMM", { locale: ptBR })} • {event.participantsCount ?? event.attendees?.length ?? 0} participantes
                       </p>
                     </div>
                     {isEventPast(event.date) ? (
