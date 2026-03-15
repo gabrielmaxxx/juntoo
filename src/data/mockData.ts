@@ -43,6 +43,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/3747490/pexels-photo-3747490.jpeg',
     distance: '1.2km',
     friendsGoing: ['Juliana', 'Rafael'],
+    participantsCount: 3,
     attendees: ['Juliana', 'Rafael', 'Gabriel']
   },
   {
