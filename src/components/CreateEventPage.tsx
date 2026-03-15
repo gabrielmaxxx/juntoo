@@ -61,7 +61,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     // Only pre-fill if user hasn't manually set state yet
     if (!formData.state) {
       handleInputChange('state', geoState);
-      if (geoCity && BRAZIL_STATES_AND_CITIES[geoState]?.includes(geoCity)) {
+      const cities = getCitiesSync();
+      if (geoCity && cities[geoState]?.includes(geoCity)) {
         handleInputChange('city', geoCity);
       }
       geoApplied.current = true;

@@ -36,6 +36,7 @@ const FieldCheck = memo(({ filled }: { filled: boolean }) => {
 FieldCheck.displayName = 'FieldCheck';
 
 export const StepEssentials = ({ formData, errors, onInputChange }: StepEssentialsProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const titleRef = useRef<HTMLInputElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestions = useTitleSuggestions(formData.category, formData.title);

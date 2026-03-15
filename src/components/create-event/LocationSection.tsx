@@ -14,6 +14,7 @@ interface LocationSectionProps {
 }
 
 export const LocationSection = ({ formData, errors, onInputChange }: LocationSectionProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   return (
     <Card>
       <CardHeader>

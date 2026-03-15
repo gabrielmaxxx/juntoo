@@ -37,6 +37,7 @@ export const ProfileEditDialog = ({
   toggleInterest,
   onSave,
 }: ProfileEditDialogProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSave = () => {

@@ -36,6 +36,7 @@ interface SearchFilters {
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const { user, profile } = useAuth();
   const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
     user?.id,

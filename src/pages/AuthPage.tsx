@@ -22,6 +22,7 @@ const Logo = () => (
 );
 
 export const AuthPage = () => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const [view, setView] = useState<AuthView>('login');
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
