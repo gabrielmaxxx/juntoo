@@ -56,6 +56,7 @@ export const EVENTS: Event[] = [
     price: 'R$ 5',
     description: 'Jogo de basquete amistoso. Times serão formados na hora. Ótima oportunidade para praticar e conhecer novas pessoas.',
     imageUrl: 'https://images.pexels.com/photos/163452/basketball-dunk-blue-game-163452.jpeg',
+    participantsCount: 3,
     attendees: ['Lucas', 'Gabriel', 'Anne']
   },
   {
