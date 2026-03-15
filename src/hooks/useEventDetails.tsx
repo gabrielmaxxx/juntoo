@@ -445,15 +445,19 @@ export const useEventDetails = (event: Event) => {
     }
   };
 
-  // Initial data fetch
+  // Initial data fetch — parallelized
   useEffect(() => {
-    if (user) {
-      checkParticipation();
-      fetchParticipants();
-    }
-    fetchCreator();
-    fetchReviews();
-    checkIfEventCompleted();
+    const loadData = async () => {
+      checkIfEventCompleted();
+      // Run all independent fetches in parallel
+      await Promise.all([
+        user ? checkParticipation() : Promise.resolve(),
+        user ? fetchParticipants() : Promise.resolve(),
+        fetchCreator(),
+        fetchReviews(),
+      ]);
+    };
+    loadData();
   }, [user, event.id]);
 
   // Real-time messages subscription + mark read
