@@ -82,7 +82,7 @@ const Index = () => {
         price: data.price?.toString() || '0',
         description: data.description || '',
         imageUrl: data.image_url || '',
-        attendees: [],
+        participantsCount: 0,
         createdBy: data.created_by
       };
       setSelectedEvent(event);

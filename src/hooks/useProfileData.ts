@@ -101,7 +101,7 @@ export const useProfileData = () => {
             price: event.price?.toString() || '0',
             description: event.description || '',
             imageUrl: event.image_url || '',
-            attendees: [],
+            participantsCount: 0,
             createdBy: event.created_by,
             creatorName: creator?.full_name || 'Usuário',
             creatorAvatar: creator?.avatar_url || '',

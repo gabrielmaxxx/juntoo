@@ -40,7 +40,7 @@ const EventPreview = memo(({ formData }: { formData: EventFormData }) => {
       createdBy: '',
       creatorName: 'Você',
       creatorAvatar: '',
-      attendees: [],
+      participantsCount: 0,
       price: formData.price ? `R$ ${formData.price}` : undefined,
       maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
       isPrivate: formData.isPrivate,

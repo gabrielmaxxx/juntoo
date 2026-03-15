@@ -13,7 +13,9 @@ export interface Event {
   imageUrl: string;
   isTrending?: boolean;
   isFeatured?: boolean;
-  attendees: string[];
+  participantsCount: number;
+  /** @deprecated Use participantsCount instead */
+  attendees?: string[];
   createdBy?: string;
   creatorAvatar?: string;
   creatorName?: string;
@@ -22,6 +24,8 @@ export interface Event {
   isRecurring?: boolean;
   averageRating?: number;
   reviewCount?: number;
+  maxParticipants?: number;
+  isPrivate?: boolean;
 }
 
 export interface User {

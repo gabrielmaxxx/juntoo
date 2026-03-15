@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface EventConversation {
   type: 'event';
@@ -15,15 +16,14 @@ export interface EventConversation {
 
 export function useEventConversations() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [conversations, setConversations] = useState<EventConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalUnread, setTotalUnread] = useState(0);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchConversations = useCallback(async () => {
     if (!user) { setConversations([]); setLoading(false); return; }
 
-    // 1. Get events the user participates in
     const { data: participations } = await supabase
       .from('event_participants')
       .select('event_id')
@@ -38,7 +38,6 @@ export function useEventConversations() {
 
     const eventIds = participations.map(p => p.event_id);
 
-    // 2. Batch: fetch events, read states, and ALL messages in parallel
     const [eventsRes, readStatesRes, allMessagesRes] = await Promise.all([
       supabase
         .from('events')
@@ -61,17 +60,13 @@ export function useEventConversations() {
     const readMap = new Map(readStatesRes.data?.map(r => [r.event_id, r.last_read_at]) || []);
     const allMessages = allMessagesRes.data || [];
 
-    // 3. Client-side: pick last message per event and compute unread counts
     const lastMsgMap = new Map<string, typeof allMessages[0]>();
     const unreadMap = new Map<string, number>();
 
     for (const msg of allMessages) {
-      // Track last message per event
       if (!lastMsgMap.has(msg.event_id)) {
         lastMsgMap.set(msg.event_id, msg);
       }
-
-      // Count unreads: messages from others after last_read_at
       if (msg.user_id !== user.id) {
         const lastReadAt = readMap.get(msg.event_id);
         if (!lastReadAt || new Date(msg.created_at) > new Date(lastReadAt)) {
@@ -80,7 +75,6 @@ export function useEventConversations() {
       }
     }
 
-    // 4. Build results (only events with messages)
     const results: EventConversation[] = [];
 
     for (const event of events) {
@@ -117,30 +111,18 @@ export function useEventConversations() {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Debounced realtime subscription
+  // Listen for cache invalidation from CacheManager instead of own channel
   useEffect(() => {
     if (!user) return;
+    
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event?.type === 'updated' && event.query?.queryKey?.[0] === 'unread-counts') {
+        fetchConversations();
+      }
+    });
 
-    const channel = supabase
-      .channel('event-messages-inbox')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'event_messages',
-      }, () => {
-        // Debounce: wait 2s before refetching
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => {
-          fetchConversations();
-        }, 2000);
-      })
-      .subscribe();
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      supabase.removeChannel(channel);
-    };
-  }, [user, fetchConversations]);
+    return () => unsubscribe();
+  }, [user, fetchConversations, queryClient]);
 
   return { conversations, loading, totalUnread, refresh: fetchConversations };
 }
