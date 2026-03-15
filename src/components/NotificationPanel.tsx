@@ -30,38 +30,19 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
   useEffect(() => {
     if (!user) return;
     loadNotifications();
-
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          // Skip message notifications — those show in the messages icon
-          if (newNotification.type === 'new_message') return;
-          setNotifications(prev => [newNotification, ...prev]);
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // No realtime channel here — CacheManager handles notifications table changes
+    // and the panel reloads when opened
   }, [user]);
+
+  // Reload notifications when panel opens
+  useEffect(() => {
+    if (open && user) {
+      loadNotifications();
+    }
+  }, [open, user]);
 
   const loadNotifications = async () => {
     if (!user) return;
-
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -69,46 +50,27 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
       .neq('type', 'new_message')
       .order('created_at', { ascending: false })
       .limit(50);
-
-    if (error) {
-      console.error('Error loading notifications:', error);
-      return;
-    }
-
+    if (error) { console.error('Error loading notifications:', error); return; }
     setNotifications((data || []) as Notification[]);
   };
-
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .eq('id', notificationId);
-
-    if (error) {
-      console.error('Error marking notification as read:', error);
-      return;
-    }
-
-    setNotifications(prev =>
-      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-    );
+    if (error) { console.error('Error marking notification as read:', error); return; }
+    setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
-
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .eq('user_id', user.id)
       .eq('read', false);
-
-    if (error) {
-      console.error('Error marking all as read:', error);
-      return;
-    }
-
+    if (error) { console.error('Error marking all as read:', error); return; }
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
@@ -117,12 +79,7 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
       .from('notifications')
       .delete()
       .eq('id', notificationId);
-
-    if (error) {
-      console.error('Error deleting notification:', error);
-      return;
-    }
-
+    if (error) { console.error('Error deleting notification:', error); return; }
     setNotifications(prev => prev.filter(n => n.id !== notificationId));
   };
 
@@ -132,23 +89,12 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         .from('friendships')
         .update({ status: 'accepted' })
         .eq('id', friendshipId);
-
       if (error) throw error;
-
-      // Mark notification as read and remove it
       await deleteNotification(notificationId);
-      
-      toast({
-        title: 'Solicitação aceita!',
-        description: 'Você agora são amigos.',
-      });
+      toast({ title: 'Solicitação aceita!', description: 'Você agora são amigos.' });
     } catch (error) {
       console.error('Error accepting friend request:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível aceitar a solicitação.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Erro', description: 'Não foi possível aceitar a solicitação.', variant: 'destructive' });
     }
   };
 
@@ -158,48 +104,27 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
         .from('friendships')
         .delete()
         .eq('id', friendshipId);
-
       if (error) throw error;
-
-      // Remove notification
       await deleteNotification(notificationId);
-      
-      toast({
-        title: 'Solicitação rejeitada',
-        description: 'A solicitação de amizade foi rejeitada.',
-      });
+      toast({ title: 'Solicitação rejeitada', description: 'A solicitação de amizade foi rejeitada.' });
     } catch (error) {
       console.error('Error rejecting friend request:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível rejeitar a solicitação.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Erro', description: 'Não foi possível rejeitar a solicitação.', variant: 'destructive' });
     }
   };
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'event_join':
-        return <Calendar className="w-5 h-5 text-primary" />;
-      case 'new_message':
-        return <MessageCircle className="w-5 h-5 text-blue-500" />;
-      case 'new_event':
-        return <Sparkles className="w-5 h-5 text-purple-500" />;
-      case 'friend_request':
-        return <UserPlus className="w-5 h-5 text-green-500" />;
-      case 'friend_request_accepted':
-        return <UserCheck className="w-5 h-5 text-green-500" />;
-      case 'participant_joined':
-        return <Users className="w-5 h-5 text-orange-500" />;
-      case 'event_updated':
-        return <RefreshCw className="w-5 h-5 text-amber-500" />;
-      case 'event_reminder':
-        return <Bell className="w-5 h-5 text-red-500" />;
-      case 'event_review_reminder':
-        return <Star className="w-5 h-5 text-yellow-500" />;
-      default:
-        return <Bell className="w-5 h-5 text-gray-500" />;
+      case 'event_join': return <Calendar className="w-5 h-5 text-primary" />;
+      case 'new_message': return <MessageCircle className="w-5 h-5 text-blue-500" />;
+      case 'new_event': return <Sparkles className="w-5 h-5 text-purple-500" />;
+      case 'friend_request': return <UserPlus className="w-5 h-5 text-green-500" />;
+      case 'friend_request_accepted': return <UserCheck className="w-5 h-5 text-green-500" />;
+      case 'participant_joined': return <Users className="w-5 h-5 text-orange-500" />;
+      case 'event_updated': return <RefreshCw className="w-5 h-5 text-amber-500" />;
+      case 'event_reminder': return <Bell className="w-5 h-5 text-red-500" />;
+      case 'event_review_reminder': return <Star className="w-5 h-5 text-yellow-500" />;
+      default: return <Bell className="w-5 h-5 text-gray-500" />;
     }
   };
 
@@ -215,16 +140,12 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-
     if (diffInMinutes < 1) return 'Agora';
     if (diffInMinutes < 60) return `${diffInMinutes}m atrás`;
-    
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h atrás`;
-    
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays}d atrás`;
-    
     return date.toLocaleDateString('pt-BR');
   };
 
@@ -245,12 +166,7 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
               )}
             </SheetTitle>
             {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={markAllAsRead}
-                className="text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
                 Marcar todas como lidas
               </Button>
             )}
@@ -287,49 +203,21 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNotification(notification.id);
-                            }}
+                            onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
                             aria-label={`Excluir notificação: ${notification.title}`}
                           >
                             <X className="h-4 w-4" aria-hidden="true" />
                           </Button>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {notification.message}
-                      </p>
-                      
+                      <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
                       {notification.type === 'friend_request' && notification.event_id && (
                         <div className="flex gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAcceptFriendRequest(notification.event_id!, notification.id);
-                            }}
-                            className="flex-1"
-                          >
-                            Aceitar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRejectFriendRequest(notification.event_id!, notification.id);
-                            }}
-                            className="flex-1"
-                          >
-                            Rejeitar
-                          </Button>
+                          <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAcceptFriendRequest(notification.event_id!, notification.id); }} className="flex-1">Aceitar</Button>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleRejectFriendRequest(notification.event_id!, notification.id); }} className="flex-1">Rejeitar</Button>
                         </div>
                       )}
-                      
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {formatTime(notification.created_at)}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">{formatTime(notification.created_at)}</p>
                     </div>
                   </div>
                 </div>

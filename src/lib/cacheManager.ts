@@ -4,67 +4,15 @@ import { queryKeys } from './queryKeys';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 type TableName = 'events' | 'event_participants' | 'event_messages' | 'event_reviews' | 
-                 'profiles' | 'friendships' | 'notifications' | 'pinned_events';
-
-interface CacheConfig {
-  table: TableName;
-  invalidateKeys: readonly (readonly string[])[];
-  filter?: (payload: any) => boolean;
-}
-
-// Map tables to their cache invalidation rules
-const cacheInvalidationRules: CacheConfig[] = [
-  {
-    table: 'events',
-    invalidateKeys: [
-      queryKeys.events.all,
-      queryKeys.events.trending(),
-    ],
-  },
-  {
-    table: 'event_participants',
-    invalidateKeys: [
-      queryKeys.events.all,
-    ],
-  },
-  {
-    table: 'event_messages',
-    invalidateKeys: [], // Handled separately with specific event ID
-  },
-  {
-    table: 'event_reviews',
-    invalidateKeys: [
-      queryKeys.events.all,
-    ],
-  },
-  {
-    table: 'profiles',
-    invalidateKeys: [
-      queryKeys.profiles.all,
-    ],
-  },
-  {
-    table: 'friendships',
-    invalidateKeys: [
-      queryKeys.friendships.all,
-      queryKeys.events.all, // Friends events need refresh
-    ],
-  },
-  {
-    table: 'notifications',
-    invalidateKeys: [], // Notifications are user-specific
-  },
-  {
-    table: 'pinned_events',
-    invalidateKeys: [], // Handled by specific user
-  },
-];
+                 'profiles' | 'friendships' | 'notifications' | 'pinned_events' |
+                 'direct_messages';
 
 class CacheManager {
   private queryClient: QueryClient | null = null;
   private channels: RealtimeChannel[] = [];
   private isSubscribed = false;
   private userId: string | null = null;
+  private debounceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   initialize(queryClient: QueryClient) {
     this.queryClient = queryClient;
@@ -72,8 +20,6 @@ class CacheManager {
 
   setUserId(userId: string | null) {
     this.userId = userId;
-    
-    // Re-subscribe with new user context
     if (this.isSubscribed) {
       this.unsubscribe();
       if (userId) {
@@ -85,192 +31,158 @@ class CacheManager {
   subscribe() {
     if (this.isSubscribed || !this.queryClient) return;
 
-    console.log('[CacheManager] Subscribing to realtime updates');
+    // Channel 1: Content tables (events, participants, reviews, profiles)
+    const contentChannel = supabase
+      .channel('cache-content')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' },
+        (payload) => this.handleChange('events', payload))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_participants' },
+        (payload) => this.handleChange('event_participants', payload))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_reviews' },
+        (payload) => this.handleChange('event_reviews', payload))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' },
+        (payload) => this.handleChange('profiles', payload))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' },
+        (payload) => this.handleChange('friendships', payload))
+      .subscribe();
 
-    // Subscribe to each table
-    cacheInvalidationRules.forEach((config) => {
-      const channel = supabase
-        .channel(`cache-${config.table}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: config.table,
-          },
-          (payload) => this.handleChange(config, payload)
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log(`[CacheManager] Subscribed to ${config.table}`);
-          }
-        });
+    this.channels.push(contentChannel);
 
-      this.channels.push(channel);
-    });
+    // Channel 2: Messaging tables (DMs, event messages) + notifications
+    const messagingChannel = supabase
+      .channel('cache-messaging')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'event_messages' },
+        (payload) => this.handleChange('event_messages', payload))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'direct_messages' },
+        (payload) => this.handleChange('direct_messages', payload))
+      .subscribe();
 
-    // Subscribe to user-specific tables
+    this.channels.push(messagingChannel);
+
+    // Channel 3: User-specific (notifications, pinned)
     if (this.userId) {
-      this.subscribeToUserSpecificTables();
+      const userChannel = supabase
+        .channel(`cache-user-${this.userId}`)
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'notifications',
+          filter: `user_id=eq.${this.userId}`,
+        }, (payload) => this.handleChange('notifications', payload))
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'pinned_events',
+          filter: `user_id=eq.${this.userId}`,
+        }, (payload) => this.handleChange('pinned_events', payload))
+        .subscribe();
+
+      this.channels.push(userChannel);
     }
 
     this.isSubscribed = true;
   }
 
-  private subscribeToUserSpecificTables() {
-    if (!this.userId) return;
-
-    // Notifications channel
-    const notificationsChannel = supabase
-      .channel(`cache-notifications-${this.userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${this.userId}`,
-        },
-        () => {
-          console.log('[CacheManager] User notifications updated');
-          this.queryClient?.invalidateQueries({ queryKey: ['notifications'] });
-        }
-      )
-      .subscribe();
-
-    this.channels.push(notificationsChannel);
-
-    // Pinned events channel
-    const pinnedChannel = supabase
-      .channel(`cache-pinned-${this.userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pinned_events',
-          filter: `user_id=eq.${this.userId}`,
-        },
-        () => {
-          console.log('[CacheManager] User pinned events updated');
-          this.queryClient?.invalidateQueries({ queryKey: ['pinned-events'] });
-        }
-      )
-      .subscribe();
-
-    this.channels.push(pinnedChannel);
+  private debouncedInvalidate(key: string, fn: () => void, delay = 1000) {
+    const existing = this.debounceTimers.get(key);
+    if (existing) clearTimeout(existing);
+    this.debounceTimers.set(key, setTimeout(() => {
+      fn();
+      this.debounceTimers.delete(key);
+    }, delay));
   }
 
-  private handleChange(config: CacheConfig, payload: any) {
+  private handleChange(table: TableName, payload: any) {
     if (!this.queryClient) return;
 
-    // Apply filter if defined
-    if (config.filter && !config.filter(payload)) return;
-
-    console.log(`[CacheManager] ${config.table} changed:`, payload.eventType);
-
-    // Invalidate configured keys
-    config.invalidateKeys.forEach((key) => {
-      this.queryClient?.invalidateQueries({ queryKey: [...key] });
-    });
-
-    // Handle specific cases
-    this.handleSpecificInvalidations(config.table, payload);
-  }
-
-  private handleSpecificInvalidations(table: TableName, payload: any) {
-    if (!this.queryClient) return;
-
-    const { new: newRecord, old: oldRecord, eventType } = payload;
+    const { new: newRecord, old: oldRecord } = payload;
     const record = newRecord || oldRecord;
 
     switch (table) {
       case 'events':
-        // Invalidate specific event detail
-        if (record?.id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.detail(record.id) 
-          });
-        }
-        // Invalidate user's events if they created it
-        if (record?.created_by) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.userCreated(record.created_by) 
-          });
-        }
+        this.debouncedInvalidate('events', () => {
+          this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.all });
+          if (record?.id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.detail(record.id) });
+          }
+          if (record?.created_by) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.userCreated(record.created_by) });
+          }
+        });
         break;
 
       case 'event_participants':
-        // Invalidate specific event
-        if (record?.event_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.detail(record.event_id) 
-          });
-        }
-        // Invalidate user's registered events
-        if (record?.user_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.userRegistered(record.user_id) 
-          });
-        }
+        this.debouncedInvalidate('participants', () => {
+          this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.all });
+          if (record?.event_id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.detail(record.event_id) });
+          }
+          if (record?.user_id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.userRegistered(record.user_id) });
+          }
+        });
         break;
 
       case 'event_messages':
-        // Invalidate event chat messages
         if (record?.event_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: ['event-messages', record.event_id] 
-          });
+          this.queryClient.invalidateQueries({ queryKey: ['event-messages', record.event_id] });
         }
+        // Refresh unread counts
+        this.debouncedInvalidate('unread-counts', () => {
+          this.queryClient?.invalidateQueries({ queryKey: ['unread-counts'] });
+        }, 2000);
+        break;
+
+      case 'direct_messages':
+        // Refresh unread counts
+        this.debouncedInvalidate('unread-counts', () => {
+          this.queryClient?.invalidateQueries({ queryKey: ['unread-counts'] });
+        }, 2000);
         break;
 
       case 'event_reviews':
-        // Invalidate specific event to refresh ratings
-        if (record?.event_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.detail(record.event_id) 
-          });
+        this.debouncedInvalidate('reviews', () => {
+          this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.all });
+          if (record?.event_id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.detail(record.event_id) });
+          }
+        });
+        break;
+
+      case 'profiles':
+        if (record?.user_id) {
+          this.queryClient.invalidateQueries({ queryKey: queryKeys.profiles.byUserId(record.user_id) });
         }
         break;
 
       case 'friendships':
-        // Invalidate both users' friend lists
-        if (record?.user_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.friendships.byUser(record.user_id) 
-          });
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.friends(record.user_id) 
-          });
-        }
-        if (record?.friend_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.friendships.byUser(record.friend_id) 
-          });
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.events.friends(record.friend_id) 
-          });
-        }
+        this.debouncedInvalidate('friendships', () => {
+          this.queryClient?.invalidateQueries({ queryKey: queryKeys.friendships.all });
+          this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.all });
+          if (record?.user_id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.friendships.byUser(record.user_id) });
+          }
+          if (record?.friend_id) {
+            this.queryClient?.invalidateQueries({ queryKey: queryKeys.friendships.byUser(record.friend_id) });
+          }
+        });
         break;
 
-      case 'profiles':
-        // Invalidate specific profile
-        if (record?.user_id) {
-          this.queryClient.invalidateQueries({ 
-            queryKey: queryKeys.profiles.byUserId(record.user_id) 
-          });
-        }
+      case 'notifications':
+        this.debouncedInvalidate('unread-counts', () => {
+          this.queryClient?.invalidateQueries({ queryKey: ['unread-counts'] });
+        }, 1000);
+        this.queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        break;
+
+      case 'pinned_events':
+        this.queryClient.invalidateQueries({ queryKey: ['pinned-events'] });
         break;
     }
   }
 
   unsubscribe() {
-    console.log('[CacheManager] Unsubscribing from realtime updates');
-    
     this.channels.forEach((channel) => {
       supabase.removeChannel(channel);
     });
-    
+    this.debounceTimers.forEach(timer => clearTimeout(timer));
+    this.debounceTimers.clear();
     this.channels = [];
     this.isSubscribed = false;
   }
@@ -303,19 +215,16 @@ class CacheManager {
   async prefetchHomeData(userId?: string, interests?: string[] | null) {
     if (!this.queryClient) return;
 
-    // Prefetch trending events
     this.queryClient.prefetchQuery({
       queryKey: queryKeys.events.trending(),
       staleTime: 5 * 60 * 1000,
     });
 
-    // Prefetch recommended events if user is logged in
     if (userId) {
       this.queryClient.prefetchQuery({
         queryKey: queryKeys.events.recommended(userId),
         staleTime: 5 * 60 * 1000,
       });
-
       this.queryClient.prefetchQuery({
         queryKey: queryKeys.events.friends(userId),
         staleTime: 5 * 60 * 1000,

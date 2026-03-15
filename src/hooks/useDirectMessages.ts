@@ -61,36 +61,56 @@ export function useConversations() {
     }
 
     const otherUserIds = [...new Set(otherParticipants.map(p => p.user_id))];
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, full_name, avatar_url')
-      .in('user_id', otherUserIds);
 
-    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+    // Fetch profiles, all messages, and unread counts in parallel (batch, no N+1)
+    const [profilesRes, messagesRes, unreadRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', otherUserIds),
+      supabase
+        .from('direct_messages')
+        .select('conversation_id, content, created_at')
+        .in('conversation_id', convIds)
+        .order('created_at', { ascending: false })
+        .limit(500),
+      supabase
+        .from('direct_messages')
+        .select('conversation_id', { count: 'exact' })
+        .in('conversation_id', convIds)
+        .eq('read', false)
+        .neq('sender_id', user.id),
+    ]);
 
-    // Get last message and unread count per conversation
+    const profileMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) || []);
+
+    // Build last message map (first occurrence per conversation = latest)
+    const lastMessageMap = new Map<string, { content: string; created_at: string }>();
+    for (const msg of messagesRes.data || []) {
+      if (!lastMessageMap.has(msg.conversation_id)) {
+        lastMessageMap.set(msg.conversation_id, { content: msg.content, created_at: msg.created_at });
+      }
+    }
+
+    // Build unread count map from individual unread messages
+    const unreadCountMap = new Map<string, number>();
+    // The query above returns all unread messages - we need per-conversation counts
+    // Since we can't group by in supabase-js easily, let's count from individual rows
+    if (unreadRes.data) {
+      for (const msg of unreadRes.data) {
+        unreadCountMap.set(msg.conversation_id, (unreadCountMap.get(msg.conversation_id) || 0) + 1);
+      }
+    }
+
     const convList: Conversation[] = [];
-    
     for (const convId of convIds) {
       const otherP = otherParticipants.find(p => p.conversation_id === convId);
       if (!otherP) continue;
       const profile = profileMap.get(otherP.user_id);
       if (!profile) continue;
 
-      const { data: lastMsg } = await supabase
-        .from('direct_messages')
-        .select('content, created_at')
-        .eq('conversation_id', convId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      const { count: unread } = await supabase
-        .from('direct_messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('conversation_id', convId)
-        .eq('read', false)
-        .neq('sender_id', user.id);
+      const lastMsg = lastMessageMap.get(convId);
+      const unread = unreadCountMap.get(convId) || 0;
 
       convList.push({
         id: convId,
@@ -102,7 +122,7 @@ export function useConversations() {
         },
         last_message: lastMsg?.content || null,
         last_message_at: lastMsg?.created_at || null,
-        unread_count: unread || 0,
+        unread_count: unread,
       });
     }
 
@@ -120,16 +140,7 @@ export function useConversations() {
     loadConversations();
   }, [loadConversations]);
 
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel('dm-updates')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' }, () => {
-        loadConversations();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user, loadConversations]);
+  // No realtime channel here — CacheManager handles direct_messages changes
 
   const startConversation = async (otherUserId: string): Promise<string | null> => {
     const { data, error } = await supabase.rpc('find_or_create_conversation', {
@@ -187,14 +198,11 @@ export function useChat(conversationId: string | null) {
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const newMsg = payload.new as DirectMessage;
-        // Only add if from another user (our own messages are added optimistically)
         if (user && newMsg.sender_id === user.id) return;
         setMessages(prev => {
-          // Deduplicate by id
           if (prev.some(m => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         });
-        // Mark as read
         if (user && newMsg.sender_id !== user.id) {
           supabase.from('direct_messages').update({ read: true }).eq('id', newMsg.id).then();
         }
@@ -204,11 +212,7 @@ export function useChat(conversationId: string | null) {
   }, [conversationId, user]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !user || !content.trim()) {
-      console.error('sendMessage blocked:', { conversationId, userId: user?.id, content: content?.trim() });
-      return;
-    }
-    // Optimistic update
+    if (!conversationId || !user || !content.trim()) return;
     const optimisticMsg: DirectMessage = {
       id: crypto.randomUUID(),
       conversation_id: conversationId,

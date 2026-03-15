@@ -35,7 +35,6 @@ interface EventWithDetails {
 const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null; recurrence_end_date: string | null }) => {
   const now = new Date();
   if (event.is_recurring) {
-    // Recurring events are upcoming if they have no end date or end date is in the future
     if (!event.recurrence_end_date) return true;
     return new Date(event.recurrence_end_date) >= now;
   }
@@ -119,43 +118,16 @@ export const useFriendsEvents = (userId: string | undefined, limit = 3) => {
     queryFn: async () => {
       if (!userId) return [];
 
-      // Get user's friends
-      const { data: friendships } = await supabase
-        .from('friendships')
-        .select('user_id, friend_id')
-        .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
-        .eq('status', 'accepted');
-
-      const friendIds = friendships?.map(f => 
-        f.user_id === userId ? f.friend_id : f.user_id
-      ) || [];
-
-      if (friendIds.length === 0) return [];
-
-      // Get events where friends are participants
-      const { data: friendParticipations } = await supabase
-        .from('event_participants')
-        .select('event_id')
-        .in('user_id', friendIds);
-
-      const friendEventIds = friendParticipations?.map(p => p.event_id) || [];
-      
-      if (friendEventIds.length === 0) return [];
-
-      // Get event details
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('events_with_details')
-        .select('*')
-        .in('id', friendEventIds)
-        .eq('is_private', false)
-        .or(`date.gte.${today},is_recurring.eq.true`);
+      // Single RPC call replaces 3 sequential queries
+      const { data, error } = await supabase.rpc('get_friends_events', {
+        p_user_id: userId,
+        p_limit: limit,
+      });
 
       if (error) throw error;
 
       return (data as EventWithDetails[])
         .filter(isEventUpcoming)
-        .slice(0, limit)
         .map(transformEvent);
     },
     enabled: !!userId,
@@ -181,7 +153,6 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
 
       const activeEvents = (data as EventWithDetails[]).filter(isEventUpcoming);
 
-      // Filter by user interests
       const recommended = activeEvents.filter(event => {
         if (!interests || interests.length === 0) return true;
         return interests.some(interest => 
