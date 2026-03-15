@@ -12,7 +12,7 @@ import { ShieldAlert } from 'lucide-react';
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { Confetti } from '@/components/ui/confetti';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { loadCities, getCitiesSync } from '@/data/brazilStatesAndCities';
 
 interface CreateEventPageProps {
   onBack: () => void;
