@@ -28,6 +28,7 @@ export const EVENTS: Event[] = [
     description: 'Comece seu domingo de forma relaxante com uma aula de yoga ao ar livre. Todos os níveis são bem-vindos. Traga seu tapete e água.',
     imageUrl: 'https://images.pexels.com/photos/3822725/pexels-photo-3822725.jpeg',
     distance: '500m',
+    participantsCount: 1,
     attendees: ['Lucas']
   },
   {
