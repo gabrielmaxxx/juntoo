@@ -53,8 +53,11 @@ const loadFromIDB = async (key: string): Promise<unknown | null> => {
   }
 };
 
-// Keys to persist offline
-const OFFLINE_KEYS = ['events', 'trending-events', 'recommended-events'];
+// Keys to persist offline — must match actual React Query key arrays
+const OFFLINE_KEYS: { key: readonly string[]; storageKey: string }[] = [
+  { key: ['events', 'public', 'with-details'], storageKey: 'events-public' },
+  { key: ['events', 'trending'], storageKey: 'events-trending' },
+];
 
 /**
  * Hook that persists critical query data to IndexedDB for offline access.
