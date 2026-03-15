@@ -183,6 +183,8 @@ const Index = () => {
   // Fully responsive mobile layout
   return (
     <div className="min-h-dvh bg-background overflow-x-hidden">
+      {/* Splash overlay — renders on top while main layout loads underneath */}
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       <div className="w-full h-dvh overflow-x-hidden overflow-y-hidden relative animate-fade-in">
         {/* Skip Link for Accessibility */}
         <SkipLink />
