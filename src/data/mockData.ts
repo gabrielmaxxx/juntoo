@@ -14,6 +14,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/1916817/pexels-photo-1916817.jpeg',
     isTrending: true,
     isFeatured: true,
+    participantsCount: 3,
     attendees: ['Juliana', 'Rafael', 'Beatriz']
   },
   {
