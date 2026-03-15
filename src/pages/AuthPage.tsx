@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Mail, CheckCircle, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
+import { useCities } from '@/hooks/useCities';
 import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
 
@@ -21,6 +22,7 @@ const Logo = () => (
 );
 
 export const AuthPage = () => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const [view, setView] = useState<AuthView>('login');
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');

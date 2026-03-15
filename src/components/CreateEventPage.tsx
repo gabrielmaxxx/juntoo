@@ -12,7 +12,7 @@ import { ShieldAlert } from 'lucide-react';
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { Confetti } from '@/components/ui/confetti';
 import { useGeolocation } from '@/hooks/useGeolocation';
-import { BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { loadCities, getCitiesSync } from '@/data/brazilStatesAndCities';
 
 interface CreateEventPageProps {
   onBack: () => void;
@@ -23,6 +23,8 @@ type Step = 0 | 1 | 2;
 
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
+  // Pre-load cities data for geolocation matching
+  useEffect(() => { loadCities(); }, []);
   const [step, setStep] = useState<Step>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -61,7 +63,8 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     // Only pre-fill if user hasn't manually set state yet
     if (!formData.state) {
       handleInputChange('state', geoState);
-      if (geoCity && BRAZIL_STATES_AND_CITIES[geoState]?.includes(geoCity)) {
+      const cities = getCitiesSync();
+      if (geoCity && cities[geoState]?.includes(geoCity)) {
         handleInputChange('city', geoCity);
       }
       geoApplied.current = true;

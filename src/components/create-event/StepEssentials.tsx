@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CATEGORIES } from '@/constants/categories';
-import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
+import { useCities } from '@/hooks/useCities';
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { useTitleSuggestions } from '@/hooks/useTitleSuggestions';
 
@@ -35,6 +36,7 @@ const FieldCheck = memo(({ filled }: { filled: boolean }) => {
 FieldCheck.displayName = 'FieldCheck';
 
 export const StepEssentials = ({ formData, errors, onInputChange }: StepEssentialsProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const titleRef = useRef<HTMLInputElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestions = useTitleSuggestions(formData.category, formData.title);

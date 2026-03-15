@@ -9,7 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { BRAZIL_STATES, BRAZIL_STATES_AND_CITIES } from '@/data/brazilStatesAndCities';
+import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
+import { useCities } from '@/hooks/useCities';
 import { CATEGORIES } from '@/constants/categories';
 import { useInfiniteEvents } from '@/hooks/useInfiniteEvents';
 import { useRecommendedEvents } from '@/hooks/useEvents';
@@ -35,6 +36,7 @@ interface SearchFilters {
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
 export const SearchPage = ({ onEventClick }: SearchPageProps) => {
+  const BRAZIL_STATES_AND_CITIES = useCities();
   const { user, profile } = useAuth();
   const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
     user?.id,

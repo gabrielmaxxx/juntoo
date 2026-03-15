@@ -479,8 +479,26 @@ export const useEventDetails = (event: Event) => {
             table: 'event_messages',
             filter: `event_id=eq.${event.id}`
           },
-          () => {
-            fetchMessages();
+          async (payload) => {
+            const newMsg = payload.new as { id: string; event_id: string; user_id: string; message: string; created_at: string };
+            // Fetch profile for the new message author
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('user_id, full_name, avatar_url')
+              .eq('user_id', newMsg.user_id)
+              .single();
+            
+            const messageWithProfile: Message = {
+              ...newMsg,
+              profiles: profileData || { full_name: 'Usuário', avatar_url: null }
+            };
+            
+            setMessages(prev => {
+              // Deduplicate by id
+              if (prev.some(m => m.id === newMsg.id)) return prev;
+              return [...prev, messageWithProfile];
+            });
+            
             // Mark as read immediately since user is viewing the chat
             if (user) {
               markEventMessagesRead(user.id, event.id);

@@ -1,5 +1,3 @@
-import municipiosData from './municipios-completo.json';
-
 // Mapeia código UF para sigla do estado
 const UF_MAP: { [key: number]: string } = {
   11: "RO", 12: "AC", 13: "AM", 14: "RR", 15: "PA", 16: "AP", 17: "TO",
@@ -9,29 +7,50 @@ const UF_MAP: { [key: number]: string } = {
   50: "MS", 51: "MT", 52: "GO", 53: "DF"
 };
 
-// Processa os municípios e agrupa por estado
-const processMunicipios = () => {
-  const statesAndCities: { [key: string]: string[] } = {};
-  
-  municipiosData.forEach((municipio: any) => {
-    const uf = UF_MAP[municipio.codigo_uf];
-    if (uf) {
-      if (!statesAndCities[uf]) {
-        statesAndCities[uf] = [];
+// In-memory cache — loaded once, reused everywhere
+let cachedCities: { [key: string]: string[] } | null = null;
+let loadingPromise: Promise<{ [key: string]: string[] }> | null = null;
+
+/**
+ * Lazy-loads the municipios JSON on first call, then caches in memory.
+ */
+export const loadCities = async (): Promise<{ [key: string]: string[] }> => {
+  if (cachedCities) return cachedCities;
+  if (loadingPromise) return loadingPromise;
+
+  loadingPromise = import('./municipios-completo.json').then((module) => {
+    const municipiosData = module.default as Array<{ codigo_uf: number; nome: string }>;
+    const statesAndCities: { [key: string]: string[] } = {};
+
+    municipiosData.forEach((municipio) => {
+      const uf = UF_MAP[municipio.codigo_uf];
+      if (uf) {
+        if (!statesAndCities[uf]) {
+          statesAndCities[uf] = [];
+        }
+        statesAndCities[uf].push(municipio.nome);
       }
-      statesAndCities[uf].push(municipio.nome);
-    }
+    });
+
+    Object.keys(statesAndCities).forEach(uf => {
+      statesAndCities[uf].sort();
+    });
+
+    cachedCities = statesAndCities;
+    loadingPromise = null;
+    return statesAndCities;
   });
-  
-  // Ordena os municípios alfabeticamente em cada estado
-  Object.keys(statesAndCities).forEach(uf => {
-    statesAndCities[uf].sort();
-  });
-  
-  return statesAndCities;
+
+  return loadingPromise;
 };
 
-export const BRAZIL_STATES_AND_CITIES = processMunicipios();
+/**
+ * Returns cached cities synchronously (empty object if not yet loaded).
+ * Call loadCities() first to ensure data is available.
+ */
+export const getCitiesSync = (): { [key: string]: string[] } => {
+  return cachedCities || {};
+};
 
 export const BRAZIL_STATES = [
   { value: "AC", label: "Acre" },
