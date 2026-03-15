@@ -23,6 +23,8 @@ type Step = 0 | 1 | 2;
 
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
+  // Pre-load cities data for geolocation matching
+  useEffect(() => { loadCities(); }, []);
   const [step, setStep] = useState<Step>(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
