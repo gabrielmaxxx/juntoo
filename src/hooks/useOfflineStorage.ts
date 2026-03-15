@@ -68,10 +68,10 @@ export const useOfflineStorage = () => {
   useEffect(() => {
     // On mount, hydrate from IndexedDB
     const hydrate = async () => {
-      for (const key of OFFLINE_KEYS) {
-        const data = await loadFromIDB(key);
+      for (const entry of OFFLINE_KEYS) {
+        const data = await loadFromIDB(entry.storageKey);
         if (data) {
-          queryClient.setQueryData([key], data);
+          queryClient.setQueryData([...entry.key], data);
         }
       }
     };
@@ -79,10 +79,10 @@ export const useOfflineStorage = () => {
 
     // Periodically save query data to IndexedDB
     const interval = setInterval(() => {
-      for (const key of OFFLINE_KEYS) {
-        const data = queryClient.getQueryData([key]);
+      for (const entry of OFFLINE_KEYS) {
+        const data = queryClient.getQueryData([...entry.key]);
         if (data) {
-          saveToIDB(key, data);
+          saveToIDB(entry.storageKey, data);
         }
       }
     }, 30000); // Every 30 seconds
