@@ -69,6 +69,7 @@ export const EVENTS: Event[] = [
     price: 'Gratuito',
     description: 'Vamos mergulhar nos hooks avançados do React e construir um mini-projeto juntos. Traga seu notebook!',
     imageUrl: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg',
+    participantsCount: 1,
     attendees: ['Mariana']
   },
   {
