@@ -90,7 +90,7 @@ export default function UserProfilePage() {
           price: String(event.price || 0),
           description: event.description || '',
           imageUrl: event.image_url || '',
-          attendees: [],
+          participantsCount: 0,
           state: event.state,
           city: event.city,
           isRecurring: event.is_recurring || false,
