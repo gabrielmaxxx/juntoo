@@ -1,10 +1,8 @@
 import { Bell, MessageCircle, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationPanel } from './NotificationPanel';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useConversations } from '@/hooks/useDirectMessages';
-import { useEventUnreadCount } from '@/hooks/useEventUnreadCount';
+import { useState } from 'react';
+import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import logoTextWhite from '@/assets/logo-text-white.png';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,42 +16,7 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const { totalUnread } = useConversations();
-  const { totalUnread: eventUnread } = useEventUnreadCount();
-  const combinedUnread = totalUnread + eventUnread;
-
-  useEffect(() => {
-    if (user) {
-      loadUnreadCount();
-      const cleanup = subscribeToNotifications();
-      return cleanup;
-    }
-  }, [user]);
-
-  const loadUnreadCount = async () => {
-    if (!user) return;
-    const { count, error } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('read', false)
-      .neq('type', 'new_message');
-    if (!error && count !== null) {
-      setUnreadCount(count);
-    }
-  };
-
-  const subscribeToNotifications = () => {
-    if (!user) return () => {};
-    const channel = supabase
-      .channel('notification-count')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
-        loadUnreadCount();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  };
+  const { totalMessageUnread, notifUnread } = useUnreadCounts();
 
   const handleEventClick = (eventId: string) => {
     if (onEventClick) onEventClick(eventId);
@@ -89,19 +52,19 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         <div className="flex items-center gap-1" role="toolbar" aria-label="Ações do usuário">
           <button 
             className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 focus-highlight relative"
-            aria-label={`Mensagens${combinedUnread > 0 ? `, ${combinedUnread} não lidas` : ''}`}
+            aria-label={`Mensagens${totalMessageUnread > 0 ? `, ${totalMessageUnread} não lidas` : ''}`}
             onClick={onMessagesClick}
           >
             <MessageCircle size={20} aria-hidden="true" />
-            <Badge count={combinedUnread} />
+            <Badge count={totalMessageUnread} />
           </button>
           <button 
             onClick={() => setShowNotifications(true)}
             className="p-2.5 hover:bg-white/15 rounded-full transition-all duration-200 relative focus-highlight"
-            aria-label={`Notificações${unreadCount > 0 ? `, ${unreadCount} não lidas` : ''}`}
+            aria-label={`Notificações${notifUnread > 0 ? `, ${notifUnread} não lidas` : ''}`}
           >
             <Bell size={20} aria-hidden="true" />
-            <Badge count={unreadCount} />
+            <Badge count={notifUnread} />
           </button>
           <button
             onClick={onSettingsClick}
