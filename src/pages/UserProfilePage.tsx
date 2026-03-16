@@ -97,6 +97,14 @@ export default function UserProfilePage() {
         }));
 
       setEvents(eventsList);
+
+      // Fetch active penalties visible to the user
+      const { data: penaltiesData } = await supabase
+        .from('user_penalties')
+        .select('penalty_type, reason, expires_at')
+        .eq('user_id', userId)
+        .eq('is_active', true);
+      setActivePenalties(penaltiesData || []);
     } catch (error) {
       console.error('Error fetching user profile:', error);
       toast.error('Erro ao carregar perfil');
