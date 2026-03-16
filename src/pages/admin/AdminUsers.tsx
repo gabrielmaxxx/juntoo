@@ -48,6 +48,19 @@ export default function AdminUsers() {
 
   useEffect(() => { fetchUsers(); }, []);
 
+  // Realtime sync: penalties/restrictions changes refresh the list
+  useEffect(() => {
+    const channel = supabase.channel('admin-users-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_penalties' }, () => {
+        if (selected) openDetail(selected);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_restrictions' }, () => {
+        if (selected) openDetail(selected);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selected]);
+
   const openDetail = async (u: UserRow) => {
     setSelected(u);
     setActionReason('');
@@ -95,7 +108,7 @@ export default function AdminUsers() {
     fetchUsers();
   };
 
-  const getStatus = (u: UserRow) => {
+  const getStatus = () => {
     const activePenalty = penalties.find(p => p.is_active && (p.penalty_type === 'ban' || p.penalty_type === 'suspension'));
     if (activePenalty?.penalty_type === 'ban') return { label: 'Banido', variant: 'destructive' as const };
     if (activePenalty?.penalty_type === 'suspension') return { label: 'Suspenso', variant: 'default' as const };
@@ -163,7 +176,7 @@ export default function AdminUsers() {
                 <div><span className="text-muted-foreground">Eventos criados:</span> {eventsCount}</div>
                 <div><span className="text-muted-foreground">Participações:</span> {participations}</div>
                 <div><span className="text-muted-foreground">Denúncias recebidas:</span> {reportsCount}</div>
-                <div><span className="text-muted-foreground">Status:</span> <Badge variant={getStatus(selected).variant}>{getStatus(selected).label}</Badge></div>
+                <div><span className="text-muted-foreground">Status:</span> <Badge variant={getStatus().variant}>{getStatus().label}</Badge></div>
               </div>
 
               {penalties.length > 0 && (

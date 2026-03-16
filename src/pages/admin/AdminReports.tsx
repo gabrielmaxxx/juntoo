@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { AlertTriangle, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, Eye, Clock, CheckCircle, XCircle, Undo2 } from 'lucide-react';
 
 const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   created: { label: 'Aberta', variant: 'destructive' },
@@ -39,6 +39,7 @@ interface Report {
   is_urgent: boolean;
   created_at: string;
   reviewer_notes: string | null;
+  reviewed_by: string | null;
 }
 
 export default function AdminReports() {
@@ -52,6 +53,7 @@ export default function AdminReports() {
   const [notes, setNotes] = useState('');
   const [reporterProfile, setReporterProfile] = useState<{ full_name: string } | null>(null);
   const [reportedProfile, setReportedProfile] = useState<{ full_name: string } | null>(null);
+  const [reviewerProfile, setReviewerProfile] = useState<{ full_name: string } | null>(null);
 
   const fetchReports = async () => {
     setLoading(true);
@@ -66,25 +68,50 @@ export default function AdminReports() {
 
   useEffect(() => { fetchReports(); }, [statusFilter, categoryFilter]);
 
+  // Realtime sync between admins
+  useEffect(() => {
+    const channel = supabase.channel('admin-reports-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        fetchReports();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [statusFilter, categoryFilter]);
+
   const openDetail = async (r: Report) => {
     setSelected(r);
     setNotes(r.reviewer_notes || '');
-    const [reporter, reported] = await Promise.all([
+    const [reporter, reported, reviewer] = await Promise.all([
       supabase.from('profiles').select('full_name').eq('user_id', r.reporter_user_id).single(),
       r.reported_user_id ? supabase.from('profiles').select('full_name').eq('user_id', r.reported_user_id).single() : Promise.resolve({ data: null }),
+      r.reviewed_by ? supabase.from('profiles').select('full_name').eq('user_id', r.reviewed_by).single() : Promise.resolve({ data: null }),
     ]);
     setReporterProfile(reporter.data);
     setReportedProfile(reported.data);
+    setReviewerProfile(reviewer.data);
   };
 
   const updateStatus = async (status: string) => {
     if (!selected) return;
     const { error } = await supabase.from('reports').update({
       status: status as any, reviewer_notes: notes, reviewed_at: new Date().toISOString(),
+      reviewed_by: (await supabase.auth.getUser()).data.user!.id,
     }).eq('id', selected.id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     await logAction(`report_${status}`, 'report', selected.id, notes);
     toast.success('Denúncia atualizada');
+    setSelected(null);
+    fetchReports();
+  };
+
+  const reopenReport = async () => {
+    if (!selected) return;
+    const { error } = await supabase.from('reports').update({
+      status: 'created' as any, reviewer_notes: null, reviewed_at: null, reviewed_by: null,
+    }).eq('id', selected.id);
+    if (error) { toast.error('Erro ao reabrir'); return; }
+    await logAction('report_reopened', 'report', selected.id, 'Denúncia reaberta');
+    toast.success('Denúncia reaberta');
     setSelected(null);
     fetchReports();
   };
@@ -115,6 +142,8 @@ export default function AdminReports() {
     toast.success('Usuário banido');
     await updateStatus('resolved');
   };
+
+  const isResolved = selected?.status === 'resolved' || selected?.status === 'dismissed';
 
   return (
     <div className="space-y-4">
@@ -187,20 +216,45 @@ export default function AdminReports() {
                 <div><span className="text-muted-foreground">Denunciante:</span> {reporterProfile?.full_name || 'N/A'}</div>
                 <div><span className="text-muted-foreground">Denunciado:</span> {reportedProfile?.full_name || 'N/A'}</div>
               </div>
+
+              {isResolved && reviewerProfile && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    <span className="font-medium text-foreground">Revisado por:</span> {reviewerProfile.full_name}
+                  </p>
+                  {selected.reviewer_notes && (
+                    <p className="text-muted-foreground mt-1">
+                      <span className="font-medium text-foreground">Notas:</span> {selected.reviewer_notes}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div><p className="text-sm font-medium mb-1">Descrição</p><p className="text-sm text-muted-foreground">{selected.description}</p></div>
               {selected.evidence_image_url && <img src={selected.evidence_image_url} alt="Evidência" className="rounded-lg max-h-48 object-cover" />}
-              <Textarea placeholder="Notas do moderador..." value={notes} onChange={e => setNotes(e.target.value)} />
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => updateStatus('under_review')}><Clock className="w-3 h-3 mr-1" />Em análise</Button>
-                <Button size="sm" variant="outline" onClick={() => updateStatus('resolved')}><CheckCircle className="w-3 h-3 mr-1" />Resolver</Button>
-                <Button size="sm" variant="outline" onClick={() => updateStatus('dismissed')}><XCircle className="w-3 h-3 mr-1" />Descartar</Button>
-                {selected.reported_user_id && (
-                  <>
-                    <Button size="sm" variant="destructive" onClick={suspendUser}>Suspender</Button>
-                    <Button size="sm" variant="destructive" onClick={banUser}>Banir</Button>
-                  </>
-                )}
-              </div>
+
+              {isResolved ? (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={reopenReport} className="gap-1">
+                    <Undo2 className="w-3 h-3" />Reabrir denúncia
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Textarea placeholder="Notas do moderador..." value={notes} onChange={e => setNotes(e.target.value)} />
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={() => updateStatus('under_review')}><Clock className="w-3 h-3 mr-1" />Em análise</Button>
+                    <Button size="sm" variant="outline" onClick={() => updateStatus('resolved')}><CheckCircle className="w-3 h-3 mr-1" />Resolver</Button>
+                    <Button size="sm" variant="outline" onClick={() => updateStatus('dismissed')}><XCircle className="w-3 h-3 mr-1" />Descartar</Button>
+                    {selected.reported_user_id && (
+                      <>
+                        <Button size="sm" variant="destructive" onClick={suspendUser}>Suspender</Button>
+                        <Button size="sm" variant="destructive" onClick={banUser}>Banir</Button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>
