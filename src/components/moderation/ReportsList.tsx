@@ -86,12 +86,32 @@ export const ReportsList = () => {
   const openDetail = async (report: Report) => {
     setSelectedReport(report);
     setReviewerNotes(report.reviewer_notes || '');
+    setUserPenalties([]);
     if (report.reported_user_id) {
-      const { data } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single();
-      setReportedProfile(data);
+      const [profileRes, penaltiesRes] = await Promise.all([
+        supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single(),
+        supabase.from('user_penalties').select('*').eq('user_id', report.reported_user_id).eq('is_active', true).order('created_at', { ascending: false }),
+      ]);
+      setReportedProfile(profileRes.data);
+      setUserPenalties(penaltiesRes.data || []);
     } else { setReportedProfile(null); }
     const { data: reporter } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reporter_user_id).single();
     setReporterProfile(reporter);
+  };
+
+  const revokePenalty = async (penaltyId: string) => {
+    if (!user) return;
+    setRevokingId(penaltyId);
+    try {
+      const { error } = await supabase.rpc('revoke_penalty', { p_penalty_id: penaltyId, p_moderator_id: user.id });
+      if (error) throw error;
+      toast.success('Punição revogada com sucesso');
+      setUserPenalties(prev => prev.filter(p => p.id !== penaltyId));
+    } catch (err: any) {
+      toast.error('Erro ao revogar: ' + (err.message || ''));
+    } finally {
+      setRevokingId(null);
+    }
   };
 
   const updateStatus = async (status: string) => {
