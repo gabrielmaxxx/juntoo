@@ -151,7 +151,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
               ))}
             </div>
           </div>
-        </section>
+      )}
+
+      {/* Spacer between sections */}
       )}
 
       {/* Spacer between sections */}
