@@ -40,6 +40,7 @@ export default function UserProfilePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('none');
   const [loading, setLoading] = useState(true);
+  const [activePenalties, setActivePenalties] = useState<{ penalty_type: string; reason: string; expires_at: string | null }[]>([]);
   const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(userId);
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function UserProfilePage() {
 
   const fetchUserProfile = async () => {
     if (!userId) return;
-
     try {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
@@ -97,6 +97,14 @@ export default function UserProfilePage() {
         }));
 
       setEvents(eventsList);
+
+      // Fetch active penalties visible to the user
+      const { data: penaltiesData } = await supabase
+        .from('user_penalties')
+        .select('penalty_type, reason, expires_at')
+        .eq('user_id', userId)
+        .eq('is_active', true);
+      setActivePenalties(penaltiesData || []);
     } catch (error) {
       console.error('Error fetching user profile:', error);
       toast.error('Erro ao carregar perfil');
@@ -330,6 +338,35 @@ export default function UserProfilePage() {
             </div>
           </CardContent>
         </Card>
+
+        {activePenalties.length > 0 && (
+          <Card className="mb-4 border-destructive/30">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                Restrições ativas
+              </h3>
+              <div className="space-y-2">
+                {activePenalties.map((p, i) => {
+                  const labels: Record<string, string> = {
+                    warning: 'Advertência', suspension: 'Conta suspensa', ban: 'Conta banida',
+                    feature_block: 'Função bloqueada', reputation_loss: 'Reputação reduzida',
+                  };
+                  return (
+                    <div key={i} className="text-sm flex items-center gap-2">
+                      <Badge variant="destructive" className="text-xs">{labels[p.penalty_type] || p.penalty_type}</Badge>
+                      {p.expires_at && (
+                        <span className="text-xs text-muted-foreground">
+                          até {new Date(p.expires_at).toLocaleDateString('pt-BR')}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Tabs defaultValue="reputation" className="w-full">
           <TabsList className="grid w-full grid-cols-3">

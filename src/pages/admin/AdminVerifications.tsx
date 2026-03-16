@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Undo2 } from 'lucide-react';
 
 interface UserVerification {
   id: string;
@@ -21,6 +21,7 @@ interface UserVerification {
   status: string;
   created_at: string;
   reviewer_notes: string | null;
+  reviewed_by: string | null;
 }
 
 interface BusinessVerification {
@@ -32,6 +33,7 @@ interface BusinessVerification {
   status: string;
   created_at: string;
   reviewer_notes: string | null;
+  reviewed_by: string | null;
 }
 
 export default function AdminVerifications() {
@@ -43,6 +45,7 @@ export default function AdminVerifications() {
   const [selectedBiz, setSelectedBiz] = useState<BusinessVerification | null>(null);
   const [notes, setNotes] = useState('');
   const [profileName, setProfileName] = useState('');
+  const [reviewerName, setReviewerName] = useState('');
   const [docUrl, setDocUrl] = useState('');
   const [selfieUrl, setSelfieUrl] = useState('');
 
@@ -59,16 +62,26 @@ export default function AdminVerifications() {
 
   useEffect(() => { fetchAll(); }, []);
 
+  // Realtime sync between admins
+  useEffect(() => {
+    const channel = supabase.channel('admin-verifications-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_verifications' }, () => fetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'business_verifications' }, () => fetchAll())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   const openUserVerif = async (v: UserVerification) => {
     setSelectedUser(v);
     setNotes(v.reviewer_notes || '');
-    const { data: p } = await supabase.from('profiles').select('full_name').eq('user_id', v.user_id).single();
-    setProfileName(p?.full_name || 'N/A');
-    // Get signed URLs
-    const [doc, selfie] = await Promise.all([
+    const [profileRes, reviewerRes, doc, selfie] = await Promise.all([
+      supabase.from('profiles').select('full_name').eq('user_id', v.user_id).single(),
+      v.reviewed_by ? supabase.from('profiles').select('full_name').eq('user_id', v.reviewed_by).single() : Promise.resolve({ data: null }),
       supabase.storage.from('verification-documents').createSignedUrl(v.document_url.replace('verification-documents/', ''), 300),
       supabase.storage.from('verification-documents').createSignedUrl(v.selfie_url.replace('verification-documents/', ''), 300),
     ]);
+    setProfileName(profileRes.data?.full_name || 'N/A');
+    setReviewerName(reviewerRes.data?.full_name || '');
     setDocUrl(doc.data?.signedUrl || '');
     setSelfieUrl(selfie.data?.signedUrl || '');
   };
@@ -83,7 +96,6 @@ export default function AdminVerifications() {
       setSelectedUser(null);
       fetchAll();
     } catch (e: any) { 
-      console.error('Approve error:', e);
       toast.error(e.message || 'Erro ao aprovar'); 
     }
   };
@@ -93,6 +105,19 @@ export default function AdminVerifications() {
     await supabase.from('user_verifications').update({ status: 'rejected', reviewer_notes: notes, reviewed_at: new Date().toISOString(), reviewed_by: user!.id }).eq('id', selectedUser.id);
     await logAction('reject_user_verification', 'verification', selectedUser.id, notes);
     toast.success('Verificação rejeitada');
+    setSelectedUser(null);
+    fetchAll();
+  };
+
+  const resetUserVerif = async () => {
+    if (!selectedUser) return;
+    await supabase.from('user_verifications').update({ status: 'pending', reviewer_notes: null, reviewed_at: null, reviewed_by: null }).eq('id', selectedUser.id);
+    // If it was approved, also revert profile verification
+    if (selectedUser.status === 'approved') {
+      await supabase.from('profiles').update({ verified: false, verification_level: 0 }).eq('user_id', selectedUser.user_id);
+    }
+    await logAction('reset_user_verification', 'verification', selectedUser.id, 'Verificação redefinida');
+    toast.success('Verificação redefinida para pendente');
     setSelectedUser(null);
     fetchAll();
   };
@@ -107,7 +132,6 @@ export default function AdminVerifications() {
       setSelectedBiz(null);
       fetchAll();
     } catch (e: any) { 
-      console.error('Approve biz error:', e);
       toast.error(e.message || 'Erro ao aprovar'); 
     }
   };
@@ -117,6 +141,18 @@ export default function AdminVerifications() {
     await supabase.from('business_verifications').update({ status: 'rejected', reviewer_notes: notes, reviewed_at: new Date().toISOString(), reviewed_by: user!.id }).eq('id', selectedBiz.id);
     await logAction('reject_business_verification', 'verification', selectedBiz.id, notes);
     toast.success('Verificação rejeitada');
+    setSelectedBiz(null);
+    fetchAll();
+  };
+
+  const resetBizVerif = async () => {
+    if (!selectedBiz) return;
+    await supabase.from('business_verifications').update({ status: 'pending', reviewer_notes: null, reviewed_at: null, reviewed_by: null }).eq('id', selectedBiz.id);
+    if (selectedBiz.status === 'approved') {
+      await supabase.from('profiles').update({ business_verified: false, verification_level: 0 }).eq('user_id', selectedBiz.user_id);
+    }
+    await logAction('reset_business_verification', 'verification', selectedBiz.id, 'Verificação redefinida');
+    toast.success('Verificação redefinida para pendente');
     setSelectedBiz(null);
     fetchAll();
   };
@@ -189,13 +225,36 @@ export default function AdminVerifications() {
             <div className="space-y-4">
               <p className="text-sm"><span className="text-muted-foreground">Usuário:</span> {profileName}</p>
               <p className="text-sm"><span className="text-muted-foreground">Status:</span> {statusBadge(selectedUser.status)}</p>
+
+              {selectedUser.status !== 'pending' && reviewerName && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    <span className="font-medium text-foreground">Revisado por:</span> {reviewerName}
+                  </p>
+                  {selectedUser.reviewer_notes && (
+                    <p className="text-muted-foreground mt-1">
+                      <span className="font-medium text-foreground">Notas:</span> {selectedUser.reviewer_notes}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {docUrl && <div><p className="text-xs font-medium mb-1">Documento</p><img src={docUrl} alt="Documento" className="rounded-lg max-h-48 object-contain" /></div>}
               {selfieUrl && <div><p className="text-xs font-medium mb-1">Selfie</p><img src={selfieUrl} alt="Selfie" className="rounded-lg max-h-48 object-contain" /></div>}
-              <Textarea placeholder="Notas..." value={notes} onChange={e => setNotes(e.target.value)} />
-              {selectedUser.status === 'pending' && (
+
+              {selectedUser.status === 'pending' ? (
+                <>
+                  <Textarea placeholder="Notas..." value={notes} onChange={e => setNotes(e.target.value)} />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={approveUser}><CheckCircle className="w-3 h-3 mr-1" />Aprovar</Button>
+                    <Button size="sm" variant="destructive" onClick={rejectUser}><XCircle className="w-3 h-3 mr-1" />Rejeitar</Button>
+                  </div>
+                </>
+              ) : (
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={approveUser}><CheckCircle className="w-3 h-3 mr-1" />Aprovar</Button>
-                  <Button size="sm" variant="destructive" onClick={rejectUser}><XCircle className="w-3 h-3 mr-1" />Rejeitar</Button>
+                  <Button size="sm" variant="outline" onClick={resetUserVerif} className="gap-1">
+                    <Undo2 className="w-3 h-3" />Redefinir para pendente
+                  </Button>
                 </div>
               )}
             </div>
@@ -215,11 +274,28 @@ export default function AdminVerifications() {
                 <div><span className="text-muted-foreground">CNPJ:</span> {selectedBiz.cnpj}</div>
                 <div><span className="text-muted-foreground">Status:</span> {statusBadge(selectedBiz.status)}</div>
               </div>
-              <Textarea placeholder="Notas..." value={notes} onChange={e => setNotes(e.target.value)} />
-              {selectedBiz.status === 'pending' && (
+
+              {selectedBiz.status !== 'pending' && selectedBiz.reviewer_notes && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="text-muted-foreground">
+                    <span className="font-medium text-foreground">Notas:</span> {selectedBiz.reviewer_notes}
+                  </p>
+                </div>
+              )}
+
+              {selectedBiz.status === 'pending' ? (
+                <>
+                  <Textarea placeholder="Notas..." value={notes} onChange={e => setNotes(e.target.value)} />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={approveBiz}><CheckCircle className="w-3 h-3 mr-1" />Aprovar</Button>
+                    <Button size="sm" variant="destructive" onClick={rejectBiz}><XCircle className="w-3 h-3 mr-1" />Rejeitar</Button>
+                  </div>
+                </>
+              ) : (
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={approveBiz}><CheckCircle className="w-3 h-3 mr-1" />Aprovar</Button>
-                  <Button size="sm" variant="destructive" onClick={rejectBiz}><XCircle className="w-3 h-3 mr-1" />Rejeitar</Button>
+                  <Button size="sm" variant="outline" onClick={resetBizVerif} className="gap-1">
+                    <Undo2 className="w-3 h-3" />Redefinir para pendente
+                  </Button>
                 </div>
               )}
             </div>

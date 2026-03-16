@@ -20,8 +20,7 @@ export default function AdminDashboard() {
   const [reportsChart, setReportsChart] = useState<{ week: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = async () => {
       const today = new Date().toISOString().split('T')[0];
       const [
         { count: totalUsers },
@@ -80,7 +79,19 @@ export default function AdminDashboard() {
       setReportsChart(reportsByWeek);
       setLoading(false);
     };
+
+  useEffect(() => {
     load();
+  }, []);
+
+  // Realtime sync for dashboard KPIs
+  useEffect(() => {
+    const channel = supabase.channel('admin-dashboard-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_penalties' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   if (loading) {
