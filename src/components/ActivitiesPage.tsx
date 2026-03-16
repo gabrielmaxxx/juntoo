@@ -109,6 +109,17 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
     );
   }
 
+  if (hasError) {
+    return (
+      <div className="p-4">
+        <QueryErrorState 
+          message="Não foi possível carregar suas atividades." 
+          onRetry={() => { refetchRegistered(); refetchCreated(); }} 
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full bg-gradient-to-b from-background to-background/50">
       {/* Header */}
