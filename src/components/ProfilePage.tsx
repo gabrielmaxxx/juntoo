@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { CATEGORIES } from '@/constants/categories';
 import { useProfileData } from '@/hooks/useProfileData';
 import { useUserReputation } from '@/hooks/useUserReputation';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { ReputationSection } from '@/components/reputation';
 import {
   ProfileHeader,
