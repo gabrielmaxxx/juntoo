@@ -24,11 +24,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const { profile, user } = useAuth();
   const userName = currentUser?.name || 'Usuário';
 
-  const { data: trendingEvents = [], isLoading: loadingTrending } = useTrendingEvents(5);
-  const { data: friendsEvents = [], isLoading: loadingFriends } = useFriendsEvents(user?.id, 3);
+  const { data: trendingEvents = [], isLoading: loadingTrending, isError: trendingError, refetch: refetchTrending } = useTrendingEvents(5);
+  const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
-  const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
+  const { data: nearbyEvents = [], isLoading: loadingNearby, isError: nearbyError, refetch: refetchNearby } = useNearbyEvents(geoCity, 10);
 
   // Show toast feedback when geolocation state changes
   const prevGeoState = useRef({ latitude, geoError, geoLoading });
