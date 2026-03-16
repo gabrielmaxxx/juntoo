@@ -12,6 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
 import { LiveRegion } from '@/components/ui/live-region';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { OfflineBanner } from '@/components/OfflineBanner';
 
 // Code-split heavy page components for smaller initial bundle
 const HomePage = lazy(() => import('@/components/HomePage').then(m => ({ default: m.HomePage })));
