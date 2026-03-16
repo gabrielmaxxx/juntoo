@@ -20,8 +20,7 @@ export default function AdminDashboard() {
   const [reportsChart, setReportsChart] = useState<{ week: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = async () => {
       const today = new Date().toISOString().split('T')[0];
       const [
         { count: totalUsers },
