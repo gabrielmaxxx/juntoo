@@ -339,6 +339,35 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
 
+        {activePenalties.length > 0 && (
+          <Card className="mb-4 border-destructive/30">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                Restrições ativas
+              </h3>
+              <div className="space-y-2">
+                {activePenalties.map((p, i) => {
+                  const labels: Record<string, string> = {
+                    warning: 'Advertência', suspension: 'Conta suspensa', ban: 'Conta banida',
+                    feature_block: 'Função bloqueada', reputation_loss: 'Reputação reduzida',
+                  };
+                  return (
+                    <div key={i} className="text-sm flex items-center gap-2">
+                      <Badge variant="destructive" className="text-xs">{labels[p.penalty_type] || p.penalty_type}</Badge>
+                      {p.expires_at && (
+                        <span className="text-xs text-muted-foreground">
+                          até {new Date(p.expires_at).toLocaleDateString('pt-BR')}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Tabs defaultValue="reputation" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="reputation">Reputação</TabsTrigger>
