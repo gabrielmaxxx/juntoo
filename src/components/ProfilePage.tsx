@@ -86,9 +86,42 @@ export const ProfilePage = () => {
   const displayName = profile?.full_name || 'Usuário';
   const displayAvatar = profile?.avatar_url || '';
   const displayLocation = profile?.city || '';
+  const { restrictions } = useAuthContext();
+
+  const penaltyLabels: Record<string, string> = {
+    restricted: 'Conta restrita', flagged: 'Conta sinalizada',
+    priority_review: 'Em revisão prioritária', low_reputation_flag: 'Reputação baixa',
+  };
 
   return (
     <div className="pb-20">
+      {restrictions.length > 0 && (
+        <Card className="mx-4 mt-4 border-destructive/30">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+              Restrições ativas na sua conta
+            </h3>
+            <div className="space-y-2">
+              {restrictions.map((r, i) => (
+                <div key={i} className="text-sm">
+                  <Badge variant="destructive" className="text-xs mr-2">
+                    {r.restriction_type.startsWith('feature_block_')
+                      ? `Função bloqueada: ${r.restriction_type.replace('feature_block_', '')}`
+                      : penaltyLabels[r.restriction_type] || r.restriction_type}
+                  </Badge>
+                  {r.expires_at && (
+                    <span className="text-xs text-muted-foreground">
+                      até {new Date(r.expires_at).toLocaleDateString('pt-BR')}
+                    </span>
+                  )}
+                  {r.reason && <p className="text-xs text-muted-foreground mt-0.5">{r.reason}</p>}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <ProfileHeader
         displayName={displayName}
         displayAvatar={displayAvatar}
