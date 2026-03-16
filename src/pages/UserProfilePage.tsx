@@ -40,6 +40,7 @@ export default function UserProfilePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>('none');
   const [loading, setLoading] = useState(true);
+  const [activePenalties, setActivePenalties] = useState<{ penalty_type: string; reason: string; expires_at: string | null }[]>([]);
   const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(userId);
 
   useEffect(() => {
