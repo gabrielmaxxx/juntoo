@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Eye, AlertTriangle, Clock, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Eye, AlertTriangle, Clock, CheckCircle, XCircle, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -62,6 +62,8 @@ export const ReportsList = () => {
   const [reporterProfile, setReporterProfile] = useState<any>(null);
   const [reviewerNotes, setReviewerNotes] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [userPenalties, setUserPenalties] = useState<any[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const fetchReports = async () => {
     setLoading(true);
@@ -84,12 +86,32 @@ export const ReportsList = () => {
   const openDetail = async (report: Report) => {
     setSelectedReport(report);
     setReviewerNotes(report.reviewer_notes || '');
+    setUserPenalties([]);
     if (report.reported_user_id) {
-      const { data } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single();
-      setReportedProfile(data);
+      const [profileRes, penaltiesRes] = await Promise.all([
+        supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reported_user_id).single(),
+        supabase.from('user_penalties').select('*').eq('user_id', report.reported_user_id).eq('is_active', true).order('created_at', { ascending: false }),
+      ]);
+      setReportedProfile(profileRes.data);
+      setUserPenalties(penaltiesRes.data || []);
     } else { setReportedProfile(null); }
     const { data: reporter } = await supabase.from('profiles').select('user_id, full_name, avatar_url').eq('user_id', report.reporter_user_id).single();
     setReporterProfile(reporter);
+  };
+
+  const revokePenalty = async (penaltyId: string) => {
+    if (!user) return;
+    setRevokingId(penaltyId);
+    try {
+      const { error } = await supabase.rpc('revoke_penalty', { p_penalty_id: penaltyId, p_moderator_id: user.id });
+      if (error) throw error;
+      toast.success('Punição revogada com sucesso');
+      setUserPenalties(prev => prev.filter(p => p.id !== penaltyId));
+    } catch (err: any) {
+      toast.error('Erro ao revogar: ' + (err.message || ''));
+    } finally {
+      setRevokingId(null);
+    }
   };
 
   const updateStatus = async (status: string) => {
@@ -218,6 +240,35 @@ export const ReportsList = () => {
                 <p className="text-sm font-medium text-foreground mb-1">Data:</p>
                 <p className="text-sm text-muted-foreground">{format(new Date(selectedReport.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
               </div>
+
+              {userPenalties.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">Punições ativas do denunciado:</p>
+                  {userPenalties.map(p => {
+                    const LABELS: Record<string, string> = { warning: 'Advertência', reputation_loss: 'Perda de reputação', suspension: 'Suspensão', feature_block: 'Bloqueio', ban: 'Banimento' };
+                    return (
+                      <div key={p.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge variant={p.penalty_type === 'ban' ? 'destructive' : 'outline'} className="text-xs shrink-0">
+                            {LABELS[p.penalty_type] || p.penalty_type}
+                          </Badge>
+                          <span className="truncate text-muted-foreground">{p.reason}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 text-destructive hover:text-destructive h-7 gap-1"
+                          onClick={() => revokePenalty(p.id)}
+                          disabled={revokingId === p.id}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Revogar
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">Notas do moderador:</p>
