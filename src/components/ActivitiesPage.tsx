@@ -24,10 +24,11 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
   const { user } = useAuthContext();
   const { isPinned, togglePin } = usePinnedEvents();
   
-  const { data: registeredEvents = [], isLoading: loadingRegistered } = useUserRegisteredEvents(user?.id);
-  const { data: createdEvents = [], isLoading: loadingCreated } = useUserCreatedEvents(user?.id);
+  const { data: registeredEvents = [], isLoading: loadingRegistered, isError: registeredError, refetch: refetchRegistered } = useUserRegisteredEvents(user?.id);
+  const { data: createdEvents = [], isLoading: loadingCreated, isError: createdError, refetch: refetchCreated } = useUserCreatedEvents(user?.id);
   
   const loading = loadingRegistered || loadingCreated;
+  const hasError = registeredError || createdError;
 
   // Helper function to check if event is completed
   const isEventCompleted = (event: Event): boolean => {
