@@ -205,40 +205,42 @@ const Index = () => {
             {/* Main Content */}
             <main id="main-content" className="overflow-y-auto" tabIndex={-1}>
               <div key={activeTab} className="animate-fade-in">
-                <Suspense fallback={<TabLoadingFallback />}>
-                  {activeTab === 'home' && (
-                    <HomePage 
-                      onEventClick={handleEventClick}
-                      currentUser={{ name: profile?.full_name || 'Usuário' }}
-                    />
-                  )}
-                  {activeTab === 'search' && (
-                    <SearchPage onEventClick={handleEventClick} />
-                  )}
-                  {activeTab === 'activities' && (
-                    <ActivitiesPage 
-                      onEventClick={handleEventClick}
-                      onCreateClick={() => setActiveTab('create')}
-                    />
-                  )}
-                  {activeTab === 'profile' && (
-                    <ProfilePage />
-                  )}
-                  {activeTab === 'create' && (
-                    <CreateEventPage onBack={() => setActiveTab('home')} />
-                  )}
-                  {activeTab === 'messages' && (
-                    <MessagesPage 
-                      onBack={() => setActiveTab('home')}
-                      initialConversationId={searchParams.get('conv') || undefined}
-                      initialUserId={searchParams.get('userId') || undefined}
-                      onOpenEventChat={(eventId) => handleEventClickById(eventId)}
-                    />
-                  )}
-                  {activeTab === 'settings' && (
-                    <SettingsPage onBack={() => setActiveTab('home')} />
-                  )}
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense fallback={<TabLoadingFallback />}>
+                    {activeTab === 'home' && (
+                      <HomePage 
+                        onEventClick={handleEventClick}
+                        currentUser={{ name: profile?.full_name || 'Usuário' }}
+                      />
+                    )}
+                    {activeTab === 'search' && (
+                      <SearchPage onEventClick={handleEventClick} />
+                    )}
+                    {activeTab === 'activities' && (
+                      <ActivitiesPage 
+                        onEventClick={handleEventClick}
+                        onCreateClick={() => setActiveTab('create')}
+                      />
+                    )}
+                    {activeTab === 'profile' && (
+                      <ProfilePage />
+                    )}
+                    {activeTab === 'create' && (
+                      <CreateEventPage onBack={() => setActiveTab('home')} />
+                    )}
+                    {activeTab === 'messages' && (
+                      <MessagesPage 
+                        onBack={() => setActiveTab('home')}
+                        initialConversationId={searchParams.get('conv') || undefined}
+                        initialUserId={searchParams.get('userId') || undefined}
+                        onOpenEventChat={(eventId) => handleEventClickById(eventId)}
+                      />
+                    )}
+                    {activeTab === 'settings' && (
+                      <SettingsPage onBack={() => setActiveTab('home')} />
+                    )}
+                  </Suspense>
+                </ErrorBoundary>
               </div>
             </main>
             
