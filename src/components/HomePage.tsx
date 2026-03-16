@@ -11,6 +11,7 @@ import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/us
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { QueryErrorState } from './QueryErrorState';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
