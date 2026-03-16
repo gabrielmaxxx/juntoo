@@ -79,7 +79,19 @@ export default function AdminDashboard() {
       setReportsChart(reportsByWeek);
       setLoading(false);
     };
+
+  useEffect(() => {
     load();
+  }, []);
+
+  // Realtime sync for dashboard KPIs
+  useEffect(() => {
+    const channel = supabase.channel('admin-dashboard-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_penalties' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   if (loading) {
