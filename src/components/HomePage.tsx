@@ -11,6 +11,7 @@ import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/us
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { QueryErrorState } from './QueryErrorState';
 
 interface HomePageProps {
   onEventClick: (event: Event) => void;
@@ -23,11 +24,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const { profile, user } = useAuth();
   const userName = currentUser?.name || 'Usuário';
 
-  const { data: trendingEvents = [], isLoading: loadingTrending } = useTrendingEvents(5);
-  const { data: friendsEvents = [], isLoading: loadingFriends } = useFriendsEvents(user?.id, 3);
+  const { data: trendingEvents = [], isLoading: loadingTrending, isError: trendingError, refetch: refetchTrending } = useTrendingEvents(5);
+  const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
-  const { data: nearbyEvents = [], isLoading: loadingNearby } = useNearbyEvents(geoCity, 10);
+  const { data: nearbyEvents = [], isLoading: loadingNearby, isError: nearbyError, refetch: refetchNearby } = useNearbyEvents(geoCity, 10);
 
   // Show toast feedback when geolocation state changes
   const prevGeoState = useRef({ latitude, geoError, geoLoading });
@@ -106,8 +107,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
 
-      {/* Trending Events */}
-      {trendingEvents.length > 0 && (
+      {trendingError ? (
+        <section className="px-5" aria-label="Erro ao carregar eventos em alta">
+          <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchTrending} compact />
+        </section>
+      ) : trendingEvents.length > 0 ? (
         <section aria-label="Eventos em Alta">
           <div className="px-5 mb-4">
             <SectionHeader 
@@ -148,7 +152,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
       {/* Spacer between sections */}
       {friendsEvents.length > 0 && trendingEvents.length > 0 && (

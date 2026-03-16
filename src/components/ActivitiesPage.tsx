@@ -10,6 +10,7 @@ import { Calendar, Users, Plus, BarChart3 } from 'lucide-react';
 import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { QueryErrorState } from '@/components/QueryErrorState';
 
 interface ActivitiesPageProps {
   onEventClick: (event: Event) => void;
@@ -23,10 +24,11 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
   const { user } = useAuthContext();
   const { isPinned, togglePin } = usePinnedEvents();
   
-  const { data: registeredEvents = [], isLoading: loadingRegistered } = useUserRegisteredEvents(user?.id);
-  const { data: createdEvents = [], isLoading: loadingCreated } = useUserCreatedEvents(user?.id);
+  const { data: registeredEvents = [], isLoading: loadingRegistered, isError: registeredError, refetch: refetchRegistered } = useUserRegisteredEvents(user?.id);
+  const { data: createdEvents = [], isLoading: loadingCreated, isError: createdError, refetch: refetchCreated } = useUserCreatedEvents(user?.id);
   
   const loading = loadingRegistered || loadingCreated;
+  const hasError = registeredError || createdError;
 
   // Helper function to check if event is completed
   const isEventCompleted = (event: Event): boolean => {
@@ -103,6 +105,17 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
             ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="p-4">
+        <QueryErrorState 
+          message="Não foi possível carregar suas atividades." 
+          onRetry={() => { refetchRegistered(); refetchCreated(); }} 
+        />
       </div>
     );
   }

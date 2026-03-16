@@ -12,6 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
 import { LiveRegion } from '@/components/ui/live-region';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { OfflineBanner } from '@/components/OfflineBanner';
 
 // Code-split heavy page components for smaller initial bundle
 const HomePage = lazy(() => import('@/components/HomePage').then(m => ({ default: m.HomePage })));
@@ -183,6 +185,7 @@ const Index = () => {
   // Fully responsive mobile layout
   return (
     <div className="min-h-dvh bg-background overflow-x-hidden">
+      <OfflineBanner />
       {/* Splash overlay — renders on top while main layout loads underneath */}
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
       <div className="w-full h-dvh overflow-x-hidden overflow-y-hidden relative animate-fade-in">
@@ -202,40 +205,42 @@ const Index = () => {
             {/* Main Content */}
             <main id="main-content" className="overflow-y-auto" tabIndex={-1}>
               <div key={activeTab} className="animate-fade-in">
-                <Suspense fallback={<TabLoadingFallback />}>
-                  {activeTab === 'home' && (
-                    <HomePage 
-                      onEventClick={handleEventClick}
-                      currentUser={{ name: profile?.full_name || 'Usuário' }}
-                    />
-                  )}
-                  {activeTab === 'search' && (
-                    <SearchPage onEventClick={handleEventClick} />
-                  )}
-                  {activeTab === 'activities' && (
-                    <ActivitiesPage 
-                      onEventClick={handleEventClick}
-                      onCreateClick={() => setActiveTab('create')}
-                    />
-                  )}
-                  {activeTab === 'profile' && (
-                    <ProfilePage />
-                  )}
-                  {activeTab === 'create' && (
-                    <CreateEventPage onBack={() => setActiveTab('home')} />
-                  )}
-                  {activeTab === 'messages' && (
-                    <MessagesPage 
-                      onBack={() => setActiveTab('home')}
-                      initialConversationId={searchParams.get('conv') || undefined}
-                      initialUserId={searchParams.get('userId') || undefined}
-                      onOpenEventChat={(eventId) => handleEventClickById(eventId)}
-                    />
-                  )}
-                  {activeTab === 'settings' && (
-                    <SettingsPage onBack={() => setActiveTab('home')} />
-                  )}
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense fallback={<TabLoadingFallback />}>
+                    {activeTab === 'home' && (
+                      <HomePage 
+                        onEventClick={handleEventClick}
+                        currentUser={{ name: profile?.full_name || 'Usuário' }}
+                      />
+                    )}
+                    {activeTab === 'search' && (
+                      <SearchPage onEventClick={handleEventClick} />
+                    )}
+                    {activeTab === 'activities' && (
+                      <ActivitiesPage 
+                        onEventClick={handleEventClick}
+                        onCreateClick={() => setActiveTab('create')}
+                      />
+                    )}
+                    {activeTab === 'profile' && (
+                      <ProfilePage />
+                    )}
+                    {activeTab === 'create' && (
+                      <CreateEventPage onBack={() => setActiveTab('home')} />
+                    )}
+                    {activeTab === 'messages' && (
+                      <MessagesPage 
+                        onBack={() => setActiveTab('home')}
+                        initialConversationId={searchParams.get('conv') || undefined}
+                        initialUserId={searchParams.get('userId') || undefined}
+                        onOpenEventChat={(eventId) => handleEventClickById(eventId)}
+                      />
+                    )}
+                    {activeTab === 'settings' && (
+                      <SettingsPage onBack={() => setActiveTab('home')} />
+                    )}
+                  </Suspense>
+                </ErrorBoundary>
               </div>
             </main>
             
