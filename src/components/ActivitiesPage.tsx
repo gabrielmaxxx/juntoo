@@ -10,6 +10,7 @@ import { Calendar, Users, Plus, BarChart3 } from 'lucide-react';
 import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { QueryErrorState } from '@/components/QueryErrorState';
 
 interface ActivitiesPageProps {
   onEventClick: (event: Event) => void;
