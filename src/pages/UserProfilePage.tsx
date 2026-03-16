@@ -54,7 +54,6 @@ export default function UserProfilePage() {
 
   const fetchUserProfile = async () => {
     if (!userId) return;
-
     try {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
