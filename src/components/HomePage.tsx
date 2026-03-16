@@ -111,7 +111,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
         <section className="px-5" aria-label="Erro ao carregar eventos em alta">
           <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchTrending} compact />
         </section>
-      ) : trendingEvents.length > 0 && (
+      ) : trendingEvents.length > 0 ? (
         <section aria-label="Eventos em Alta">
           <div className="px-5 mb-4">
             <SectionHeader 
@@ -151,10 +151,8 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
               ))}
             </div>
           </div>
-      )}
-
-      {/* Spacer between sections */}
-      )}
+        </section>
+      ) : null}
 
       {/* Spacer between sections */}
       {friendsEvents.length > 0 && trendingEvents.length > 0 && (
