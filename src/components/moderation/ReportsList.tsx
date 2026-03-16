@@ -241,6 +241,35 @@ export const ReportsList = () => {
                 <p className="text-sm text-muted-foreground">{format(new Date(selectedReport.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
               </div>
 
+              {userPenalties.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">Punições ativas do denunciado:</p>
+                  {userPenalties.map(p => {
+                    const LABELS: Record<string, string> = { warning: 'Advertência', reputation_loss: 'Perda de reputação', suspension: 'Suspensão', feature_block: 'Bloqueio', ban: 'Banimento' };
+                    return (
+                      <div key={p.id} className="flex items-center justify-between gap-2 p-2 rounded-md bg-muted text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge variant={p.penalty_type === 'ban' ? 'destructive' : 'outline'} className="text-xs shrink-0">
+                            {LABELS[p.penalty_type] || p.penalty_type}
+                          </Badge>
+                          <span className="truncate text-muted-foreground">{p.reason}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 text-destructive hover:text-destructive h-7 gap-1"
+                          onClick={() => revokePenalty(p.id)}
+                          disabled={revokingId === p.id}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Revogar
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">Notas do moderador:</p>
                 <Textarea value={reviewerNotes} onChange={e => setReviewerNotes(e.target.value)} placeholder="Observações..." className="min-h-[80px]" />
