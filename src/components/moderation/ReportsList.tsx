@@ -62,6 +62,8 @@ export const ReportsList = () => {
   const [reporterProfile, setReporterProfile] = useState<any>(null);
   const [reviewerNotes, setReviewerNotes] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [userPenalties, setUserPenalties] = useState<any[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const fetchReports = async () => {
     setLoading(true);
