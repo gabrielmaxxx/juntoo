@@ -77,11 +77,15 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         </div>
       </header>
 
-      <NotificationPanel
-        open={showNotifications}
-        onOpenChange={setShowNotifications}
-        onEventClick={handleEventClick}
-      />
+      {showNotifications && (
+        <Suspense fallback={null}>
+          <NotificationPanel
+            open={showNotifications}
+            onOpenChange={setShowNotifications}
+            onEventClick={handleEventClick}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
