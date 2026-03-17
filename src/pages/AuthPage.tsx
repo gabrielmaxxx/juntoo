@@ -22,8 +22,19 @@ const Logo = () => (
 );
 
 export const AuthPage = () => {
-  const BRAZIL_STATES_AND_CITIES = useCities();
   const [view, setView] = useState<AuthView>('login');
+  // Lazy-load city data only when signup form is shown
+  const [BRAZIL_STATES, setBrazilStates] = useState<{ value: string; label: string }[]>([]);
+  const [BRAZIL_STATES_AND_CITIES, setBrazilCities] = useState<{ [key: string]: string[] }>({});
+
+  useEffect(() => {
+    if (view === 'signup') {
+      import('@/data/brazilStatesAndCities').then(mod => {
+        setBrazilStates(mod.BRAZIL_STATES);
+        mod.loadCities().then(setBrazilCities);
+      });
+    }
+  }, [view]);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
