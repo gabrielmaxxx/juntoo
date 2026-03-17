@@ -1,10 +1,11 @@
 import { Bell, MessageCircle, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { NotificationPanel } from './NotificationPanel';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import logoTextWhite from '@/assets/logo-text-white.png';
 import { useNavigate } from 'react-router-dom';
+
+const NotificationPanel = lazy(() => import('./NotificationPanel').then(m => ({ default: m.NotificationPanel })));
 
 interface AppHeaderProps {
   onEventClick?: (eventId: string) => void;
@@ -76,11 +77,15 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
         </div>
       </header>
 
-      <NotificationPanel
-        open={showNotifications}
-        onOpenChange={setShowNotifications}
-        onEventClick={handleEventClick}
-      />
+      {showNotifications && (
+        <Suspense fallback={null}>
+          <NotificationPanel
+            open={showNotifications}
+            onOpenChange={setShowNotifications}
+            onEventClick={handleEventClick}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
