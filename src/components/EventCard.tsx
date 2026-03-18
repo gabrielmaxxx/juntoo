@@ -254,7 +254,12 @@ export const EventCard = ({
             >
               <Share2 className="w-4 h-4" />
             </button>
-            <Button variant="default" size="sm" className="rounded-xl text-xs font-semibold px-4">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="rounded-xl text-xs font-semibold px-4"
+              onClick={(e) => { e.stopPropagation(); onEventClick?.(event); }}
+            >
               Participar
             </Button>
           </div>
