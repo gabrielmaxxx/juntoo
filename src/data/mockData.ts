@@ -44,7 +44,7 @@ export const EVENTS: Event[] = [
     distance: '1.2km',
     friendsGoing: ['Juliana', 'Rafael'],
     participantsCount: 3,
-    attendees: ['Juliana', 'Rafael', 'Gabriel']
+    
   },
   {
     id: '4',
