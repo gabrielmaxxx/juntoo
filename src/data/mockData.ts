@@ -15,7 +15,7 @@ export const EVENTS: Event[] = [
     isTrending: true,
     isFeatured: true,
     participantsCount: 3,
-    attendees: ['Juliana', 'Rafael', 'Beatriz']
+    
   },
   {
     id: '2',
