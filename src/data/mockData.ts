@@ -86,7 +86,7 @@ export const EVENTS: Event[] = [
     isFeatured: true,
     createdBy: 'Anne',
     participantsCount: 3,
-    attendees: ['Anne', 'Gabriel', 'Mariana']
+    
   }
 ];
 
