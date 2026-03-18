@@ -14,8 +14,6 @@ export interface Event {
   isTrending?: boolean;
   isFeatured?: boolean;
   participantsCount: number;
-  /** @deprecated Use participantsCount instead */
-  attendees?: string[];
   createdBy?: string;
   creatorAvatar?: string;
   creatorName?: string;

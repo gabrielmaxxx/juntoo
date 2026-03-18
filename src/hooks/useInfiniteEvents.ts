@@ -25,7 +25,12 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     .order('date', { ascending: true })
     .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
 
-  // Apply filters
+  // Server-side text search using ilike
+  if (filters.text) {
+    const searchText = `%${filters.text}%`;
+    query = query.or(`title.ilike.${searchText},description.ilike.${searchText},location.ilike.${searchText},category.ilike.${searchText}`);
+  }
+
   if (filters.category && filters.category !== 'Todos') {
     query = query.eq('category', filters.category);
   }
@@ -53,7 +58,6 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
 
   if (error) throw error;
 
-  // Transform to Event type
   const events: Event[] = (data || []).map(event => ({
     id: event.id!,
     title: event.title || '',
@@ -66,7 +70,7 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     price: event.price?.toString() || 'Gratuito',
     description: event.description || '',
     imageUrl: event.image_url || '/placeholder.svg',
-    participantsCount: 0,
+    participantsCount: event.participants_count || 0,
     createdBy: event.created_by || '',
     creatorName: event.creator_name || '',
     creatorAvatar: event.creator_avatar || '',
@@ -75,20 +79,8 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     reviewCount: event.review_count || 0,
   }));
 
-  // Client-side text search (Supabase doesn't have full-text search without extensions)
-  let filteredEvents = events;
-  if (filters.text) {
-    const searchText = filters.text.toLowerCase();
-    filteredEvents = events.filter(event =>
-      event.title.toLowerCase().includes(searchText) ||
-      event.description.toLowerCase().includes(searchText) ||
-      event.location.toLowerCase().includes(searchText) ||
-      event.category.toLowerCase().includes(searchText)
-    );
-  }
-
   return {
-    events: filteredEvents,
+    events,
     nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
   };
 };

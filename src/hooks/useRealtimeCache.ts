@@ -17,19 +17,16 @@ export const useRealtimeCache = () => {
   }, [queryClient]);
 
   useEffect(() => {
-    // Update user context when auth state changes
     cacheManager.setUserId(user?.id || null);
 
-    // Subscribe to realtime updates when user is authenticated
     if (user?.id) {
       cacheManager.subscribe();
+    } else {
+      cacheManager.unsubscribe();
     }
 
     return () => {
-      // Cleanup on unmount or user logout
-      if (!user?.id) {
-        cacheManager.unsubscribe();
-      }
+      cacheManager.unsubscribe();
     };
   }, [user?.id]);
 

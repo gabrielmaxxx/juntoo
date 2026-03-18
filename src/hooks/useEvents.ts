@@ -97,7 +97,7 @@ export const useTrendingEvents = (limit = 5) => {
         .select('*')
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
-        .order('created_at', { ascending: false })
+        .order('participants_count', { ascending: false, nullsFirst: false })
         .limit(50);
 
       if (error) throw error;

@@ -128,7 +128,7 @@ export const EventCard = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-              <span className="text-xs text-muted-foreground font-medium">{event.participantsCount ?? event.attendees?.length ?? 0}</span>
+              <span className="text-xs text-muted-foreground font-medium">{event.participantsCount ?? 0}</span>
             </div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
@@ -235,7 +235,7 @@ export const EventCard = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4 text-primary" aria-hidden="true" />
-              <span className="text-xs text-muted-foreground font-medium">{event.participantsCount ?? event.attendees?.length ?? 0}</span>
+              <span className="text-xs text-muted-foreground font-medium">{event.participantsCount ?? 0}</span>
             </div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
@@ -254,7 +254,12 @@ export const EventCard = ({
             >
               <Share2 className="w-4 h-4" />
             </button>
-            <Button variant="default" size="sm" className="rounded-xl text-xs font-semibold px-4">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="rounded-xl text-xs font-semibold px-4"
+              onClick={(e) => { e.stopPropagation(); onEventClick?.(event); }}
+            >
               Participar
             </Button>
           </div>

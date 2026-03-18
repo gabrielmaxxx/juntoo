@@ -15,7 +15,7 @@ export const EVENTS: Event[] = [
     isTrending: true,
     isFeatured: true,
     participantsCount: 3,
-    attendees: ['Juliana', 'Rafael', 'Beatriz']
+    
   },
   {
     id: '2',
@@ -29,7 +29,7 @@ export const EVENTS: Event[] = [
     imageUrl: 'https://images.pexels.com/photos/3822725/pexels-photo-3822725.jpeg',
     distance: '500m',
     participantsCount: 1,
-    attendees: ['Lucas']
+    
   },
   {
     id: '3',
@@ -44,7 +44,7 @@ export const EVENTS: Event[] = [
     distance: '1.2km',
     friendsGoing: ['Juliana', 'Rafael'],
     participantsCount: 3,
-    attendees: ['Juliana', 'Rafael', 'Gabriel']
+    
   },
   {
     id: '4',
@@ -57,7 +57,7 @@ export const EVENTS: Event[] = [
     description: 'Jogo de basquete amistoso. Times serão formados na hora. Ótima oportunidade para praticar e conhecer novas pessoas.',
     imageUrl: 'https://images.pexels.com/photos/163452/basketball-dunk-blue-game-163452.jpeg',
     participantsCount: 3,
-    attendees: ['Lucas', 'Gabriel', 'Anne']
+    
   },
   {
     id: '5',
@@ -70,7 +70,7 @@ export const EVENTS: Event[] = [
     description: 'Vamos mergulhar nos hooks avançados do React e construir um mini-projeto juntos. Traga seu notebook!',
     imageUrl: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg',
     participantsCount: 1,
-    attendees: ['Mariana']
+    
   },
   {
     id: '6',
@@ -86,7 +86,7 @@ export const EVENTS: Event[] = [
     isFeatured: true,
     createdBy: 'Anne',
     participantsCount: 3,
-    attendees: ['Anne', 'Gabriel', 'Mariana']
+    
   }
 ];
 
