@@ -189,6 +189,27 @@ export const AuthPage = () => {
       return;
     }
 
+    if (password.length < 8) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 8 caracteres.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      toast({
+        title: "Senha fraca",
+        description: "A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!fullName || !selectedState || !city || selectedInterests.length === 0) {
       toast({
         title: "Erro",
