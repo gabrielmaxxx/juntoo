@@ -414,7 +414,7 @@ export const AuthPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12"
                 required
-                minLength={6}
+                minLength={8}
                 autoFocus
               />
             </div>
