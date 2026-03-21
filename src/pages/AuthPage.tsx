@@ -133,10 +133,10 @@ export const AuthPage = () => {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       toast({
         title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres.",
+        description: "A senha deve ter pelo menos 8 caracteres.",
         variant: "destructive"
       });
       return;
@@ -184,6 +184,27 @@ export const AuthPage = () => {
       toast({
         title: "Erro",
         description: "As senhas não coincidem.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (password.length < 8) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 8 caracteres.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      toast({
+        title: "Senha fraca",
+        description: "A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número.",
         variant: "destructive"
       });
       return;
@@ -393,7 +414,7 @@ export const AuthPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12"
                 required
-                minLength={6}
+                minLength={8}
                 autoFocus
               />
             </div>
@@ -410,7 +431,7 @@ export const AuthPage = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="h-12"
                 required
-                minLength={6}
+                minLength={8}
               />
               {password && confirmPassword && (
                 <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
@@ -597,7 +618,7 @@ export const AuthPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="h-12"
             required
-            minLength={6}
+            minLength={8}
           />
           {password && confirmPassword && (
             <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
@@ -618,7 +639,7 @@ export const AuthPage = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="h-12"
             required
-            minLength={6}
+            minLength={8}
           />
           {password && confirmPassword && (
             <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>

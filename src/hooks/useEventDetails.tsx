@@ -460,11 +460,10 @@ export const useEventDetails = (event: Event) => {
     loadData();
   }, [user, event.id]);
 
-  // Real-time messages subscription + mark read
+  // Fetch messages when participating and subscribe to realtime updates
   useEffect(() => {
     if (isParticipating) {
       fetchMessages();
-      // Mark event messages as read when chat is open
       if (user) {
         markEventMessagesRead(user.id, event.id);
       }
@@ -481,7 +480,15 @@ export const useEventDetails = (event: Event) => {
           },
           async (payload) => {
             const newMsg = payload.new as { id: string; event_id: string; user_id: string; message: string; created_at: string };
-            // Fetch profile for the new message author
+            
+            // Skip if it's our own optimistic message (already in state)
+            setMessages(prev => {
+              if (prev.some(m => m.id === newMsg.id)) return prev;
+              // For messages from other users, fetch their profile
+              return prev; // Will be updated below
+            });
+
+            // Fetch profile and add message
             const { data: profileData } = await supabase
               .from('profiles')
               .select('user_id, full_name, avatar_url')
@@ -494,12 +501,16 @@ export const useEventDetails = (event: Event) => {
             };
             
             setMessages(prev => {
-              // Deduplicate by id
-              if (prev.some(m => m.id === newMsg.id)) return prev;
-              return [...prev, messageWithProfile];
+              // Remove temp messages from same user and deduplicate
+              const filtered = prev.filter(m => {
+                if (m.id === newMsg.id) return false;
+                // Remove optimistic temp message if this is from same user
+                if (m.id.startsWith('temp-') && m.user_id === newMsg.user_id && m.message === newMsg.message) return false;
+                return true;
+              });
+              return [...filtered, messageWithProfile];
             });
             
-            // Mark as read immediately since user is viewing the chat
             if (user) {
               markEventMessagesRead(user.id, event.id);
             }

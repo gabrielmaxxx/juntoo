@@ -123,9 +123,10 @@ class CacheManager {
         if (record?.event_id) {
           this.queryClient.invalidateQueries({ queryKey: ['event-messages', record.event_id] });
         }
-        // Refresh unread counts
+        // Refresh unread counts and event conversations
         this.debouncedInvalidate('unread-counts', () => {
           this.queryClient?.invalidateQueries({ queryKey: ['unread-counts'] });
+          this.queryClient?.invalidateQueries({ queryKey: ['event-conversations'] });
         }, 2000);
         break;
 
@@ -211,25 +212,10 @@ class CacheManager {
     this.queryClient?.invalidateQueries({ queryKey: queryKeys.events.friends(userId) });
   }
 
-  // Prefetch commonly accessed data
-  async prefetchHomeData(userId?: string, interests?: string[] | null) {
-    if (!this.queryClient) return;
-
-    this.queryClient.prefetchQuery({
-      queryKey: queryKeys.events.trending(),
-      staleTime: 5 * 60 * 1000,
-    });
-
-    if (userId) {
-      this.queryClient.prefetchQuery({
-        queryKey: queryKeys.events.recommended(userId),
-        staleTime: 5 * 60 * 1000,
-      });
-      this.queryClient.prefetchQuery({
-        queryKey: queryKeys.events.friends(userId),
-        staleTime: 5 * 60 * 1000,
-      });
-    }
+  // Prefetch is handled by React Query hooks directly - this is a no-op placeholder
+  // since prefetchQuery requires a queryFn which lives in the hooks.
+  async prefetchHomeData(_userId?: string, _interests?: string[] | null) {
+    // No-op: prefetching is managed by individual hooks with their own queryFns
   }
 
   // Optimistic update helpers
