@@ -123,9 +123,10 @@ class CacheManager {
         if (record?.event_id) {
           this.queryClient.invalidateQueries({ queryKey: ['event-messages', record.event_id] });
         }
-        // Refresh unread counts
+        // Refresh unread counts and event conversations
         this.debouncedInvalidate('unread-counts', () => {
           this.queryClient?.invalidateQueries({ queryKey: ['unread-counts'] });
+          this.queryClient?.invalidateQueries({ queryKey: ['event-conversations'] });
         }, 2000);
         break;
 
