@@ -110,7 +110,7 @@ const Index = () => {
 
   // Show auth page if user is not authenticated
   if (!user) {
-    return <AuthPage />;
+    return <Suspense fallback={<div className="flex items-center justify-center h-screen bg-background"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" /></div>}><AuthPage /></Suspense>;
   }
 
   // Show banned screen
