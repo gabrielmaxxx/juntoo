@@ -20,7 +20,14 @@ export const useRealtimeCache = () => {
     cacheManager.setUserId(user?.id || null);
 
     if (user?.id) {
-      cacheManager.subscribe();
+      // Defer realtime subscriptions to avoid blocking initial render
+      const timer = setTimeout(() => {
+        cacheManager.subscribe();
+      }, 2000);
+      return () => {
+        clearTimeout(timer);
+        cacheManager.unsubscribe();
+      };
     } else {
       cacheManager.unsubscribe();
     }
