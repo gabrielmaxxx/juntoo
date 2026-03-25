@@ -7,6 +7,7 @@ import { ReportsList } from '@/components/moderation/ReportsList';
 import { ReportedUsers } from '@/components/moderation/ReportedUsers';
 import { ModerationStats } from '@/components/moderation/ModerationStats';
 import { VerificationReviews } from '@/components/moderation/VerificationReviews';
+import { PenaltyHistory } from '@/components/moderation/PenaltyHistory';
 import { cn } from '@/lib/utils';
 
 interface ModerationPanelProps {
