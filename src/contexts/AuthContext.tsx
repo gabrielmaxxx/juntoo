@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,6 +30,7 @@ interface AuthContextType {
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
+  profileLoading: boolean;
   restrictions: UserRestriction[];
   isBanned: boolean;
   isSuspended: boolean;
@@ -46,8 +47,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [restrictions, setRestrictions] = useState<UserRestriction[]>([]);
   const queryClient = useQueryClient();
+  const initializedRef = useRef(false);
 
   const fetchRestrictions = useCallback(async (userId: string) => {
     try {
@@ -60,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const fetchProfile = useCallback(async (userId: string) => {
+    setProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -98,16 +102,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error('Error in fetchProfile:', error);
+    } finally {
+      setProfileLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    // Get session first, then listen for changes
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      // Auth state resolved — unblock rendering immediately
+      setLoading(false);
+
+      if (session?.user) {
+        // Profile/restrictions load in background, don't block UI
+        fetchProfile(session.user.id);
+        fetchRestrictions(session.user.id);
+      }
+      initializedRef.current = true;
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Defer to avoid Supabase deadlock in auth callback
           setTimeout(() => {
             fetchProfile(session.user.id);
             fetchRestrictions(session.user.id);
@@ -117,21 +139,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setRestrictions([]);
         }
         
-        setLoading(false);
+        if (!initializedRef.current) {
+          setLoading(false);
+          initializedRef.current = true;
+        }
       }
     );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-        fetchRestrictions(session.user.id);
-      }
-      
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, [fetchProfile, fetchRestrictions]);
@@ -184,6 +197,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       profile,
       loading,
+      profileLoading,
       restrictions,
       isBanned,
       isSuspended,
