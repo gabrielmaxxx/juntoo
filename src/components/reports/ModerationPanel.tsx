@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Shield, FileText, Users, BarChart3, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, Users, BarChart3, BadgeCheck, History } from 'lucide-react';
 import { ReportsList } from '@/components/moderation/ReportsList';
 import { ReportedUsers } from '@/components/moderation/ReportedUsers';
 import { ModerationStats } from '@/components/moderation/ModerationStats';
