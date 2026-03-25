@@ -110,9 +110,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
 
-      {trendingError ? (
+      {homeError ? (
         <section className="px-5" aria-label="Erro ao carregar eventos em alta">
-          <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchTrending} compact />
+          <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchHome} compact />
         </section>
       ) : trendingEvents.length > 0 ? (
         <section aria-label="Eventos em Alta">
