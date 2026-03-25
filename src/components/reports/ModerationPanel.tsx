@@ -2,18 +2,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Shield, FileText, Users, BarChart3, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, Shield, FileText, Users, BarChart3, BadgeCheck, History } from 'lucide-react';
 import { ReportsList } from '@/components/moderation/ReportsList';
 import { ReportedUsers } from '@/components/moderation/ReportedUsers';
 import { ModerationStats } from '@/components/moderation/ModerationStats';
 import { VerificationReviews } from '@/components/moderation/VerificationReviews';
+import { PenaltyHistory } from '@/components/moderation/PenaltyHistory';
 import { cn } from '@/lib/utils';
 
 interface ModerationPanelProps {
   onBack: () => void;
 }
 
-type ModerationView = 'reports' | 'users' | 'stats' | 'verifications';
+type ModerationView = 'reports' | 'users' | 'stats' | 'verifications' | 'penalties';
 
 interface NavSection {
   title: string;
@@ -26,6 +27,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { key: 'reports', label: 'Denúncias', icon: FileText },
       { key: 'users', label: 'Usuários', icon: Users },
+      { key: 'penalties', label: 'Punições', icon: History },
       { key: 'stats', label: 'Estatísticas', icon: BarChart3 },
     ],
   },
@@ -69,6 +71,7 @@ export const ModerationPanel = ({ onBack }: ModerationPanelProps) => {
     switch (activeView) {
       case 'reports': return <ReportsList />;
       case 'users': return <ReportedUsers />;
+      case 'penalties': return <PenaltyHistory />;
       case 'stats': return <ModerationStats />;
       case 'verifications': return <VerificationReviews />;
     }
