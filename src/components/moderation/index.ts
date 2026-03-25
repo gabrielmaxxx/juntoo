@@ -4,3 +4,4 @@ export { ModerationStats } from './ModerationStats';
 export { UserModerationProfile } from './UserModerationProfile';
 export { PenaltyActions } from './PenaltyActions';
 export { VerificationReviews } from './VerificationReviews';
+export { PenaltyHistory } from './PenaltyHistory';
