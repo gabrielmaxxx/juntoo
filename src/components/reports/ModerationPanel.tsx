@@ -27,6 +27,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { key: 'reports', label: 'Denúncias', icon: FileText },
       { key: 'users', label: 'Usuários', icon: Users },
+      { key: 'penalties', label: 'Punições', icon: History },
       { key: 'stats', label: 'Estatísticas', icon: BarChart3 },
     ],
   },
