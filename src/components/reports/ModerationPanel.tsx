@@ -71,6 +71,7 @@ export const ModerationPanel = ({ onBack }: ModerationPanelProps) => {
     switch (activeView) {
       case 'reports': return <ReportsList />;
       case 'users': return <ReportedUsers />;
+      case 'penalties': return <PenaltyHistory />;
       case 'stats': return <ModerationStats />;
       case 'verifications': return <VerificationReviews />;
     }
