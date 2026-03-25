@@ -49,7 +49,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     prevGeoState.current = { latitude, geoError, geoLoading };
   }, [latitude, geoCity, geoError, geoLoading]);
 
-  const loading = loadingTrending || loadingFriends;
+  const loading = loadingHome || loadingFriends;
 
   const getDailyMission = () => {
     const missions = [
