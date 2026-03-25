@@ -6,14 +6,16 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import UserProfilePage from "./pages/UserProfilePage";
-import { FriendSuggestionsPage } from "./components/FriendSuggestionsPage";
-import { AuthPage } from "./pages/AuthPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
+
+// Lazy-loaded pages (not needed on initial render)
+const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
+const FriendSuggestionsPage = lazy(() => import("./components/FriendSuggestionsPage").then(m => ({ default: m.FriendSuggestionsPage })));
+const AuthPage = lazy(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
 
 // Admin pages (lazy loaded)
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -36,7 +38,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AdminFallback = () => (
+const PageFallback = () => (
   <div className="flex items-center justify-center h-screen bg-background">
     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
   </div>
@@ -55,21 +57,21 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/user/:userId" element={<UserProfilePage />} />
-                  <Route path="/friend-suggestions" element={<FriendSuggestionsPage />} />
+                  <Route path="/auth" element={<Suspense fallback={<PageFallback />}><AuthPage /></Suspense>} />
+                  <Route path="/user/:userId" element={<Suspense fallback={<PageFallback />}><UserProfilePage /></Suspense>} />
+                  <Route path="/friend-suggestions" element={<Suspense fallback={<PageFallback />}><FriendSuggestionsPage /></Suspense>} />
                   <Route path="/events/join/:privateCode" element={<Index />} />
 
                   {/* Admin Backoffice */}
-                  <Route path="/admin" element={<Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>}>
+                  <Route path="/admin" element={<Suspense fallback={<PageFallback />}><AdminLayout /></Suspense>}>
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                    <Route path="dashboard" element={<Suspense fallback={<AdminFallback />}><AdminDashboard /></Suspense>} />
-                    <Route path="reports" element={<Suspense fallback={<AdminFallback />}><AdminReports /></Suspense>} />
-                    <Route path="users" element={<Suspense fallback={<AdminFallback />}><AdminUsers /></Suspense>} />
-                    <Route path="events" element={<Suspense fallback={<AdminFallback />}><AdminEvents /></Suspense>} />
-                    <Route path="verifications" element={<Suspense fallback={<AdminFallback />}><AdminVerifications /></Suspense>} />
-                    <Route path="metrics" element={<Suspense fallback={<AdminFallback />}><AdminMetrics /></Suspense>} />
-                    <Route path="logs" element={<Suspense fallback={<AdminFallback />}><AdminLogs /></Suspense>} />
+                    <Route path="dashboard" element={<Suspense fallback={<PageFallback />}><AdminDashboard /></Suspense>} />
+                    <Route path="reports" element={<Suspense fallback={<PageFallback />}><AdminReports /></Suspense>} />
+                    <Route path="users" element={<Suspense fallback={<PageFallback />}><AdminUsers /></Suspense>} />
+                    <Route path="events" element={<Suspense fallback={<PageFallback />}><AdminEvents /></Suspense>} />
+                    <Route path="verifications" element={<Suspense fallback={<PageFallback />}><AdminVerifications /></Suspense>} />
+                    <Route path="metrics" element={<Suspense fallback={<PageFallback />}><AdminMetrics /></Suspense>} />
+                    <Route path="logs" element={<Suspense fallback={<PageFallback />}><AdminLogs /></Suspense>} />
                   </Route>
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

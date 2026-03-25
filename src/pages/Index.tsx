@@ -5,7 +5,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { Navigation } from '@/components/Navigation';
 import { EventDetails } from '@/components/EventDetails';
 import { JoinPrivateEvent } from '@/components/JoinPrivateEvent';
-import { AuthPage } from '@/pages/AuthPage';
+const AuthPage = lazy(() => import('@/pages/AuthPage').then(m => ({ default: m.AuthPage })));
 import { SkipLink } from '@/components/SkipLink';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -110,7 +110,7 @@ const Index = () => {
 
   // Show auth page if user is not authenticated
   if (!user) {
-    return <AuthPage />;
+    return <Suspense fallback={<div className="flex items-center justify-center h-screen bg-background"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" /></div>}><AuthPage /></Suspense>;
   }
 
   // Show banned screen

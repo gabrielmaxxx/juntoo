@@ -12,34 +12,39 @@ let cachedCities: { [key: string]: string[] } | null = null;
 let loadingPromise: Promise<{ [key: string]: string[] }> | null = null;
 
 /**
- * Lazy-loads the municipios JSON on first call, then caches in memory.
+ * Lazy-loads the municipios JSON via HTTP fetch from public/ (not bundled as JS).
  */
 export const loadCities = async (): Promise<{ [key: string]: string[] }> => {
   if (cachedCities) return cachedCities;
   if (loadingPromise) return loadingPromise;
 
-  loadingPromise = import('./municipios-completo.json').then((module) => {
-    const municipiosData = module.default as Array<{ codigo_uf: number; nome: string }>;
-    const statesAndCities: { [key: string]: string[] } = {};
+  loadingPromise = fetch('/municipios-completo.json')
+    .then(res => res.json())
+    .then((municipiosData: Array<{ codigo_uf: number; nome: string }>) => {
+      const statesAndCities: { [key: string]: string[] } = {};
 
-    municipiosData.forEach((municipio) => {
-      const uf = UF_MAP[municipio.codigo_uf];
-      if (uf) {
-        if (!statesAndCities[uf]) {
-          statesAndCities[uf] = [];
+      municipiosData.forEach((municipio) => {
+        const uf = UF_MAP[municipio.codigo_uf];
+        if (uf) {
+          if (!statesAndCities[uf]) {
+            statesAndCities[uf] = [];
+          }
+          statesAndCities[uf].push(municipio.nome);
         }
-        statesAndCities[uf].push(municipio.nome);
-      }
-    });
+      });
 
-    Object.keys(statesAndCities).forEach(uf => {
-      statesAndCities[uf].sort();
-    });
+      Object.keys(statesAndCities).forEach(uf => {
+        statesAndCities[uf].sort();
+      });
 
-    cachedCities = statesAndCities;
-    loadingPromise = null;
-    return statesAndCities;
-  });
+      cachedCities = statesAndCities;
+      loadingPromise = null;
+      return statesAndCities;
+    })
+    .catch(() => {
+      loadingPromise = null;
+      return {};
+    });
 
   return loadingPromise;
 };
