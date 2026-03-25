@@ -57,6 +57,7 @@ const loadFromIDB = async (key: string): Promise<unknown | null> => {
 const OFFLINE_KEYS: { key: readonly string[]; storageKey: string }[] = [
   { key: ['events', 'public', 'with-details'], storageKey: 'events-public' },
   { key: ['events', 'trending'], storageKey: 'events-trending' },
+  { key: ['home-data'], storageKey: 'home-data' },
 ];
 
 /**
