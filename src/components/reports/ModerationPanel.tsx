@@ -14,7 +14,7 @@ interface ModerationPanelProps {
   onBack: () => void;
 }
 
-type ModerationView = 'reports' | 'users' | 'stats' | 'verifications';
+type ModerationView = 'reports' | 'users' | 'stats' | 'verifications' | 'penalties';
 
 interface NavSection {
   title: string;
