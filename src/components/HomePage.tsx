@@ -7,7 +7,8 @@ import { SectionDivider } from './ui/section-divider';
 import { SectionHeader } from './ui/section-header';
 import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
-import { useTrendingEvents, useFriendsEvents, useNearbyEvents } from '@/hooks/useEvents';
+import { useFriendsEvents } from '@/hooks/useEvents';
+import { useHomeData } from '@/hooks/useHomeData';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -24,11 +25,13 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
   const { profile, user } = useAuth();
   const userName = currentUser?.name || 'Usuário';
 
-  const { data: trendingEvents = [], isLoading: loadingTrending, isError: trendingError, refetch: refetchTrending } = useTrendingEvents(5);
-  const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
-
   const { latitude, longitude, city: geoCity, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
-  const { data: nearbyEvents = [], isLoading: loadingNearby, isError: nearbyError, refetch: refetchNearby } = useNearbyEvents(geoCity, 10);
+  const { data: homeData, isLoading: loadingHome, isError: homeError, refetch: refetchHome } = useHomeData(geoCity);
+  const trendingEvents = homeData?.trending ?? [];
+  const nearbyEvents = homeData?.nearby ?? [];
+  const loadingNearby = loadingHome;
+
+  const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
   // Show toast feedback when geolocation state changes
   const prevGeoState = useRef({ latitude, geoError, geoLoading });
@@ -46,7 +49,7 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
     prevGeoState.current = { latitude, geoError, geoLoading };
   }, [latitude, geoCity, geoError, geoLoading]);
 
-  const loading = loadingTrending || loadingFriends;
+  const loading = loadingHome || loadingFriends;
 
   const getDailyMission = () => {
     const missions = [
@@ -107,9 +110,9 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
 
-      {trendingError ? (
+      {homeError ? (
         <section className="px-5" aria-label="Erro ao carregar eventos em alta">
-          <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchTrending} compact />
+          <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchHome} compact />
         </section>
       ) : trendingEvents.length > 0 ? (
         <section aria-label="Eventos em Alta">
