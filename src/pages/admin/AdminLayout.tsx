@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import {
   LayoutDashboard, FileText, Users, Calendar, BadgeCheck,
-  BarChart3, ScrollText, LogOut, Shield, Menu, X,
+  BarChart3, ScrollText, LogOut, Shield, Menu, X, Gavel,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
