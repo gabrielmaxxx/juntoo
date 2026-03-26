@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [eventsChart, setEventsChart] = useState<{ week: string; count: number }[]>([]);
   const [usersChart, setUsersChart] = useState<{ week: string; count: number }[]>([]);
   const [reportsChart, setReportsChart] = useState<{ week: string; count: number }[]>([]);
+  const [penaltiesChart, setPenaltiesChart] = useState<{ week: string; total: number; active: number; revoked: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
