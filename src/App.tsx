@@ -26,6 +26,7 @@ const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
 const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
 const AdminLogs = lazy(() => import("./pages/admin/AdminLogs"));
+const AdminPenalties = lazy(() => import("./pages/admin/AdminPenalties"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
