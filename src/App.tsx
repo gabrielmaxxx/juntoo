@@ -26,6 +26,7 @@ const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
 const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
 const AdminLogs = lazy(() => import("./pages/admin/AdminLogs"));
+const AdminPenalties = lazy(() => import("./pages/admin/AdminPenalties"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ const App = () => (
                     <Route path="users" element={<Suspense fallback={<PageFallback />}><AdminUsers /></Suspense>} />
                     <Route path="events" element={<Suspense fallback={<PageFallback />}><AdminEvents /></Suspense>} />
                     <Route path="verifications" element={<Suspense fallback={<PageFallback />}><AdminVerifications /></Suspense>} />
+                    <Route path="penalties" element={<Suspense fallback={<PageFallback />}><AdminPenalties /></Suspense>} />
                     <Route path="metrics" element={<Suspense fallback={<PageFallback />}><AdminMetrics /></Suspense>} />
                     <Route path="logs" element={<Suspense fallback={<PageFallback />}><AdminLogs /></Suspense>} />
                   </Route>
