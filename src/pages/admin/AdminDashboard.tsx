@@ -63,16 +63,21 @@ export default function AdminDashboard() {
       const eventsByWeek: { week: string; count: number }[] = [];
       const usersByWeek: { week: string; count: number }[] = [];
       const reportsByWeek: { week: string; count: number }[] = [];
+      const penaltiesByWeek: { week: string; total: number; active: number; revoked: number }[] = [];
 
       for (const w of weeks) {
-        const [{ count: ec }, { count: uc }, { count: rc }] = await Promise.all([
+        const [{ count: ec }, { count: uc }, { count: rc }, { data: penaltyData }] = await Promise.all([
           supabase.from('events').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
           supabase.from('reports').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
+          supabase.from('user_penalties').select('is_active').gte('created_at', w.start).lt('created_at', w.end),
         ]);
         eventsByWeek.push({ week: w.label, count: ec || 0 });
         usersByWeek.push({ week: w.label, count: uc || 0 });
         reportsByWeek.push({ week: w.label, count: rc || 0 });
+        const activeCount = penaltyData?.filter(p => p.is_active).length || 0;
+        const revokedCount = penaltyData?.filter(p => !p.is_active).length || 0;
+        penaltiesByWeek.push({ week: w.label, total: (penaltyData?.length || 0), active: activeCount, revoked: revokedCount });
       }
 
       setEventsChart(eventsByWeek);
