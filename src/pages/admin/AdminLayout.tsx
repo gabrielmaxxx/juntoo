@@ -16,6 +16,7 @@ const navItems = [
   { to: '/admin/users', label: 'Usuários', icon: Users },
   { to: '/admin/events', label: 'Eventos', icon: Calendar },
   { to: '/admin/verifications', label: 'Verificações', icon: BadgeCheck },
+  { to: '/admin/penalties', label: 'Punições', icon: Gavel },
   { to: '/admin/metrics', label: 'Métricas', icon: BarChart3 },
   { to: '/admin/logs', label: 'Logs', icon: ScrollText },
 ];
