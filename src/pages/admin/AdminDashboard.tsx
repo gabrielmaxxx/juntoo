@@ -131,7 +131,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Eventos por Semana</CardTitle></CardHeader>
           <CardContent>
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Eventos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line type="monotone" dataKey="count" name="Usuários" stroke="hsl(var(--primary))" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -171,8 +171,30 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Denúncias" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
               </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Gavel className="w-4 h-4" />
+              Punições por Semana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={penaltiesChart}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="week" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
+                <Area type="monotone" dataKey="active" name="Ativas" stackId="1" fill="hsl(var(--destructive))" stroke="hsl(var(--destructive))" fillOpacity={0.4} />
+                <Area type="monotone" dataKey="revoked" name="Revogadas" stackId="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--muted-foreground))" fillOpacity={0.3} />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
