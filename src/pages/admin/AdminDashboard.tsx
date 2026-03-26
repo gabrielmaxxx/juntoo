@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, ShieldAlert, BarChart3, TrendingUp } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Users, Calendar, FileText, ShieldAlert, TrendingUp, Gavel } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, Legend } from 'recharts';
 
 interface Stats {
   totalUsers: number;
@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [eventsChart, setEventsChart] = useState<{ week: string; count: number }[]>([]);
   const [usersChart, setUsersChart] = useState<{ week: string; count: number }[]>([]);
   const [reportsChart, setReportsChart] = useState<{ week: string; count: number }[]>([]);
+  const [penaltiesChart, setPenaltiesChart] = useState<{ week: string; total: number; active: number; revoked: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -62,21 +63,27 @@ export default function AdminDashboard() {
       const eventsByWeek: { week: string; count: number }[] = [];
       const usersByWeek: { week: string; count: number }[] = [];
       const reportsByWeek: { week: string; count: number }[] = [];
+      const penaltiesByWeek: { week: string; total: number; active: number; revoked: number }[] = [];
 
       for (const w of weeks) {
-        const [{ count: ec }, { count: uc }, { count: rc }] = await Promise.all([
+        const [{ count: ec }, { count: uc }, { count: rc }, { data: penaltyData }] = await Promise.all([
           supabase.from('events').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
           supabase.from('reports').select('*', { count: 'exact', head: true }).gte('created_at', w.start).lt('created_at', w.end),
+          supabase.from('user_penalties').select('is_active').gte('created_at', w.start).lt('created_at', w.end),
         ]);
         eventsByWeek.push({ week: w.label, count: ec || 0 });
         usersByWeek.push({ week: w.label, count: uc || 0 });
         reportsByWeek.push({ week: w.label, count: rc || 0 });
+        const activeCount = penaltyData?.filter(p => p.is_active).length || 0;
+        const revokedCount = penaltyData?.filter(p => !p.is_active).length || 0;
+        penaltiesByWeek.push({ week: w.label, total: (penaltyData?.length || 0), active: activeCount, revoked: revokedCount });
       }
 
       setEventsChart(eventsByWeek);
       setUsersChart(usersByWeek);
       setReportsChart(reportsByWeek);
+      setPenaltiesChart(penaltiesByWeek);
       setLoading(false);
     };
 
@@ -124,7 +131,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Eventos por Semana</CardTitle></CardHeader>
           <CardContent>
@@ -134,7 +141,7 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Eventos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -149,7 +156,7 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Line type="monotone" dataKey="count" name="Usuários" stroke="hsl(var(--primary))" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -164,8 +171,30 @@ export default function AdminDashboard() {
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis className="text-xs" />
                 <Tooltip />
-                <Bar dataKey="count" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Denúncias" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
               </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Gavel className="w-4 h-4" />
+              Punições por Semana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={penaltiesChart}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="week" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
+                <Area type="monotone" dataKey="active" name="Ativas" stackId="1" fill="hsl(var(--destructive))" stroke="hsl(var(--destructive))" fillOpacity={0.4} />
+                <Area type="monotone" dataKey="revoked" name="Revogadas" stackId="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--muted-foreground))" fillOpacity={0.3} />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
