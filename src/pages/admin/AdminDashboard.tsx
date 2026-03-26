@@ -83,6 +83,7 @@ export default function AdminDashboard() {
       setEventsChart(eventsByWeek);
       setUsersChart(usersByWeek);
       setReportsChart(reportsByWeek);
+      setPenaltiesChart(penaltiesByWeek);
       setLoading(false);
     };
 
