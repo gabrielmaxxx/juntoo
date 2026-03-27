@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       business_verifications: {
         Row: {
           cnpj: string
@@ -225,18 +252,21 @@ export type Database = {
           event_id: string
           id: string
           joined_at: string
+          safety_acknowledged: boolean
           user_id: string
         }
         Insert: {
           event_id: string
           id?: string
           joined_at?: string
+          safety_acknowledged?: boolean
           user_id: string
         }
         Update: {
           event_id?: string
           id?: string
           joined_at?: string
+          safety_acknowledged?: boolean
           user_id?: string
         }
         Relationships: [
@@ -747,6 +777,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_consents: {
+        Row: {
+          accepted_privacy_version: string
+          accepted_terms_version: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_privacy_version?: string
+          accepted_terms_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_privacy_version?: string
+          accepted_terms_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_data_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          request_type: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          request_type: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          request_type?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_penalties: {
         Row: {
