@@ -10,6 +10,7 @@ import { ArrowLeft, Mail, CheckCircle, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
