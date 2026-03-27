@@ -158,10 +158,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     // Log logout before clearing session
     if (user) {
-      await supabase.from('activity_logs' as any).insert({
-        user_id: user.id,
-        action: 'logout',
-      } as any).catch(() => {});
+      try {
+        await supabase.from('activity_logs' as any).insert({
+          user_id: user.id,
+          action: 'logout',
+        } as any);
+      } catch {}
     }
     const { error } = await supabase.auth.signOut();
     if (error) {
