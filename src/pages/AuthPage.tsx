@@ -674,10 +674,34 @@ export const AuthPage = () => {
         </div>
       </div>
 
+      {/* LGPD Consent */}
+      <div className="space-y-3 pt-2 border-t border-border">
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="terms"
+            checked={acceptedTerms}
+            onCheckedChange={(v) => setAcceptedTerms(v === true)}
+          />
+          <label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
+            Aceito os <span className="text-primary font-medium underline">Termos de Uso</span>
+          </label>
+        </div>
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="privacy"
+            checked={acceptedPrivacy}
+            onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
+          />
+          <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
+            Aceito a <span className="text-primary font-medium underline">Política de Privacidade</span>
+          </label>
+        </div>
+      </div>
+
       <Button 
         type="submit" 
         className="w-full h-12 text-base font-semibold rounded-full bg-blue-600 hover:bg-blue-700" 
-        disabled={loading}
+        disabled={loading || !acceptedTerms || !acceptedPrivacy}
       >
         {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>

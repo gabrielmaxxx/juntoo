@@ -155,6 +155,12 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
             onClick={() => setView('account')}
           />
           <SettingsItem
+            icon={<FileText className="w-5 h-5" />}
+            label="Privacidade e Dados"
+            description="LGPD, exportação e exclusão de dados"
+            onClick={() => setView('privacy-data')}
+          />
+          <SettingsItem
             icon={<BadgeCheck className="w-5 h-5" />}
             label="Verificação de Identidade"
             description="Verifique sua conta ou empresa"
