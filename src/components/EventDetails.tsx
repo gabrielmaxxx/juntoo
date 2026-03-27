@@ -47,6 +47,20 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
   const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
   const [activeTab, setActiveTab] = useState('details');
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
+
+  const onParticipateClick = () => {
+    if (isParticipating) {
+      handleParticipate();
+    } else {
+      setShowSafetyModal(true);
+    }
+  };
+
+  const onSafetyAccept = () => {
+    setShowSafetyModal(false);
+    handleParticipate();
+  };
 
   return (
     <div className="h-full flex flex-col bg-background">
