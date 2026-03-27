@@ -14,9 +14,10 @@ import { SupportPage } from './SupportPage';
 import { AboutPage } from './AboutPage';
 import { ModerationPanel } from '@/components/reports/ModerationPanel';
 import { VerificationSettings } from './VerificationSettings';
+import { PrivacyDataPage } from './PrivacyDataPage';
 import { supabase } from '@/integrations/supabase/client';
 
-type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation' | 'verification';
+type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation' | 'verification' | 'privacy-data';
 
 interface SettingsPageProps {
   onBack: () => void;
