@@ -308,6 +308,15 @@ export const AuthPage = () => {
 
       if (error) throw error;
 
+      // Log login activity
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        await supabase.from('activity_logs' as any).insert({
+          user_id: loggedUser.id,
+          action: 'login',
+        } as any);
+      }
+
       toast({
         title: "Login realizado!",
         description: "Bem-vindo de volta!",
