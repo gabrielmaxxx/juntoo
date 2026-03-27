@@ -262,6 +262,19 @@ export const AuthPage = () => {
           console.error('Profile creation error:', profileError);
         }
 
+        // Record LGPD consent
+        await supabase.from('user_consents' as any).insert({
+          user_id: data.user.id,
+          accepted_terms_version: '1.0',
+          accepted_privacy_version: '1.0',
+        } as any);
+
+        // Log activity
+        await supabase.from('activity_logs' as any).insert({
+          user_id: data.user.id,
+          action: 'signup',
+        } as any);
+
         toast({
           title: "Conta criada com sucesso!",
           description: "Você já pode usar o aplicativo.",
