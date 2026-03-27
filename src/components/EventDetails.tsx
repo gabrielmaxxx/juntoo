@@ -166,7 +166,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
               <Button 
                 variant={isParticipating ? "outline" : "hero"} 
                 className="w-full h-12 text-sm font-semibold rounded-2xl" 
-                onClick={handleParticipate}
+                onClick={onParticipateClick}
                 disabled={loading}
               >
                 {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
@@ -175,6 +175,12 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           })()}
         </div>
       )}
+
+      <SafetyModal
+        open={showSafetyModal}
+        onAccept={onSafetyAccept}
+        onCancel={() => setShowSafetyModal(false)}
+      />
     </div>
   );
 };
