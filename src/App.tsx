@@ -75,6 +75,7 @@ const App = () => (
                     <Route path="penalties" element={<Suspense fallback={<PageFallback />}><AdminPenalties /></Suspense>} />
                     <Route path="metrics" element={<Suspense fallback={<PageFallback />}><AdminMetrics /></Suspense>} />
                     <Route path="logs" element={<Suspense fallback={<PageFallback />}><AdminLogs /></Suspense>} />
+                    <Route path="activity-logs" element={<Suspense fallback={<PageFallback />}><AdminActivityLogs /></Suspense>} />
                   </Route>
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
