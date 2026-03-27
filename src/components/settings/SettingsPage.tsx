@@ -99,6 +99,9 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   if (view === 'verification') {
     return <VerificationSettings onBack={() => setView('main')} />;
   }
+  if (view === 'privacy-data') {
+    return <PrivacyDataPage onBack={() => setView('main')} />;
+  }
 
   return (
     <div className="pb-20 bg-background min-h-screen">
