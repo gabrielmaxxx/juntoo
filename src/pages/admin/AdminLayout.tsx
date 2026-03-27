@@ -18,7 +18,8 @@ const navItems = [
   { to: '/admin/verifications', label: 'Verificações', icon: BadgeCheck },
   { to: '/admin/penalties', label: 'Punições', icon: Gavel },
   { to: '/admin/metrics', label: 'Métricas', icon: BarChart3 },
-  { to: '/admin/logs', label: 'Logs', icon: ScrollText },
+  { to: '/admin/logs', label: 'Logs Admin', icon: ScrollText },
+  { to: '/admin/activity-logs', label: 'Atividades', icon: Activity },
 ];
 
 export default function AdminLayout() {
