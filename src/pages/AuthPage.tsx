@@ -44,6 +44,8 @@ export const AuthPage = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const { toast } = useToast();
 
   // Check if user is coming from password reset link
