@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Event } from '@/types';
+import { SafetyModal } from '@/components/SafetyModal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -46,6 +47,20 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
   const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
   const [activeTab, setActiveTab] = useState('details');
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
+
+  const onParticipateClick = () => {
+    if (isParticipating) {
+      handleParticipate();
+    } else {
+      setShowSafetyModal(true);
+    }
+  };
+
+  const onSafetyAccept = () => {
+    setShowSafetyModal(false);
+    handleParticipate();
+  };
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -151,7 +166,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
               <Button 
                 variant={isParticipating ? "outline" : "hero"} 
                 className="w-full h-12 text-sm font-semibold rounded-2xl" 
-                onClick={handleParticipate}
+                onClick={onParticipateClick}
                 disabled={loading}
               >
                 {loading ? 'Carregando...' : isParticipating ? 'Sair do Evento' : 'Participar'}
@@ -160,6 +175,12 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           })()}
         </div>
       )}
+
+      <SafetyModal
+        open={showSafetyModal}
+        onAccept={onSafetyAccept}
+        onCancel={() => setShowSafetyModal(false)}
+      />
     </div>
   );
 };

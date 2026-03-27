@@ -14,9 +14,10 @@ import { SupportPage } from './SupportPage';
 import { AboutPage } from './AboutPage';
 import { ModerationPanel } from '@/components/reports/ModerationPanel';
 import { VerificationSettings } from './VerificationSettings';
+import { PrivacyDataPage } from './PrivacyDataPage';
 import { supabase } from '@/integrations/supabase/client';
 
-type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation' | 'verification';
+type SettingsView = 'main' | 'notifications' | 'privacy' | 'account' | 'appearance' | 'support' | 'about' | 'moderation' | 'verification' | 'privacy-data';
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -98,6 +99,9 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
   if (view === 'verification') {
     return <VerificationSettings onBack={() => setView('main')} />;
   }
+  if (view === 'privacy-data') {
+    return <PrivacyDataPage onBack={() => setView('main')} />;
+  }
 
   return (
     <div className="pb-20 bg-background min-h-screen">
@@ -149,6 +153,12 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
             label="Conta"
             description="E-mail, senha e gerenciamento"
             onClick={() => setView('account')}
+          />
+          <SettingsItem
+            icon={<FileText className="w-5 h-5" />}
+            label="Privacidade e Dados"
+            description="LGPD, exportação e exclusão de dados"
+            onClick={() => setView('privacy-data')}
           />
           <SettingsItem
             icon={<BadgeCheck className="w-5 h-5" />}

@@ -10,6 +10,7 @@ import { ArrowLeft, Mail, CheckCircle, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
@@ -43,6 +44,8 @@ export const AuthPage = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const { toast } = useToast();
 
   // Check if user is coming from password reset link
@@ -219,6 +222,15 @@ export const AuthPage = () => {
       return;
     }
 
+    if (!acceptedTerms || !acceptedPrivacy) {
+      toast({
+        title: "Consentimento necessário",
+        description: "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -249,6 +261,19 @@ export const AuthPage = () => {
         if (profileError) {
           console.error('Profile creation error:', profileError);
         }
+
+        // Record LGPD consent
+        await supabase.from('user_consents' as any).insert({
+          user_id: data.user.id,
+          accepted_terms_version: '1.0',
+          accepted_privacy_version: '1.0',
+        } as any);
+
+        // Log activity
+        await supabase.from('activity_logs' as any).insert({
+          user_id: data.user.id,
+          action: 'signup',
+        } as any);
 
         toast({
           title: "Conta criada com sucesso!",
@@ -282,6 +307,15 @@ export const AuthPage = () => {
       });
 
       if (error) throw error;
+
+      // Log login activity
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        await supabase.from('activity_logs' as any).insert({
+          user_id: loggedUser.id,
+          action: 'login',
+        } as any);
+      }
 
       toast({
         title: "Login realizado!",
@@ -649,10 +683,34 @@ export const AuthPage = () => {
         </div>
       </div>
 
+      {/* LGPD Consent */}
+      <div className="space-y-3 pt-2 border-t border-border">
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="terms"
+            checked={acceptedTerms}
+            onCheckedChange={(v) => setAcceptedTerms(v === true)}
+          />
+          <label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
+            Aceito os <span className="text-primary font-medium underline">Termos de Uso</span>
+          </label>
+        </div>
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="privacy"
+            checked={acceptedPrivacy}
+            onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
+          />
+          <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
+            Aceito a <span className="text-primary font-medium underline">Política de Privacidade</span>
+          </label>
+        </div>
+      </div>
+
       <Button 
         type="submit" 
         className="w-full h-12 text-base font-semibold rounded-full bg-blue-600 hover:bg-blue-700" 
-        disabled={loading}
+        disabled={loading || !acceptedTerms || !acceptedPrivacy}
       >
         {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>
