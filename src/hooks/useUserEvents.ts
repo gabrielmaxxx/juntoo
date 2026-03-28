@@ -75,7 +75,7 @@ export const useUserRegisteredEvents = (userId: string | undefined) => {
       // Get events with details
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .in('id', eventIds);
 
       if (error) throw error;
