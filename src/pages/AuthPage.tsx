@@ -692,7 +692,16 @@ export const AuthPage = () => {
             onCheckedChange={(v) => setAcceptedTerms(v === true)}
           />
           <label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
-            Aceito os <span className="text-primary font-medium underline">Termos de Uso</span>
+            Li e aceito os{' '}
+            <a
+              href="/termos-de-uso-e-politica-de-privacidade.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-medium underline hover:text-primary/80"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Termos de Uso
+            </a>
           </label>
         </div>
         <div className="flex items-start gap-2">
@@ -702,9 +711,21 @@ export const AuthPage = () => {
             onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
           />
           <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
-            Aceito a <span className="text-primary font-medium underline">Política de Privacidade</span>
+            Li e aceito a{' '}
+            <a
+              href="/termos-de-uso-e-politica-de-privacidade.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-medium underline hover:text-primary/80"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Política de Privacidade
+            </a>
           </label>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Ao criar sua conta, você concorda com o tratamento dos seus dados conforme a LGPD (Lei nº 13.709/2018).
+        </p>
       </div>
 
       <Button 
