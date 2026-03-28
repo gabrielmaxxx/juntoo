@@ -82,7 +82,7 @@ export const useHomeData = (city: string | null) => {
       // Single query fetching enough events for both trending + nearby
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
         .order('participants_count', { ascending: false, nullsFirst: false })
