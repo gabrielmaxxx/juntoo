@@ -20,7 +20,7 @@ interface FetchEventsParams {
 const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
   let query = supabase
     .from('events_with_details')
-    .select('*')
+    .select(EVENT_LIST_COLUMNS)
     .eq('is_private', false)
     .gte('date', new Date().toISOString().split('T')[0])
     .order('date', { ascending: true })

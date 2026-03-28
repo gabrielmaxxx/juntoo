@@ -96,7 +96,7 @@ export const useUserCreatedEvents = (userId: string | undefined) => {
 
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('created_by', userId);
 
       if (error) throw error;
