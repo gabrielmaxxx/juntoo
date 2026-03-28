@@ -1192,6 +1192,10 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      is_event_participant: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_profile_public: { Args: { target_user_id: string }; Returns: boolean }
       is_service_role: { Args: never; Returns: boolean }
       revoke_penalty: {
