@@ -71,7 +71,7 @@ export const usePublicEvents = () => {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
         .order('date', { ascending: true })
@@ -95,7 +95,7 @@ export const useTrendingEvents = (limit = 5) => {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
         .order('participants_count', { ascending: false, nullsFirst: false })
@@ -144,7 +144,7 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
         .order('created_at', { ascending: false })
@@ -178,7 +178,7 @@ export const useNearbyEvents = (city: string | null, limit = 10) => {
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .ilike('city', `%${city}%`)
         .or(`date.gte.${today},is_recurring.eq.true`)

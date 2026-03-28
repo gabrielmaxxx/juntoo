@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
 import { queryKeys } from '@/lib/queryKeys';
+import { EVENT_LIST_COLUMNS } from '@/lib/eventColumns';
 
 interface EventWithDetails {
   id: string;
