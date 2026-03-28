@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
 import { queryKeys } from '@/lib/queryKeys';
+import { EVENT_LIST_COLUMNS } from '@/lib/eventColumns';
 
 interface EventWithDetails {
   id: string;
@@ -81,7 +82,7 @@ export const useHomeData = (city: string | null) => {
       // Single query fetching enough events for both trending + nearby
       const { data, error } = await supabase
         .from('events_with_details')
-        .select('*')
+        .select(EVENT_LIST_COLUMNS)
         .eq('is_private', false)
         .or(`date.gte.${today},is_recurring.eq.true`)
         .order('participants_count', { ascending: false, nullsFirst: false })
