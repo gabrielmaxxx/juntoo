@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star, MapPin, Camera, Edit3, UserPlus } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
+import { TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
 
 
 interface ProfileHeaderProps {
