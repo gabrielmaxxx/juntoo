@@ -16,6 +16,7 @@ import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
 const FriendSuggestionsPage = lazy(() => import("./components/FriendSuggestionsPage").then(m => ({ default: m.FriendSuggestionsPage })));
 const AuthPage = lazy(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 // Admin pages (lazy loaded)
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
