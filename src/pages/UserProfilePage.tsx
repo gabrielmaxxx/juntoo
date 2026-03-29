@@ -295,6 +295,15 @@ export default function UserProfilePage() {
                   {profile.full_name}
                   <VerifiedBadge verified={profile.verified} businessVerified={profile.business_verified} />
                 </h1>
+                {stats && (
+                  <div className="mb-2 flex justify-center md:justify-start">
+                    <TrustScoreBadge
+                      score={computeTrustScore5(stats.average_overall, stats.events_attended, stats.total_reviews)}
+                      totalReviews={stats.total_reviews}
+                      size="md"
+                    />
+                  </div>
+                )}
                 {profile.city && (
                   <p className="text-muted-foreground mb-4">{profile.city}</p>
                 )}
