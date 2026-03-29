@@ -16,6 +16,7 @@ import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
 const FriendSuggestionsPage = lazy(() => import("./components/FriendSuggestionsPage").then(m => ({ default: m.FriendSuggestionsPage })));
 const AuthPage = lazy(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 // Admin pages (lazy loaded)
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -62,6 +63,7 @@ const App = () => (
                   <Route path="/auth" element={<Suspense fallback={<PageFallback />}><AuthPage /></Suspense>} />
                   <Route path="/user/:userId" element={<Suspense fallback={<PageFallback />}><UserProfilePage /></Suspense>} />
                   <Route path="/friend-suggestions" element={<Suspense fallback={<PageFallback />}><FriendSuggestionsPage /></Suspense>} />
+                  <Route path="/termos" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
                   <Route path="/events/join/:privateCode" element={<Index />} />
 
                   {/* Admin Backoffice */}
