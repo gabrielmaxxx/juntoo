@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
 import { ReportButton } from '@/components/reports';
-import { ReputationSection } from '@/components/reputation';
+import { ReputationSection, TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
 import { useUserReputation } from '@/hooks/useUserReputation';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { toast } from 'sonner';
@@ -295,6 +295,15 @@ export default function UserProfilePage() {
                   {profile.full_name}
                   <VerifiedBadge verified={profile.verified} businessVerified={profile.business_verified} />
                 </h1>
+                {stats && (
+                  <div className="mb-2 flex justify-center md:justify-start">
+                    <TrustScoreBadge
+                      score={computeTrustScore5(stats.average_overall, stats.events_attended, stats.total_reviews)}
+                      totalReviews={stats.total_reviews}
+                      size="md"
+                    />
+                  </div>
+                )}
                 {profile.city && (
                   <p className="text-muted-foreground mb-4">{profile.city}</p>
                 )}

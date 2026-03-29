@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star, MapPin, Camera, Edit3, UserPlus } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
+import { TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
 
 
 interface ProfileHeaderProps {
@@ -17,6 +18,7 @@ interface ProfileHeaderProps {
   uploadingAvatar: boolean;
   averageRating?: number;
   totalReviews?: number;
+  eventsAttended?: number;
   verified?: boolean;
   businessVerified?: boolean;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -32,6 +34,7 @@ export const ProfileHeader = ({
   uploadingAvatar,
   averageRating = 0,
   totalReviews = 0,
+  eventsAttended = 0,
   verified,
   businessVerified,
   onAvatarUpload,
@@ -98,6 +101,13 @@ export const ProfileHeader = ({
               <span className="ml-2 text-sm text-muted-foreground whitespace-nowrap">
                 ({totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'})
               </span>
+            </div>
+            <div className="mt-1.5">
+              <TrustScoreBadge
+                score={computeTrustScore5(averageRating, eventsAttended, totalReviews)}
+                totalReviews={totalReviews}
+                size="sm"
+              />
             </div>
           </div>
         </div>
