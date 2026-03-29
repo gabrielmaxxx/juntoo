@@ -713,7 +713,7 @@ export const AuthPage = () => {
           <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
             Li e aceito a{' '}
             <a
-              href="/termos-de-uso-e-politica-de-privacidade.pdf"
+              href="/termos#privacidade"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-medium underline hover:text-primary/80"
