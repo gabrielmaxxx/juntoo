@@ -102,6 +102,13 @@ export const ProfileHeader = ({
                 ({totalReviews} {totalReviews === 1 ? 'avaliação' : 'avaliações'})
               </span>
             </div>
+            <div className="mt-1.5">
+              <TrustScoreBadge
+                score={computeTrustScore5(averageRating, eventsAttended, totalReviews)}
+                totalReviews={totalReviews}
+                size="sm"
+              />
+            </div>
           </div>
         </div>
         
