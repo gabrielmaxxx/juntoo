@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
 import { ReportButton } from '@/components/reports';
-import { ReputationSection } from '@/components/reputation';
+import { ReputationSection, TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
 import { useUserReputation } from '@/hooks/useUserReputation';
 import { useConversations } from '@/hooks/useDirectMessages';
 import { toast } from 'sonner';
