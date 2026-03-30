@@ -121,6 +121,11 @@ export const useEventDetails = (event: Event) => {
       }));
 
       setParticipants(participantsWithProfiles);
+      
+      // Check if event is full
+      if (event.maxParticipants) {
+        setIsFull(participantData.length >= event.maxParticipants);
+      }
     } catch (error) {
       console.error('Error fetching participants:', error);
     }
