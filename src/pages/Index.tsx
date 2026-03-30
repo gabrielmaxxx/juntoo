@@ -174,7 +174,18 @@ const Index = () => {
     );
   }
 
-  // Splash is now an overlay — main layout renders underneath so hooks can start fetching
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <OnboardingFlow
+        onComplete={() => setShowOnboarding(false)}
+        onEventClick={(event) => {
+          setShowOnboarding(false);
+          setSelectedEvent(event);
+        }}
+      />
+    );
+  }
 
   // Handle private event join route
   if (privateCode) {
