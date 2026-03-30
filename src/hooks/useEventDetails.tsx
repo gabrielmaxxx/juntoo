@@ -554,6 +554,44 @@ export const useEventDetails = (event: Event) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const cancelEvent = async () => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id)
+        .eq('created_by', user.id);
+      if (error) throw error;
+      haptic('success');
+      toast({ title: 'Evento cancelado', description: 'O evento foi removido com sucesso.' });
+      return true;
+    } catch (error) {
+      console.error('Error cancelling event:', error);
+      toast({ title: 'Erro', description: 'Não foi possível cancelar o evento.', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const updateEvent = async (updates: { title?: string; description?: string; location?: string; date?: string; time?: string }) => {
+    if (!user) return false;
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update(updates)
+        .eq('id', event.id)
+        .eq('created_by', user.id);
+      if (error) throw error;
+      haptic('success');
+      toast({ title: 'Evento atualizado! ✅' });
+      return true;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast({ title: 'Erro', description: 'Não foi possível atualizar o evento.', variant: 'destructive' });
+      return false;
+    }
+  };
+
   return {
     user,
     isParticipating,
@@ -567,11 +605,14 @@ export const useEventDetails = (event: Event) => {
     averageRating,
     userHasReviewed,
     isEventCompleted,
+    isFull,
     messagesEndRef,
     sendMessage,
     handleParticipate,
     handleDeleteReview,
     fetchReviews,
+    cancelEvent,
+    updateEvent,
   };
 };
 
