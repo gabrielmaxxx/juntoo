@@ -4,3 +4,4 @@ export { EventCreator } from './EventCreator';
 export { EventParticipants } from './EventParticipants';
 export { EventReviewsSection } from './EventReviewsSection';
 export { EventChat } from './EventChat';
+export { EventEditDialog } from './EventEditDialog';
