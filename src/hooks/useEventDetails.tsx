@@ -382,6 +382,25 @@ export const useEventDetails = (event: Event) => {
           ),
         });
       } else {
+        // Check if event is full
+        if (event.maxParticipants) {
+          const { count: currentCount } = await supabase
+            .from('event_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', event.id);
+          
+          if (currentCount && currentCount >= event.maxParticipants) {
+            haptic('error');
+            toast({
+              title: "Evento lotado! 😔",
+              description: `Este evento já atingiu o limite de ${event.maxParticipants} participantes.`,
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
         const { data: existing } = await supabase
           .from('event_participants')
           .select('id')
@@ -417,12 +436,12 @@ export const useEventDetails = (event: Event) => {
           .eq('event_id', event.id);
         
         const participantCount = count || 1;
-        const messages = [
+        const celebrationMessages = [
           "Você está dentro! Nos vemos lá! 🎉",
           "Presença confirmada! Vai ser incrível! 🚀",
           "Tudo certo! Você está na lista! ✅",
         ];
-        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        const randomMsg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
         
         toast({
           title: randomMsg,
