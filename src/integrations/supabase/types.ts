@@ -644,6 +644,7 @@ export type Database = {
           full_name: string
           id: string
           interests: string[] | null
+          onboarding_completed: boolean
           updated_at: string
           user_id: string
           user_number: number
@@ -659,6 +660,7 @@ export type Database = {
           full_name: string
           id?: string
           interests?: string[] | null
+          onboarding_completed?: boolean
           updated_at?: string
           user_id: string
           user_number?: number
@@ -674,6 +676,7 @@ export type Database = {
           full_name?: string
           id?: string
           interests?: string[] | null
+          onboarding_completed?: boolean
           updated_at?: string
           user_id?: string
           user_number?: number
