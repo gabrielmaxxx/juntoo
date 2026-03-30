@@ -5,6 +5,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { Navigation } from '@/components/Navigation';
 import { EventDetails } from '@/components/EventDetails';
 import { JoinPrivateEvent } from '@/components/JoinPrivateEvent';
+import { OnboardingFlow } from '@/components/OnboardingFlow';
 const AuthPage = lazy(() => import('@/pages/AuthPage').then(m => ({ default: m.AuthPage })));
 import { SkipLink } from '@/components/SkipLink';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -39,6 +40,14 @@ const Index = () => {
   const { privateCode } = useParams<{ privateCode: string }>();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check onboarding status when profile loads
+  useEffect(() => {
+    if (profile && !(profile as any).onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [profile]);
 
   const activeTab = searchParams.get('tab') || 'home';
 
@@ -165,7 +174,18 @@ const Index = () => {
     );
   }
 
-  // Splash is now an overlay — main layout renders underneath so hooks can start fetching
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <OnboardingFlow
+        onComplete={() => setShowOnboarding(false)}
+        onEventClick={(event) => {
+          setShowOnboarding(false);
+          setSelectedEvent(event);
+        }}
+      />
+    );
+  }
 
   // Handle private event join route
   if (privateCode) {
