@@ -60,6 +60,7 @@ export const useEventDetails = (event: Event) => {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [userHasReviewed, setUserHasReviewed] = useState(false);
   const [isEventCompleted, setIsEventCompleted] = useState(false);
+  const [isFull, setIsFull] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const checkIfEventCompleted = () => {
@@ -120,6 +121,11 @@ export const useEventDetails = (event: Event) => {
       }));
 
       setParticipants(participantsWithProfiles);
+      
+      // Check if event is full
+      if (event.maxParticipants) {
+        setIsFull(participantData.length >= event.maxParticipants);
+      }
     } catch (error) {
       console.error('Error fetching participants:', error);
     }
@@ -382,6 +388,25 @@ export const useEventDetails = (event: Event) => {
           ),
         });
       } else {
+        // Check if event is full
+        if (event.maxParticipants) {
+          const { count: currentCount } = await supabase
+            .from('event_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', event.id);
+          
+          if (currentCount && currentCount >= event.maxParticipants) {
+            haptic('error');
+            toast({
+              title: "Evento lotado! 😔",
+              description: `Este evento já atingiu o limite de ${event.maxParticipants} participantes.`,
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
         const { data: existing } = await supabase
           .from('event_participants')
           .select('id')
@@ -417,12 +442,12 @@ export const useEventDetails = (event: Event) => {
           .eq('event_id', event.id);
         
         const participantCount = count || 1;
-        const messages = [
+        const celebrationMessages = [
           "Você está dentro! Nos vemos lá! 🎉",
           "Presença confirmada! Vai ser incrível! 🚀",
           "Tudo certo! Você está na lista! ✅",
         ];
-        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        const randomMsg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
         
         toast({
           title: randomMsg,
@@ -529,6 +554,44 @@ export const useEventDetails = (event: Event) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const cancelEvent = async () => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id)
+        .eq('created_by', user.id);
+      if (error) throw error;
+      haptic('success');
+      toast({ title: 'Evento cancelado', description: 'O evento foi removido com sucesso.' });
+      return true;
+    } catch (error) {
+      console.error('Error cancelling event:', error);
+      toast({ title: 'Erro', description: 'Não foi possível cancelar o evento.', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const updateEvent = async (updates: { title?: string; description?: string; location?: string; date?: string; time?: string }) => {
+    if (!user) return false;
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update(updates)
+        .eq('id', event.id)
+        .eq('created_by', user.id);
+      if (error) throw error;
+      haptic('success');
+      toast({ title: 'Evento atualizado! ✅' });
+      return true;
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast({ title: 'Erro', description: 'Não foi possível atualizar o evento.', variant: 'destructive' });
+      return false;
+    }
+  };
+
   return {
     user,
     isParticipating,
@@ -542,11 +605,14 @@ export const useEventDetails = (event: Event) => {
     averageRating,
     userHasReviewed,
     isEventCompleted,
+    isFull,
     messagesEndRef,
     sendMessage,
     handleParticipate,
     handleDeleteReview,
     fetchReviews,
+    cancelEvent,
+    updateEvent,
   };
 };
 

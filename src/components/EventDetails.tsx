@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventDetails } from '@/hooks/useEventDetails';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { ReportButton } from '@/components/reports';
-import { Crown } from 'lucide-react';
+import { Crown, Pencil, Trash2, Users } from 'lucide-react';
 import {
   EventHero,
   EventInfo,
@@ -15,8 +15,19 @@ import {
   EventParticipants,
   EventReviewsSection,
   EventChat,
+  EventEditDialog,
 } from './event-details';
 import { EventParticipantReview } from './reputation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface EventDetailsProps {
   event: Event;
@@ -38,16 +49,21 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
     averageRating,
     userHasReviewed,
     isEventCompleted,
+    isFull,
     messagesEndRef,
     sendMessage,
     handleParticipate,
     handleDeleteReview,
     fetchReviews,
+    cancelEvent,
+    updateEvent,
   } = useEventDetails(event);
 
   const isCreator = useMemo(() => authUser?.id === event.createdBy, [authUser, event.createdBy]);
   const [activeTab, setActiveTab] = useState('details');
   const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const onParticipateClick = () => {
     if (isParticipating) {
@@ -60,6 +76,11 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const onSafetyAccept = () => {
     setShowSafetyModal(false);
     handleParticipate();
+  };
+
+  const handleCancel = async () => {
+    const success = await cancelEvent();
+    if (success) onBack();
   };
 
   return (
@@ -76,7 +97,17 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           <TabsList className="w-full justify-start rounded-none border-b border-border/50 px-4 pt-2">
             <TabsTrigger value="details" className="text-sm font-semibold">Detalhes</TabsTrigger>
             {isParticipating && <TabsTrigger value="chat" className="text-sm font-semibold">Chat</TabsTrigger>}
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
+              {isCreator && (
+                <>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowEditDialog(true)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setShowCancelDialog(true)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
               <ReportButton
                 reportedEventId={event.id}
                 reportedUserId={event.createdBy}
@@ -94,6 +125,24 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                   <Crown className="w-3.5 h-3.5" aria-hidden="true" />
                   Você é o organizador
                 </Badge>
+              </div>
+            )}
+
+            {/* Full event badge */}
+            {isFull && !isParticipating && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+                <Users className="w-4 h-4 text-destructive" />
+                <span className="text-sm font-medium text-destructive">
+                  Evento lotado — {event.maxParticipants}/{event.maxParticipants} participantes
+                </span>
+              </div>
+            )}
+
+            {/* Capacity indicator */}
+            {event.maxParticipants && !isFull && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Users className="w-3.5 h-3.5" />
+                <span>{participants.length}/{event.maxParticipants} vagas preenchidas</span>
               </div>
             )}
 
@@ -162,6 +211,17 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                 </Button>
               );
             }
+            if (isFull && !isParticipating) {
+              return (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 text-sm font-semibold rounded-2xl opacity-60" 
+                  disabled
+                >
+                  Evento lotado
+                </Button>
+              );
+            }
             return (
               <Button 
                 variant={isParticipating ? "outline" : "hero"} 
@@ -181,6 +241,40 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
         onAccept={onSafetyAccept}
         onCancel={() => setShowSafetyModal(false)}
       />
+
+      {/* Edit Dialog */}
+      {showEditDialog && (
+        <EventEditDialog
+          open={showEditDialog}
+          onClose={() => setShowEditDialog(false)}
+          event={{
+            title: event.title,
+            description: event.description || '',
+            location: event.location,
+            date: event.date,
+            time: event.time,
+          }}
+          onSave={updateEvent}
+        />
+      )}
+
+      {/* Cancel Confirmation */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar evento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. O evento será removido e todos os participantes serão notificados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancelar evento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
