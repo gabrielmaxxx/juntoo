@@ -40,6 +40,14 @@ const Index = () => {
   const { privateCode } = useParams<{ privateCode: string }>();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check onboarding status when profile loads
+  useEffect(() => {
+    if (profile && !(profile as any).onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [profile]);
 
   const activeTab = searchParams.get('tab') || 'home';
 
