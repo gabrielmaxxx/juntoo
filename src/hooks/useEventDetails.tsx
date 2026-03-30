@@ -60,6 +60,7 @@ export const useEventDetails = (event: Event) => {
   const [averageRating, setAverageRating] = useState<number | null>(null);
   const [userHasReviewed, setUserHasReviewed] = useState(false);
   const [isEventCompleted, setIsEventCompleted] = useState(false);
+  const [isFull, setIsFull] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const checkIfEventCompleted = () => {
