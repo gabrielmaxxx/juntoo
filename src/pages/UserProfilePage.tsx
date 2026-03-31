@@ -292,10 +292,13 @@ export default function UserProfilePage() {
               </Avatar>
 
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl font-bold mb-2 flex items-center justify-center md:justify-start gap-1.5">
+                <h1 className="text-2xl font-bold mb-1 flex items-center justify-center md:justify-start gap-1.5">
                   {profile.full_name}
                   <VerifiedBadge verified={profile.verified} businessVerified={profile.business_verified} />
                 </h1>
+                {profile.bio && (
+                  <p className="text-sm text-muted-foreground italic mb-2">"{profile.bio}"</p>
+                )}
                 {stats && (
                   <div className="mb-2 flex justify-center md:justify-start">
                     <TrustScoreBadge
@@ -306,7 +309,15 @@ export default function UserProfilePage() {
                   </div>
                 )}
                 {profile.city && (
-                  <p className="text-muted-foreground mb-4">{profile.city}</p>
+                  <p className="text-muted-foreground mb-2">{profile.city}</p>
+                )}
+
+                {/* Stats */}
+                {stats && (
+                  <div className="flex gap-4 mb-3 justify-center md:justify-start text-sm text-muted-foreground">
+                    <span><strong className="text-foreground">{stats.events_attended}</strong> participações</span>
+                    <span><strong className="text-foreground">{stats.total_reviews}</strong> avaliações</span>
+                  </div>
                 )}
                 
                 {profile.interests && profile.interests.length > 0 && (
