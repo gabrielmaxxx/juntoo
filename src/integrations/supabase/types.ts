@@ -595,6 +595,52 @@ export type Database = {
           },
         ]
       }
+      pinned_messages: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          message_id: string
+          pinned_by: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          message_id: string
+          pinned_by: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          message_id?: string
+          pinned_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pinned_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pinned_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "event_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       privacy_preferences: {
         Row: {
           allow_direct_messages: boolean

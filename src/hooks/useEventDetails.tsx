@@ -434,6 +434,23 @@ export const useEventDetails = (event: Event) => {
 
         setIsParticipating(true);
         haptic('success');
+
+        // Send welcome system message in chat
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('user_id', user.id)
+            .single();
+          const name = profile?.full_name || 'Alguém';
+          await supabase.from('event_messages').insert({
+            event_id: event.id,
+            user_id: user.id,
+            message: `👋 ${name} entrou no evento!`,
+          });
+        } catch {
+          // Non-critical, ignore
+        }
         
         // Fetch updated participants to show count
         const { count } = await supabase
