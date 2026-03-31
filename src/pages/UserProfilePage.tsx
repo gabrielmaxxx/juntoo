@@ -27,6 +27,7 @@ interface Profile {
   interests: string[] | null;
   verified?: boolean;
   business_verified?: boolean;
+  bio?: string;
 }
 
 type FriendshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted';
