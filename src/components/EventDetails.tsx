@@ -188,6 +188,16 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
                 sendMessage={sendMessage}
                 currentUser={user}
                 messagesEndRef={messagesEndRef}
+                eventId={event.id}
+                eventTitle={event.title}
+                eventDate={event.date}
+                eventTime={event.time}
+                eventLocation={event.location}
+                createdBy={event.createdBy}
+                isEventPast={(() => {
+                  if (event.isRecurring) return false;
+                  return new Date() >= new Date(`${event.date}T${event.time}`);
+                })()}
               />
             </TabsContent>
           )}
