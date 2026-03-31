@@ -4,21 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, MapPin, Camera, Edit3, UserPlus } from 'lucide-react';
+import { Star, MapPin, Camera, Edit3, UserPlus, Calendar, Trophy, TrendingUp } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
 import { TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
-
 
 interface ProfileHeaderProps {
   displayName: string;
   displayAvatar: string;
   displayLocation: string;
+  displayBio: string;
   userNumber: string;
   selectedInterests: string[];
   uploadingAvatar: boolean;
   averageRating?: number;
   totalReviews?: number;
   eventsAttended?: number;
+  eventsCreated?: number;
   verified?: boolean;
   businessVerified?: boolean;
   onAvatarUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -29,12 +30,14 @@ export const ProfileHeader = ({
   displayName,
   displayAvatar,
   displayLocation,
+  displayBio,
   userNumber,
   selectedInterests,
   uploadingAvatar,
   averageRating = 0,
   totalReviews = 0,
   eventsAttended = 0,
+  eventsCreated = 0,
   verified,
   businessVerified,
   onAvatarUpload,
@@ -113,6 +116,33 @@ export const ProfileHeader = ({
         </div>
         
         <div className="shrink-0" />
+      </div>
+
+      {/* Bio */}
+      {displayBio && (
+        <p className="text-sm text-muted-foreground mb-3 italic">"{displayBio}"</p>
+      )}
+
+      {/* Stats summary */}
+      <div className="flex gap-4 mb-4">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Calendar className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-foreground">{eventsAttended}</span>
+          <span className="hidden sm:inline">participações</span>
+          <span className="sm:hidden">part.</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Trophy className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-foreground">{eventsCreated}</span>
+          <span className="hidden sm:inline">criados</span>
+          <span className="sm:hidden">criados</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-foreground">{totalReviews}</span>
+          <span className="hidden sm:inline">avaliações</span>
+          <span className="sm:hidden">aval.</span>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-4">

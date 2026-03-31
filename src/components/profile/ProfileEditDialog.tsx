@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
@@ -15,6 +16,8 @@ interface ProfileEditDialogProps {
   onOpenChange: (open: boolean) => void;
   editedName: string;
   setEditedName: (name: string) => void;
+  editedBio: string;
+  setEditedBio: (bio: string) => void;
   selectedState: string;
   setSelectedState: (state: string) => void;
   selectedCity: string;
@@ -29,6 +32,8 @@ export const ProfileEditDialog = ({
   onOpenChange,
   editedName,
   setEditedName,
+  editedBio,
+  setEditedBio,
   selectedState,
   setSelectedState,
   selectedCity,
@@ -61,13 +66,18 @@ export const ProfileEditDialog = ({
       return;
     }
 
+    if (editedBio.length > 150) {
+      setErrors(prev => ({ ...prev, bio: 'Bio deve ter no máximo 150 caracteres' }));
+      return;
+    }
+
     setErrors({});
     onSave();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Perfil</DialogTitle>
         </DialogHeader>
@@ -89,6 +99,32 @@ export const ProfileEditDialog = ({
                 {errors.full_name}
               </p>
             )}
+          </div>
+
+          <div>
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={editedBio}
+              onChange={(e) => {
+                setEditedBio(e.target.value);
+                if (errors.bio) setErrors(prev => ({ ...prev, bio: '' }));
+              }}
+              placeholder="Conte um pouco sobre você..."
+              rows={2}
+              maxLength={150}
+              className="resize-none min-h-[60px]"
+            />
+            <div className="flex justify-between mt-1">
+              {errors.bio ? (
+                <p className="text-sm text-destructive" role="alert">{errors.bio}</p>
+              ) : (
+                <span />
+              )}
+              <span className={`text-xs ${editedBio.length > 140 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {editedBio.length}/150
+              </span>
+            </div>
           </div>
           
           <div>
