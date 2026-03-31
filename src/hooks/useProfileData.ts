@@ -116,7 +116,7 @@ export const useProfileData = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-
+  const { data: friends = [] } = useQuery({
     queryKey: ['profile-friends', profile?.user_id],
     queryFn: async (): Promise<Friend[]> => {
       const { data, error } = await supabase
