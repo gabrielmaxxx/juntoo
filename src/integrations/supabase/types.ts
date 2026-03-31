@@ -684,6 +684,7 @@ export type Database = {
         Row: {
           account_type: string
           avatar_url: string | null
+          bio: string | null
           business_verified: boolean
           city: string | null
           created_at: string
@@ -700,6 +701,7 @@ export type Database = {
         Insert: {
           account_type?: string
           avatar_url?: string | null
+          bio?: string | null
           business_verified?: boolean
           city?: string | null
           created_at?: string
@@ -716,6 +718,7 @@ export type Database = {
         Update: {
           account_type?: string
           avatar_url?: string | null
+          bio?: string | null
           business_verified?: boolean
           city?: string | null
           created_at?: string

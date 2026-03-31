@@ -18,6 +18,7 @@ export interface UserProfile {
   verification_level?: number;
   business_verified?: boolean;
   onboarding_completed?: boolean;
+  bio?: string;
 }
 
 export interface UserRestriction {

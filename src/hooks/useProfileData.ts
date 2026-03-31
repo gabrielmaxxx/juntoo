@@ -102,6 +102,20 @@ export const useProfileData = () => {
     gcTime: 5 * 60 * 1000,
   });
 
+  const { data: eventsCreated = 0 } = useQuery({
+    queryKey: ['profile-events-created', profile?.user_id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', profile!.user_id);
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!profile?.user_id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: friends = [] } = useQuery({
     queryKey: ['profile-friends', profile?.user_id],
     queryFn: async (): Promise<Friend[]> => {
@@ -173,14 +187,16 @@ export const useProfileData = () => {
     }
   };
 
-  const handleSaveProfile = async (editedName: string, selectedCity: string, selectedState: string, selectedInterests: string[]) => {
+  const handleSaveProfile = async (editedName: string, selectedCity: string, selectedState: string, selectedInterests: string[], bio?: string) => {
     try {
       const location = selectedCity && selectedState ? `${selectedCity}, ${selectedState}` : profile?.city || null;
-      await updateProfile({
+      const updates: Record<string, any> = {
         full_name: editedName,
         city: location,
         interests: selectedInterests.length > 0 ? selectedInterests : null,
-      });
+      };
+      if (bio !== undefined) updates.bio = bio;
+      await updateProfile(updates);
       toast({ title: "Perfil atualizado!", description: "Suas informações foram salvas com sucesso." });
       return true;
     } catch (error) {
@@ -197,6 +213,7 @@ export const useProfileData = () => {
     upcomingEvents: eventsData?.upcoming ?? [],
     completedEvents: eventsData?.completed ?? [],
     friends,
+    eventsCreated,
     loadingEvents,
     handleAvatarUpload,
     handleSaveProfile,

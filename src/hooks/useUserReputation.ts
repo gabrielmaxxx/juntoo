@@ -45,39 +45,43 @@ export interface Badge {
 function calculateBadges(stats: ReputationStats): Badge[] {
   const badges: Badge[] = [];
 
-  if (stats.events_attended >= 10) {
+  // Participativo — by event count
+  if (stats.events_attended >= 3) {
     badges.push({
-      id: 'active_participant',
-      name: 'Participante Ativo',
-      description: 'Participou de 10+ eventos',
+      id: 'participativo',
+      name: stats.events_attended >= 20 ? 'Super Participativo' : stats.events_attended >= 10 ? 'Muito Participativo' : 'Participativo',
+      description: `Participou de ${stats.events_attended} eventos`,
       icon: '🎯',
       color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     });
   }
 
+  // Bem avaliado — by rating
+  if (stats.average_overall >= 4.0 && stats.total_reviews >= 3) {
+    badges.push({
+      id: 'bem_avaliado',
+      name: stats.average_overall >= 4.7 ? 'Excelente Avaliação' : 'Bem Avaliado',
+      description: `Nota média de ${stats.average_overall.toFixed(1)} com ${stats.total_reviews} avaliações`,
+      icon: '⭐',
+      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    });
+  }
+
+  // Confiável — high attendance rate
   if (stats.attendance_rate >= 90 && stats.events_joined >= 5) {
     badges.push({
-      id: 'reliable_member',
-      name: 'Membro Confiável',
+      id: 'confiavel',
+      name: 'Confiável',
       description: 'Taxa de presença acima de 90%',
       icon: '✅',
       color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     });
   }
 
-  if (stats.average_overall >= 4.7 && stats.total_reviews >= 20) {
-    badges.push({
-      id: 'top_rated',
-      name: 'Melhor Avaliado',
-      description: 'Nota média acima de 4.7 com 20+ avaliações',
-      icon: '⭐',
-      color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    });
-  }
-
+  // Pessoa Segura — high safety rating
   if (stats.average_safety >= 4.5 && stats.total_reviews >= 5) {
     badges.push({
-      id: 'safe_person',
+      id: 'seguro',
       name: 'Pessoa Segura',
       description: 'Alta pontuação em segurança',
       icon: '🛡️',
@@ -85,11 +89,12 @@ function calculateBadges(stats: ReputationStats): Badge[] {
     });
   }
 
-  if (stats.events_attended >= 5 && stats.average_overall >= 4.0) {
+  // Veterano — 20+ events
+  if (stats.events_attended >= 20) {
     badges.push({
-      id: 'trusted_organizer',
-      name: 'Organizador Confiável',
-      description: 'Organizou 5+ eventos com boas avaliações',
+      id: 'veterano',
+      name: 'Veterano',
+      description: 'Participou de 20+ eventos',
       icon: '🏆',
       color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
     });

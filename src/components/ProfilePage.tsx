@@ -22,6 +22,7 @@ export const ProfilePage = () => {
     upcomingEvents,
     completedEvents,
     friends,
+    eventsCreated,
     loadingEvents,
     handleAvatarUpload,
     handleSaveProfile,
@@ -31,6 +32,7 @@ export const ProfilePage = () => {
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
+  const [editedBio, setEditedBio] = useState(profile?.bio || '');
   const [activeTab, setActiveTab] = useState('reputation');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedState, setSelectedState] = useState('');
@@ -46,6 +48,7 @@ export const ProfilePage = () => {
       }
     }
     setEditedName(profile?.full_name || '');
+    setEditedBio(profile?.bio || '');
     
     if (profile?.interests && Array.isArray(profile.interests)) {
       const cleanInterests = profile.interests.filter((interest: string) => {
@@ -77,7 +80,7 @@ export const ProfilePage = () => {
   };
 
   const onSaveProfile = async () => {
-    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests);
+    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests, editedBio);
     if (success) {
       setIsEditingProfile(false);
     }
@@ -86,6 +89,7 @@ export const ProfilePage = () => {
   const displayName = profile?.full_name || 'Usuário';
   const displayAvatar = profile?.avatar_url || '';
   const displayLocation = profile?.city || '';
+  const displayBio = profile?.bio || '';
   const { restrictions } = useAuthContext();
 
   const penaltyLabels: Record<string, string> = {
@@ -126,12 +130,14 @@ export const ProfilePage = () => {
         displayName={displayName}
         displayAvatar={displayAvatar}
         displayLocation={displayLocation}
+        displayBio={displayBio}
         userNumber={userNumber}
         selectedInterests={selectedInterests}
         uploadingAvatar={uploadingAvatar}
         averageRating={stats?.average_overall || 0}
         totalReviews={stats?.total_reviews || 0}
         eventsAttended={stats?.events_attended || 0}
+        eventsCreated={eventsCreated}
         verified={profile?.verified}
         businessVerified={profile?.business_verified}
         onAvatarUpload={onAvatarUpload}
@@ -143,6 +149,8 @@ export const ProfilePage = () => {
         onOpenChange={setIsEditingProfile}
         editedName={editedName}
         setEditedName={setEditedName}
+        editedBio={editedBio}
+        setEditedBio={setEditedBio}
         selectedState={selectedState}
         setSelectedState={setSelectedState}
         selectedCity={selectedCity}
@@ -164,8 +172,6 @@ export const ProfilePage = () => {
           <TabsContent value="reputation" className="mt-0">
             <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
           </TabsContent>
-
-
 
           <TabsContent value="events" className="p-4">
             <ProfileEvents events={upcomingEvents} loading={loadingEvents} type="upcoming" />
