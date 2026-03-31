@@ -102,7 +102,21 @@ export const useProfileData = () => {
     gcTime: 5 * 60 * 1000,
   });
 
-  const { data: friends = [] } = useQuery({
+  const { data: eventsCreated = 0 } = useQuery({
+    queryKey: ['profile-events-created', profile?.user_id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', profile!.user_id);
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!profile?.user_id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+
     queryKey: ['profile-friends', profile?.user_id],
     queryFn: async (): Promise<Friend[]> => {
       const { data, error } = await supabase
