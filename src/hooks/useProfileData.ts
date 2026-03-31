@@ -213,6 +213,7 @@ export const useProfileData = () => {
     upcomingEvents: eventsData?.upcoming ?? [],
     completedEvents: eventsData?.completed ?? [],
     friends,
+    eventsCreated,
     loadingEvents,
     handleAvatarUpload,
     handleSaveProfile,
