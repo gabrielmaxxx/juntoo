@@ -1185,6 +1185,7 @@ export type Database = {
         Args: { p_moderator_id: string; p_verification_id: string }
         Returns: undefined
       }
+      can_send_notification: { Args: { p_user_id: string }; Returns: boolean }
       find_or_create_conversation: {
         Args: { other_user_id: string }
         Returns: string
