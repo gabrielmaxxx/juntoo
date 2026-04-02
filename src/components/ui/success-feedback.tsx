@@ -28,8 +28,8 @@ export const SuccessFeedback = ({ message, show, onDone, duration = 2000 }: Succ
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
       <div className="flex flex-col items-center gap-3 animate-scale-in">
-        <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-          <CheckCircle2 className="w-10 h-10 text-green-500" />
+        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+          <CheckCircle2 className="w-10 h-10 text-primary" />
         </div>
         <p className="text-lg font-semibold text-foreground">{message}</p>
       </div>

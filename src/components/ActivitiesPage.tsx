@@ -11,6 +11,7 @@ import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { QueryErrorState } from '@/components/QueryErrorState';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface ActivitiesPageProps {
   onEventClick: (event: Event) => void;
