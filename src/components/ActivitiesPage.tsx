@@ -173,13 +173,14 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
           
           <TabsContent value="registered" className="flex-1 overflow-y-auto px-4 pb-24">
             {registeredEvents.length === 0 ? (
-              <div className="text-center py-12">
-                <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                <h3 className="font-medium text-foreground mb-2">Nenhuma inscrição ainda</h3>
-                <p className="text-sm text-muted-foreground">
-                  Explore eventos na página inicial e se inscreva!
-                </p>
-              </div>
+              <EmptyState
+                icon={<Calendar className="w-9 h-9 text-primary" />}
+                emoji="🎯"
+                title="Sua agenda está livre!"
+                description="Descubra eventos incríveis e conheça pessoas novas. Sua próxima experiência está a um toque."
+                actionLabel="Explorar eventos"
+                onAction={() => onCreateClick?.()}
+              />
             ) : (
               <div className="space-y-6">
                 {/* Upcoming Events */}
