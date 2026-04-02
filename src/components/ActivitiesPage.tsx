@@ -11,6 +11,8 @@ import { usePinnedEvents } from '@/hooks/usePinnedEvents';
 import { useUserRegisteredEvents, useUserCreatedEvents } from '@/hooks/useUserEvents';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { QueryErrorState } from '@/components/QueryErrorState';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ActivitiesPageProps {
   onEventClick: (event: Event) => void;
@@ -96,14 +98,24 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
 
   if (loading) {
     return (
-      <div className="p-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-muted rounded-lg"></div>
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded-lg"></div>
-            ))}
-          </div>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-12 w-48 rounded-lg" />
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-xl" />
+        </div>
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3 bg-card rounded-2xl p-3">
+              <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+              <div className="flex-1 space-y-2 py-1">
+                <Skeleton className="h-4 w-3/4 rounded-lg" />
+                <Skeleton className="h-3 w-1/2 rounded-lg" />
+                <Skeleton className="h-3 w-16 rounded-lg" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -173,13 +185,14 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
           
           <TabsContent value="registered" className="flex-1 overflow-y-auto px-4 pb-24">
             {registeredEvents.length === 0 ? (
-              <div className="text-center py-12">
-                <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                <h3 className="font-medium text-foreground mb-2">Nenhuma inscrição ainda</h3>
-                <p className="text-sm text-muted-foreground">
-                  Explore eventos na página inicial e se inscreva!
-                </p>
-              </div>
+              <EmptyState
+                icon={<Calendar className="w-9 h-9 text-primary" />}
+                emoji="🎯"
+                title="Sua agenda está livre!"
+                description="Descubra eventos incríveis e conheça pessoas novas. Sua próxima experiência está a um toque."
+                actionLabel="Explorar eventos"
+                onAction={() => onCreateClick?.()}
+              />
             ) : (
               <div className="space-y-6">
                 {/* Upcoming Events */}
@@ -239,17 +252,14 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
           
           <TabsContent value="created" className="flex-1 overflow-y-auto px-4 pb-24">
             {createdEvents.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                <h3 className="font-medium text-foreground mb-2">Nenhum evento criado</h3>
-                <p className="text-sm text-muted-foreground">
-                  Que tal organizar seu primeiro evento?
-                </p>
-                <Button className="mt-4" size="sm" onClick={onCreateClick}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Evento
-                </Button>
-              </div>
+              <EmptyState
+                icon={<Users className="w-9 h-9 text-primary" />}
+                emoji="🚀"
+                title="Organize algo incrível!"
+                description="Crie um evento e reúna pessoas para fazer acontecer. Esportes, estudos, lazer — você escolhe."
+                actionLabel="Criar meu evento"
+                onAction={onCreateClick}
+              />
             ) : (
               <div className="space-y-6">
                 {/* Upcoming Events */}

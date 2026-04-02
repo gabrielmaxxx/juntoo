@@ -141,10 +141,19 @@ export const MessagesPage = ({ onBack, initialConversationId, initialUserId, onO
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <MessageCircle className="w-12 h-12 mb-3 opacity-40" />
-            <p className="text-sm font-medium">Nenhuma conversa ainda</p>
-            <p className="text-xs mt-1">Acesse o perfil de um usuário para iniciar uma conversa</p>
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-fade-in">
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5 relative">
+              <MessageCircle className="w-9 h-9 text-primary" />
+              <span className="absolute -top-2 -right-2 text-2xl" aria-hidden="true">💬</span>
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              {search ? 'Nenhum resultado' : 'Comece uma conversa!'}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed">
+              {search
+                ? `Nenhuma conversa encontrada para "${search}".`
+                : 'Participe de um evento ou visite o perfil de alguém para trocar uma ideia.'}
+            </p>
           </div>
         ) : (
           filtered.map(conv => {
