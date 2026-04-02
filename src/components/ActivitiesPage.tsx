@@ -97,14 +97,24 @@ export const ActivitiesPage = ({ onEventClick, onCreateClick }: ActivitiesPagePr
 
   if (loading) {
     return (
-      <div className="p-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-muted rounded-lg"></div>
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded-lg"></div>
-            ))}
-          </div>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-12 w-48 rounded-lg" />
+        <div className="grid grid-cols-2 gap-4">
+          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-xl" />
+        </div>
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3 bg-card rounded-2xl p-3">
+              <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+              <div className="flex-1 space-y-2 py-1">
+                <Skeleton className="h-4 w-3/4 rounded-lg" />
+                <Skeleton className="h-3 w-1/2 rounded-lg" />
+                <Skeleton className="h-3 w-16 rounded-lg" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
