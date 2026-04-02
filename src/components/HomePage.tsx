@@ -290,9 +290,15 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
               ))}
             </div>
           ) : (
-            <div className="bg-card rounded-2xl p-4 text-center" style={{ boxShadow: 'var(--shadow-card)' }}>
-              <p className="text-sm text-muted-foreground">
-                {geoCity ? `Nenhum evento encontrado em ${geoCity} no momento.` : 'Não foi possível identificar sua cidade.'}
+            <div className="bg-card rounded-2xl p-6 text-center animate-fade-in" style={{ boxShadow: 'var(--shadow-card)' }}>
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <MapPinned className="w-6 h-6 text-primary" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">
+                {geoCity ? `Nada acontecendo em ${geoCity} agora` : 'Nenhum evento próximo'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Que tal criar o primeiro evento da região? 🌟
               </p>
             </div>
           )}

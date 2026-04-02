@@ -390,16 +390,19 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
             </Button>
           </div>
         ) : allEvents.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Search className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-fade-in">
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5 relative">
+              <Search className="w-9 h-9 text-primary" aria-hidden="true" />
+              <span className="absolute -top-2 -right-2 text-2xl" aria-hidden="true">🔍</span>
             </div>
-            <h2 className="text-lg font-medium text-foreground mb-2">Nenhum evento encontrado</h2>
-            <p className="text-muted-foreground mb-4">
-              Tente ajustar seus filtros ou termos de busca
+            <h2 className="text-lg font-bold text-foreground mb-2">Nenhum evento por aqui</h2>
+            <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed mb-6">
+              {filters.text
+                ? `Não encontramos eventos para "${filters.text}". Que tal tentar outra busca?`
+                : 'Tente ajustar os filtros ou explore outras categorias.'}
             </p>
             <Button variant="outline" onClick={clearFilters}>
-              Limpar Filtros
+              Limpar filtros e ver tudo
             </Button>
           </div>
         ) : (
