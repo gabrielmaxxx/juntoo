@@ -46,6 +46,7 @@ export const AuthPage = () => {
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [acceptedAge, setAcceptedAge] = useState(false);
   const { toast } = useToast();
 
   // Check if user is coming from password reset link
