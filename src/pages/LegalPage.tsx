@@ -239,7 +239,7 @@ const LegalPage = () => {
             <p>Os dados poderão ser transferidos para o exterior com salvaguardas adequadas.</p>
           </Section>
 
-          <Section title="17. Segurança da Informação">
+          <Section title="20. Segurança da Informação">
             <p>Medidas incluem:</p>
             <ul>
               <li>Criptografia avançada;</li>
