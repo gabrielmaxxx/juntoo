@@ -46,6 +46,7 @@ export const AuthPage = () => {
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [acceptedAge, setAcceptedAge] = useState(false);
   const { toast } = useToast();
 
   // Check if user is coming from password reset link
@@ -723,6 +724,16 @@ export const AuthPage = () => {
             </a>
           </label>
         </div>
+        <div className="flex items-start gap-2">
+          <Checkbox
+            id="age"
+            checked={acceptedAge}
+            onCheckedChange={(v) => setAcceptedAge(v === true)}
+          />
+          <label htmlFor="age" className="text-sm leading-tight cursor-pointer">
+            Declaro ter <strong>18 anos ou mais</strong> e assumo total responsabilidade por minhas interações na plataforma, incluindo encontros presenciais.
+          </label>
+        </div>
         <p className="text-xs text-muted-foreground">
           Ao criar sua conta, você concorda com o tratamento dos seus dados conforme a LGPD (Lei nº 13.709/2018).
         </p>
@@ -731,7 +742,7 @@ export const AuthPage = () => {
       <Button 
         type="submit" 
         className="w-full h-12 text-base font-semibold rounded-full bg-blue-600 hover:bg-blue-700" 
-        disabled={loading || !acceptedTerms || !acceptedPrivacy}
+        disabled={loading || !acceptedTerms || !acceptedPrivacy || !acceptedAge}
       >
         {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>

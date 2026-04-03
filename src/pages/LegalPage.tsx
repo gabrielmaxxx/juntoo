@@ -165,6 +165,34 @@ const LegalPage = () => {
             <p>O usuário é integralmente responsável pelo conteúdo publicado.</p>
             <p>Concede ao Juntoo licença global, irrevogável, gratuita e sublicenciável para uso do conteúdo na plataforma.</p>
           </Section>
+
+          <Section title="12. Restrição de Idade">
+            <p><strong>12.1.</strong> A utilização do Juntoo é restrita a pessoas com <strong>18 (dezoito) anos de idade ou mais</strong>.</p>
+            <p><strong>12.2.</strong> Ao cadastrar-se, o usuário declara expressamente possuir a idade mínima exigida.</p>
+            <p><strong>12.3.</strong> O Juntoo reserva-se o direito de solicitar comprovação de idade a qualquer momento e encerrar contas de usuários menores de 18 anos.</p>
+            <p><strong>12.4.</strong> Caso seja constatada a falsidade da declaração de idade, o usuário poderá ter sua conta suspensa ou banida permanentemente, sem direito a reembolso ou indenização.</p>
+          </Section>
+
+          <Section title="13. Responsabilidade em Encontros Presenciais">
+            <p><strong>13.1.</strong> O Juntoo é exclusivamente uma plataforma de intermediação digital. Não organiza, supervisiona ou participa de encontros presenciais entre usuários.</p>
+            <p><strong>13.2.</strong> O usuário reconhece que:</p>
+            <ul>
+              <li>Encontros presenciais são de sua inteira responsabilidade;</li>
+              <li>Deve tomar precauções de segurança pessoal (avisar terceiros, escolher locais públicos, etc.);</li>
+              <li>O Juntoo não garante a identidade, intenção ou conduta de outros usuários;</li>
+              <li>Qualquer dano, prejuízo ou incidente decorrente de encontros presenciais não será de responsabilidade do Juntoo.</li>
+            </ul>
+            <p><strong>13.3.</strong> O Juntoo disponibiliza ferramentas de segurança (denúncias, verificação de identidade, sistema de reputação) como medida de boa-fé, sem que isso constitua garantia de segurança.</p>
+          </Section>
+
+          <Section title="14. Canal de Contato e Suporte">
+            <p>O usuário pode entrar em contato com o Juntoo através de:</p>
+            <ul>
+              <li>Canal de suporte integrado ao aplicativo (Configurações → Ajuda e Suporte);</li>
+              <li>E-mail: <strong>contato@juntoo.com.br</strong></li>
+            </ul>
+            <p>O Juntoo compromete-se a responder solicitações em até 15 (quinze) dias úteis.</p>
+          </Section>
         </section>
 
         <Separator />
@@ -175,11 +203,11 @@ const LegalPage = () => {
             <Shield className="w-5 h-5 text-primary" /> Política de Privacidade
           </h2>
 
-          <Section title="12. Privacidade e Proteção de Dados">
+          <Section title="15. Privacidade e Proteção de Dados">
             <p>O tratamento de dados observa a legislação do Brasil, especialmente a LGPD (Lei nº 13.709/2018).</p>
           </Section>
 
-          <Section title="13. Finalidades do Tratamento">
+          <Section title="16. Finalidades do Tratamento">
             <ul>
               <li>Funcionamento da plataforma;</li>
               <li>Segurança;</li>
@@ -189,7 +217,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="14. Bases Legais">
+          <Section title="17. Bases Legais">
             <ul>
               <li>Execução de contrato;</li>
               <li>Legítimo interesse;</li>
@@ -198,7 +226,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="15. Compartilhamento de Dados">
+          <Section title="18. Compartilhamento de Dados">
             <p>Com:</p>
             <ul>
               <li>Provedores tecnológicos;</li>
@@ -207,11 +235,11 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="16. Transferência Internacional">
+          <Section title="19. Transferência Internacional">
             <p>Os dados poderão ser transferidos para o exterior com salvaguardas adequadas.</p>
           </Section>
 
-          <Section title="17. Segurança da Informação">
+          <Section title="20. Segurança da Informação">
             <p>Medidas incluem:</p>
             <ul>
               <li>Criptografia avançada;</li>
@@ -220,7 +248,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="18. Retenção de Dados">
+          <Section title="21. Retenção de Dados">
             <p>Dados serão mantidos conforme:</p>
             <ul>
               <li>Necessidade operacional;</li>
@@ -229,7 +257,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="19. Direitos do Titular">
+          <Section title="22. Direitos do Titular">
             <p>O usuário poderá exercer seus direitos via e-mail de privacidade do Juntoo, incluindo:</p>
             <ul>
               <li>Acesso aos dados;</li>
@@ -240,19 +268,19 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="20. Incidentes de Segurança">
+          <Section title="23. Incidentes de Segurança">
             <p>O Juntoo adotará medidas imediatas e notificará autoridades e usuários quando necessário.</p>
           </Section>
 
-          <Section title="21. Suspensão e Encerramento">
+          <Section title="24. Suspensão e Encerramento">
             <p>O Juntoo poderá encerrar contas sem aviso prévio em caso de risco ou violação.</p>
           </Section>
 
-          <Section title="22. Alterações dos Termos">
+          <Section title="25. Alterações dos Termos">
             <p>Os Termos poderão ser atualizados a qualquer tempo. O uso continuado da plataforma após alterações constitui aceite das novas condições.</p>
           </Section>
 
-          <Section title="23. Legislação e Foro">
+          <Section title="26. Legislação e Foro">
             <p>Regido pelas leis do Brasil. Foro da comarca de [●] para questões não submetidas à arbitragem.</p>
           </Section>
         </section>
