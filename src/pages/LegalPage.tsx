@@ -226,7 +226,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="15. Compartilhamento de Dados">
+          <Section title="18. Compartilhamento de Dados">
             <p>Com:</p>
             <ul>
               <li>Provedores tecnológicos;</li>
