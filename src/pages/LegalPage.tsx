@@ -217,7 +217,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="14. Bases Legais">
+          <Section title="17. Bases Legais">
             <ul>
               <li>Execução de contrato;</li>
               <li>Legítimo interesse;</li>
