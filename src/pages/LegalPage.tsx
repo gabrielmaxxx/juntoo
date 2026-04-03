@@ -207,7 +207,7 @@ const LegalPage = () => {
             <p>O tratamento de dados observa a legislação do Brasil, especialmente a LGPD (Lei nº 13.709/2018).</p>
           </Section>
 
-          <Section title="13. Finalidades do Tratamento">
+          <Section title="16. Finalidades do Tratamento">
             <ul>
               <li>Funcionamento da plataforma;</li>
               <li>Segurança;</li>
