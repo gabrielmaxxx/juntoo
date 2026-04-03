@@ -268,7 +268,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="20. Incidentes de Segurança">
+          <Section title="23. Incidentes de Segurança">
             <p>O Juntoo adotará medidas imediatas e notificará autoridades e usuários quando necessário.</p>
           </Section>
 
