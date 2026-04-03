@@ -248,7 +248,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="18. Retenção de Dados">
+          <Section title="21. Retenção de Dados">
             <p>Dados serão mantidos conforme:</p>
             <ul>
               <li>Necessidade operacional;</li>
