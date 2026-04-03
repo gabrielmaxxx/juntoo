@@ -203,7 +203,7 @@ const LegalPage = () => {
             <Shield className="w-5 h-5 text-primary" /> Política de Privacidade
           </h2>
 
-          <Section title="12. Privacidade e Proteção de Dados">
+          <Section title="15. Privacidade e Proteção de Dados">
             <p>O tratamento de dados observa a legislação do Brasil, especialmente a LGPD (Lei nº 13.709/2018).</p>
           </Section>
 
