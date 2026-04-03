@@ -235,7 +235,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="16. Transferência Internacional">
+          <Section title="19. Transferência Internacional">
             <p>Os dados poderão ser transferidos para o exterior com salvaguardas adequadas.</p>
           </Section>
 
