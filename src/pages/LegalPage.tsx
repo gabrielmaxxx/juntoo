@@ -165,6 +165,34 @@ const LegalPage = () => {
             <p>O usuário é integralmente responsável pelo conteúdo publicado.</p>
             <p>Concede ao Juntoo licença global, irrevogável, gratuita e sublicenciável para uso do conteúdo na plataforma.</p>
           </Section>
+
+          <Section title="12. Restrição de Idade">
+            <p><strong>12.1.</strong> A utilização do Juntoo é restrita a pessoas com <strong>18 (dezoito) anos de idade ou mais</strong>.</p>
+            <p><strong>12.2.</strong> Ao cadastrar-se, o usuário declara expressamente possuir a idade mínima exigida.</p>
+            <p><strong>12.3.</strong> O Juntoo reserva-se o direito de solicitar comprovação de idade a qualquer momento e encerrar contas de usuários menores de 18 anos.</p>
+            <p><strong>12.4.</strong> Caso seja constatada a falsidade da declaração de idade, o usuário poderá ter sua conta suspensa ou banida permanentemente, sem direito a reembolso ou indenização.</p>
+          </Section>
+
+          <Section title="13. Responsabilidade em Encontros Presenciais">
+            <p><strong>13.1.</strong> O Juntoo é exclusivamente uma plataforma de intermediação digital. Não organiza, supervisiona ou participa de encontros presenciais entre usuários.</p>
+            <p><strong>13.2.</strong> O usuário reconhece que:</p>
+            <ul>
+              <li>Encontros presenciais são de sua inteira responsabilidade;</li>
+              <li>Deve tomar precauções de segurança pessoal (avisar terceiros, escolher locais públicos, etc.);</li>
+              <li>O Juntoo não garante a identidade, intenção ou conduta de outros usuários;</li>
+              <li>Qualquer dano, prejuízo ou incidente decorrente de encontros presenciais não será de responsabilidade do Juntoo.</li>
+            </ul>
+            <p><strong>13.3.</strong> O Juntoo disponibiliza ferramentas de segurança (denúncias, verificação de identidade, sistema de reputação) como medida de boa-fé, sem que isso constitua garantia de segurança.</p>
+          </Section>
+
+          <Section title="14. Canal de Contato e Suporte">
+            <p>O usuário pode entrar em contato com o Juntoo através de:</p>
+            <ul>
+              <li>Canal de suporte integrado ao aplicativo (Configurações → Ajuda e Suporte);</li>
+              <li>E-mail: <strong>contato@juntoo.com.br</strong></li>
+            </ul>
+            <p>O Juntoo compromete-se a responder solicitações em até 15 (quinze) dias úteis.</p>
+          </Section>
         </section>
 
         <Separator />
