@@ -280,7 +280,7 @@ const LegalPage = () => {
             <p>Os Termos poderão ser atualizados a qualquer tempo. O uso continuado da plataforma após alterações constitui aceite das novas condições.</p>
           </Section>
 
-          <Section title="23. Legislação e Foro">
+          <Section title="26. Legislação e Foro">
             <p>Regido pelas leis do Brasil. Foro da comarca de [●] para questões não submetidas à arbitragem.</p>
           </Section>
         </section>

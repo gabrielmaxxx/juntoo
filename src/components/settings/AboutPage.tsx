@@ -43,17 +43,17 @@ export const AboutPage = ({ onBack }: AboutPageProps) => {
         {/* Links */}
         <Card>
           <CardContent className="p-0 divide-y divide-border">
-            <a href="#" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
+            <a href="/termos#termos" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
               <FileText className="w-5 h-5 text-muted-foreground" />
               <span className="text-sm font-medium text-foreground flex-1">Termos de Uso</span>
               <ExternalLink className="w-4 h-4 text-muted-foreground" />
             </a>
-            <a href="#" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
+            <a href="/termos#privacidade" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
               <Shield className="w-5 h-5 text-muted-foreground" />
               <span className="text-sm font-medium text-foreground flex-1">Política de Privacidade</span>
               <ExternalLink className="w-4 h-4 text-muted-foreground" />
             </a>
-            <a href="#" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
+            <a href="/termos#privacidade" className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors">
               <Globe className="w-5 h-5 text-muted-foreground" />
               <span className="text-sm font-medium text-foreground flex-1">Licenças de código aberto</span>
               <ExternalLink className="w-4 h-4 text-muted-foreground" />
