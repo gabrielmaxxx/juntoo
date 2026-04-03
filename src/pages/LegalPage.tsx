@@ -276,7 +276,7 @@ const LegalPage = () => {
             <p>O Juntoo poderá encerrar contas sem aviso prévio em caso de risco ou violação.</p>
           </Section>
 
-          <Section title="22. Alterações dos Termos">
+          <Section title="25. Alterações dos Termos">
             <p>Os Termos poderão ser atualizados a qualquer tempo. O uso continuado da plataforma após alterações constitui aceite das novas condições.</p>
           </Section>
 
