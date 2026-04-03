@@ -272,7 +272,7 @@ const LegalPage = () => {
             <p>O Juntoo adotará medidas imediatas e notificará autoridades e usuários quando necessário.</p>
           </Section>
 
-          <Section title="21. Suspensão e Encerramento">
+          <Section title="24. Suspensão e Encerramento">
             <p>O Juntoo poderá encerrar contas sem aviso prévio em caso de risco ou violação.</p>
           </Section>
 
