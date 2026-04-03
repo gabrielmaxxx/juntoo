@@ -257,7 +257,7 @@ const LegalPage = () => {
             </ul>
           </Section>
 
-          <Section title="19. Direitos do Titular">
+          <Section title="22. Direitos do Titular">
             <p>O usuário poderá exercer seus direitos via e-mail de privacidade do Juntoo, incluindo:</p>
             <ul>
               <li>Acesso aos dados;</li>
