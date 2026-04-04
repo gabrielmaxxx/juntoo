@@ -37,9 +37,11 @@ const isEventUpcoming = (event: { date: string; time: string; is_recurring: bool
   const now = new Date();
   if (event.is_recurring) {
     if (!event.recurrence_end_date) return true;
-    return new Date(event.recurrence_end_date) >= now;
+    const endDate = new Date(`${event.recurrence_end_date}T23:59:59`);
+    return endDate >= now;
   }
   const eventDateTime = new Date(`${event.date}T${event.time}`);
+  eventDateTime.setHours(eventDateTime.getHours() + 3);
   return now < eventDateTime;
 };
 
