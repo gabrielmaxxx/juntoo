@@ -110,14 +110,42 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const base64Url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
-    if (!imageUrl) {
+    if (!base64Url) {
       throw new Error("No image generated");
     }
 
+    // Upload the base64 image to Supabase Storage instead of returning raw base64
+    const base64Data = base64Url.split(',')[1];
+    if (!base64Data) {
+      throw new Error("Invalid image data");
+    }
+
+    const binaryString = atob(base64Data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    const fileName = `ai-covers/${crypto.randomUUID()}.png`;
+    const serviceClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
+    const { error: uploadError } = await serviceClient.storage
+      .from('avatars')
+      .upload(fileName, bytes, { contentType: 'image/png', upsert: false });
+
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      throw new Error("Failed to upload generated image");
+    }
+
+    const { data: publicUrlData } = serviceClient.storage
+      .from('avatars')
+      .getPublicUrl(fileName);
+
     return new Response(
-      JSON.stringify({ imageUrl }),
+      JSON.stringify({ imageUrl: publicUrlData.publicUrl }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
