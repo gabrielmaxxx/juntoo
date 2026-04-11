@@ -7,6 +7,7 @@ import { EventDetails } from '@/components/EventDetails';
 import { JoinPrivateEvent } from '@/components/JoinPrivateEvent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 const AuthPage = lazy(() => import('@/pages/AuthPage').then(m => ({ default: m.AuthPage })));
+const LandingPage = lazy(() => import('@/components/landing/LandingPage'));
 import { SkipLink } from '@/components/SkipLink';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
