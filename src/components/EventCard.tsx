@@ -1,10 +1,12 @@
 import { Event } from '@/types';
-import { MapPin, Clock, Users, Star, Pin, Share2 } from 'lucide-react';
+import { MapPin, Clock, Users, Star, Pin, Share2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { cn } from '@/lib/utils';
 import { haptic } from '@/lib/haptics';
 import { shareEvent } from '@/lib/share';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface EventCardProps {
   event: Event;
@@ -25,6 +27,8 @@ export const EventCard = ({
 }: EventCardProps) => {
   const averageRating = event.averageRating ?? null;
   const reviewCount = event.reviewCount ?? 0;
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joined, setJoined] = useState(false);
 
   const formatDate = (date: string, time: string) => {
     const eventDate = new Date(`${date}T${time}`);
@@ -35,10 +39,29 @@ export const EventCard = ({
     });
   };
 
+  const handleParticipate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (joined) {
+      onEventClick?.(event);
+      return;
+    }
+    setJoinLoading(true);
+    haptic('medium');
+    // Simulate join then navigate
+    setTimeout(() => {
+      setJoinLoading(false);
+      setJoined(true);
+      haptic('success');
+      setTimeout(() => onEventClick?.(event), 600);
+    }, 800);
+  };
+
   if (variant === 'featured') {
     return (
-      <article 
-        className="relative w-80 h-52 rounded-2xl overflow-hidden cursor-pointer group transition-all duration-300 hover:scale-[1.02] focus-highlight"
+      <motion.article
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative w-80 h-52 rounded-2xl overflow-hidden cursor-pointer group focus-highlight"
         style={{ boxShadow: 'var(--shadow-elevated)' }}
         onClick={() => { haptic('light'); onEventClick?.(event); }}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEventClick?.(event); } }}
@@ -75,7 +98,7 @@ export const EventCard = ({
             🔥 Em Alta
           </div>
         )}
-      </article>
+      </motion.article>
     );
   }
 
@@ -86,9 +109,11 @@ export const EventCard = ({
     };
 
     return (
-      <article 
+      <motion.article
+        whileHover={{ y: -2, boxShadow: 'var(--shadow-medium)' }}
+        whileTap={{ scale: 0.98 }}
         className={cn(
-          "bg-card rounded-2xl p-3.5 cursor-pointer transition-all duration-200 hover:shadow-md relative",
+          "bg-card rounded-2xl p-3.5 cursor-pointer relative",
           isPinned && "ring-2 ring-primary/30"
         )}
         style={{ boxShadow: 'var(--shadow-card)' }}
@@ -164,14 +189,16 @@ export const EventCard = ({
             )}
           </div>
         </div>
-      </article>
+      </motion.article>
     );
   }
 
   // Default variant
   return (
-    <article 
-      className="bg-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg group"
+    <motion.article
+      whileHover={{ y: -4, boxShadow: 'var(--shadow-elevated)' }}
+      whileTap={{ scale: 0.98 }}
+      className="bg-card rounded-2xl overflow-hidden cursor-pointer group"
       style={{ boxShadow: 'var(--shadow-card)' }}
       onClick={() => { haptic('light'); onEventClick?.(event); }}
       role="button"
@@ -197,7 +224,6 @@ export const EventCard = ({
             🔥 Em Alta
           </div>
         )}
-        {/* Category pill on image */}
         <div className="absolute bottom-3 left-3">
           <span className="text-xs bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full font-medium">
             {event.category}
@@ -233,10 +259,16 @@ export const EventCard = ({
 
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
+            <motion.div
+              className="flex items-center gap-1"
+              key={event.participantsCount}
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 0.3 }}
+            >
               <Users className="w-4 h-4 text-primary" aria-hidden="true" />
               <span className="text-xs text-muted-foreground font-medium">{event.participantsCount ?? 0}</span>
-            </div>
+            </motion.div>
             {averageRating !== null && averageRating > 0 && (
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" aria-hidden="true" />
@@ -255,16 +287,26 @@ export const EventCard = ({
               <Share2 className="w-4 h-4" />
             </button>
             <Button 
-              variant="default" 
+              variant={joined ? "secondary" : "default"}
               size="sm" 
               className="rounded-xl text-xs font-semibold px-4"
-              onClick={(e) => { e.stopPropagation(); onEventClick?.(event); }}
+              loading={joinLoading}
+              onClick={handleParticipate}
             >
-              Participar
+              {joined ? (
+                <span className="flex items-center gap-1.5">
+                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                    <Check className="w-3.5 h-3.5" />
+                  </motion.span>
+                  Participando
+                </span>
+              ) : (
+                "Participar"
+              )}
             </Button>
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 };
