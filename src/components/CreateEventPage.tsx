@@ -1,38 +1,46 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { ArrowLeft, ArrowRight, PartyPopper, Share2, ExternalLink, Sparkles } from 'lucide-react';
+import { ArrowLeft, PartyPopper, Share2, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PrivateLinkSuccess } from './create-event';
-import { StepEssentials } from './create-event/StepEssentials';
-import { StepDetails } from './create-event/StepDetails';
-import { TemplatePicker } from './create-event/TemplatePicker';
+import { WizardCategory } from './create-event/WizardCategory';
+import { WizardTitle } from './create-event/WizardTitle';
+import { WizardDescription } from './create-event/WizardDescription';
+import { WizardDateTime } from './create-event/WizardDateTime';
+import { WizardLocation } from './create-event/WizardLocation';
+import { WizardCapacity } from './create-event/WizardCapacity';
+import { WizardPreview } from './create-event/WizardPreview';
 import { useEventForm } from '@/hooks/useEventForm';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { ShieldAlert } from 'lucide-react';
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { Confetti } from '@/components/ui/confetti';
-import { useGeolocation } from '@/hooks/useGeolocation';
-import { loadCities, getCitiesSync } from '@/data/brazilStatesAndCities';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const DRAFT_KEY = 'juntoo_event_draft';
+const TOTAL_STEPS = 7; // 0=category, 1=title, 2=desc, 3=datetime, 4=location, 5=capacity, 6=preview
 
 interface CreateEventPageProps {
   onBack: () => void;
 }
 
-// step 0 = template picker, 1 = essentials, 2 = details
-type Step = 0 | 1 | 2;
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+};
 
 export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
   const { isFeatureBlocked } = useAuthContext();
-  // Pre-load cities data for geolocation matching
-  useEffect(() => { loadCities(); }, []);
-  const [step, setStep] = useState<Step>(0);
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const totalFormSteps = 2;
 
   const handleSuccess = useCallback(() => {
     setShowSuccess(true);
     setShowConfetti(true);
+    localStorage.removeItem(DRAFT_KEY);
   }, []);
 
   const {
@@ -47,72 +55,76 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     removeImage,
     generateCoverImage,
     handleSubmit: originalHandleSubmit,
-    validateForm
+    validateForm,
   } = useEventForm(handleSuccess);
 
-  // Auto-fill state/city from geolocation
-  const { stateCode: geoState, city: geoCity, requestLocation } = useGeolocation();
-  const geoApplied = useRef(false);
-
+  // Restore draft from localStorage
+  const draftLoaded = useRef(false);
   useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
-
-  useEffect(() => {
-    if (geoApplied.current || !geoState) return;
-    // Only pre-fill if user hasn't manually set state yet
-    if (!formData.state) {
-      handleInputChange('state', geoState);
-      const cities = getCitiesSync();
-      if (geoCity && cities[geoState]?.includes(geoCity)) {
-        handleInputChange('city', geoCity);
+    if (draftLoaded.current) return;
+    draftLoaded.current = true;
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        if (parsed.step !== undefined) setStep(parsed.step);
+        if (parsed.data) {
+          Object.entries(parsed.data).forEach(([key, value]) => {
+            if (value !== undefined && value !== '') {
+              handleInputChange(key as keyof EventFormData, value as string | boolean);
+            }
+          });
+        }
       }
-      geoApplied.current = true;
-    }
-  }, [geoState, geoCity, formData.state, handleInputChange]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    await originalHandleSubmit(e);
-  }, [originalHandleSubmit]);
-
-  const handleTemplateSelect = useCallback((prefill: Partial<EventFormData>) => {
-    Object.entries(prefill).forEach(([key, value]) => {
-      if (value !== undefined) {
-        handleInputChange(key as keyof EventFormData, value as string | boolean);
-      }
-    });
-    setStep(1);
+    } catch { /* ignore */ }
   }, [handleInputChange]);
 
-  const handleContinue = useCallback(() => {
-    const step1Fields = ['title', 'category', 'date', 'time', 'state', 'city', 'location'] as const;
-    let hasError = false;
-    for (const field of step1Fields) {
-      if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
-        hasError = true;
-        break;
-      }
-    }
-    if (hasError) {
-      validateForm();
+  // Auto-save draft
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, data: formData }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [step, formData]);
+
+  const goTo = useCallback((target: number) => {
+    setDirection(target > step ? 1 : -1);
+    setStep(target);
+  }, [step]);
+
+  const next = useCallback(() => goTo(step + 1), [goTo, step]);
+  const prev = useCallback(() => {
+    if (step === 0) onBack();
+    else goTo(step - 1);
+  }, [goTo, step, onBack]);
+
+  const handleCategorySelect = useCallback((category: string) => {
+    handleInputChange('category', category);
+    // Auto-advance after short delay
+    setTimeout(() => {
+      setDirection(1);
+      setStep(1);
+    }, 200);
+  }, [handleInputChange]);
+
+  const handleFieldChange = useCallback((field: string, value: string | boolean) => {
+    handleInputChange(field as keyof EventFormData, value);
+  }, [handleInputChange]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm()) {
+      // Find first missing required field and go to that step
+      if (!formData.category) return goTo(0);
+      if (formData.title.trim().length < 3) return goTo(1);
+      if (!formData.date || !formData.time) return goTo(3);
+      if (!formData.state || !formData.city || formData.location.trim().length < 3) return goTo(4);
       return;
     }
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [formData, validateForm]);
+    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+    await originalHandleSubmit(fakeEvent);
+  }, [validateForm, originalHandleSubmit, formData, goTo]);
 
-  const handleBack = useCallback(() => {
-    if (step === 0) {
-      onBack();
-    } else if (step === 1) {
-      setStep(0);
-    } else {
-      setStep(1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [step, onBack]);
-
-  // Block if feature is restricted
+  // Feature blocked
   if (isFeatureBlocked('create_events')) {
     return (
       <div className="min-h-dvh bg-background">
@@ -184,76 +196,122 @@ export const CreateEventPage = ({ onBack }: CreateEventPageProps) => {
     );
   }
 
-  const formStep = step as 1 | 2;
+  const STEP_LABELS = ['Categoria', 'Nome', 'Descrição', 'Data', 'Local', 'Vagas', 'Revisar'];
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4">
+      <div className="bg-primary text-primary-foreground p-4 shrink-0">
         <div className="max-w-lg mx-auto flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={handleBack} className="text-primary-foreground hover:bg-primary-foreground/20" aria-label="Voltar">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={prev}
+            className="text-primary-foreground hover:bg-primary-foreground/20"
+            aria-label="Voltar"
+          >
             <ArrowLeft className="w-6 h-6" aria-hidden="true" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Criar Evento</h1>
-            {step > 0 && (
-              <p className="text-xs text-primary-foreground/70">Etapa {step} de {totalFormSteps}</p>
-            )}
+            <h1 className="text-lg font-heading font-semibold">Criar Evento</h1>
+            <p className="text-xs text-primary-foreground/70">
+              {STEP_LABELS[step]} • Etapa {step + 1} de {TOTAL_STEPS}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Progress — only on form steps */}
-      {step > 0 && (
-        <div className="max-w-lg mx-auto px-4 pt-3">
-          <Progress value={(step / totalFormSteps) * 100} className="h-1.5" />
-        </div>
-      )}
+      {/* Progress bar */}
+      <div className="max-w-lg mx-auto w-full px-4 pt-3 shrink-0">
+        <Progress value={((step + 1) / TOTAL_STEPS) * 100} className="h-1.5" />
+      </div>
 
-      {/* Content */}
-      <div className="max-w-lg mx-auto px-4 pt-6 pb-24">
-        {step === 0 && (
-          <TemplatePicker
-            onSelect={handleTemplateSelect}
-            onSkip={() => setStep(1)}
-          />
-        )}
-
-        {step > 0 && (
-          <form onSubmit={handleSubmit} noValidate>
-            {step === 1 && (
-              <>
-                <StepEssentials formData={formData} errors={errors} onInputChange={handleInputChange} />
-                <div className="mt-8">
-                  <Button type="button" className="w-full h-12" onClick={handleContinue}>
-                    Continuar
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {step === 2 && (
-              <>
-                <StepDetails
-                  formData={formData}
-                  errors={errors}
-                  uploadingImage={uploadingImage}
-                  generatingImage={generatingImage}
-                  onInputChange={handleInputChange}
-                  onImageUpload={handleImageUpload}
-                  onRemoveImage={removeImage}
-                  onGenerateCover={generateCoverImage}
+      {/* Step content with slide animation */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 pt-8 pb-24">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={step}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+            >
+              {step === 0 && (
+                <WizardCategory
+                  selected={formData.category}
+                  onSelect={handleCategorySelect}
                 />
-                <div className="mt-8">
-                  <Button type="submit" className="w-full h-12" disabled={isSubmitting || generatingImage}>
-                    {generatingImage ? 'Gerando capa...' : isSubmitting ? 'Criando...' : 'Criar Evento'}
-                  </Button>
-                </div>
-              </>
-            )}
-          </form>
-        )}
+              )}
+
+              {step === 1 && (
+                <WizardTitle
+                  title={formData.title}
+                  category={formData.category}
+                  onChange={(v) => handleInputChange('title', v)}
+                  onNext={next}
+                />
+              )}
+
+              {step === 2 && (
+                <WizardDescription
+                  description={formData.description || ''}
+                  onChange={(v) => handleInputChange('description', v)}
+                  onNext={next}
+                  onSkip={next}
+                />
+              )}
+
+              {step === 3 && (
+                <WizardDateTime
+                  date={formData.date}
+                  time={formData.time}
+                  isRecurring={formData.isRecurring}
+                  recurrenceType={formData.recurrenceType}
+                  recurrenceEndDate={formData.recurrenceEndDate || ''}
+                  onChange={handleFieldChange}
+                  onNext={next}
+                />
+              )}
+
+              {step === 4 && (
+                <WizardLocation
+                  state={formData.state}
+                  city={formData.city}
+                  location={formData.location}
+                  onChange={handleFieldChange}
+                  onNext={next}
+                />
+              )}
+
+              {step === 5 && (
+                <WizardCapacity
+                  maxParticipants={formData.maxParticipants || ''}
+                  isPrivate={formData.isPrivate}
+                  price={formData.price || ''}
+                  onChange={handleFieldChange}
+                  onNext={next}
+                />
+              )}
+
+              {step === 6 && (
+                <WizardPreview
+                  formData={formData}
+                  isSubmitting={isSubmitting}
+                  generatingImage={generatingImage}
+                  uploadingImage={uploadingImage}
+                  onSubmit={handleSubmit}
+                  onEdit={goTo}
+                  onImageUpload={handleImageUpload}
+                  onGenerateCover={generateCoverImage}
+                  onRemoveImage={removeImage}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
