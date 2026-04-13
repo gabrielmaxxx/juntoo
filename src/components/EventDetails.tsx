@@ -293,6 +293,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <NotificationOptIn open={showOptIn} onOpenChange={setShowOptIn} />
     </div>
   );
 };
