@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Event } from '@/types';
 import { SafetyModal } from '@/components/SafetyModal';
+import { NotificationOptIn } from '@/components/NotificationOptIn';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventDetails } from '@/hooks/useEventDetails';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useNotifications } from '@/hooks/useNotifications';
 import { ReportButton } from '@/components/reports';
 import { Crown, Pencil, Trash2, Users } from 'lucide-react';
 import {
