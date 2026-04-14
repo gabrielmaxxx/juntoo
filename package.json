@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-types": "supabase gen types typescript --project-id hspfyakugditkxrvngrc > src/integrations/supabase/types.ts",
+    "db:types": "npm run generate-types"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
