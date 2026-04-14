@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Event } from '@/types';
 import { SafetyModal } from '@/components/SafetyModal';
-import { NotificationOptIn } from '@/components/NotificationOptIn';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEventDetails } from '@/hooks/useEventDetails';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
 import { ReportButton } from '@/components/reports';
 import { Crown, Pencil, Trash2, Users } from 'lucide-react';
 import {
@@ -66,8 +64,6 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const [showSafetyModal, setShowSafetyModal] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showOptIn, setShowOptIn] = useState(false);
-  const { shouldShowOptIn } = useNotifications();
 
   const onParticipateClick = () => {
     if (isParticipating) {
@@ -77,13 +73,9 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
     }
   };
 
-  const onSafetyAccept = async () => {
+  const onSafetyAccept = () => {
     setShowSafetyModal(false);
-    await handleParticipate();
-    // After first successful join, show opt-in if applicable
-    if (shouldShowOptIn) {
-      setTimeout(() => setShowOptIn(true), 1200);
-    }
+    handleParticipate();
   };
 
   const handleCancel = async () => {
@@ -293,7 +285,6 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <NotificationOptIn open={showOptIn} onOpenChange={setShowOptIn} />
     </div>
   );
 };
