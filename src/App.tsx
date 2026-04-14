@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
@@ -11,6 +11,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
+import { queryClient } from "./lib/queryClient";
 
 // Lazy-loaded pages (not needed on initial render)
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
@@ -29,17 +30,6 @@ const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
 const AdminLogs = lazy(() => import("./pages/admin/AdminLogs"));
 const AdminPenalties = lazy(() => import("./pages/admin/AdminPenalties"));
 const AdminActivityLogs = lazy(() => import("./pages/admin/AdminActivityLogs"));
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 30,
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 const PageFallback = () => (
   <div className="flex items-center justify-center h-screen bg-background">
