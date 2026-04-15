@@ -10,11 +10,13 @@ export {
   useTodayEvents,
   useSearchEvents,
 } from './hooks/useEventDiscovery';
+export { useEventChat } from './hooks/useEventChat';
 
 // Components
 export { EventFeed } from './components/EventFeed';
 export { SearchAndFilter } from './components/SearchAndFilter';
 export { EventMap } from './components/EventMap';
+export { EventChatEnhanced } from './components/EventChatEnhanced';
 
 // Services
 export { searchEvents } from './services/eventService';
