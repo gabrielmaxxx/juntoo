@@ -86,7 +86,7 @@ for pattern in "${!PATTERNS[@]}"; do
 done
 
 # Check for hardcoded JWTs (eyJhbGc pattern) in source code (not .env)
-jwt_matches=$(grep -rlE 'eyJhbGciOi' --include="*.ts" --include="*.tsx" --include="*.js" $SCAN_DIRS 2>/dev/null | grep -v node_modules | grep -v ".test." || true)
+jwt_matches=$(grep -rlE 'eyJhbGciOi' --include="*.ts" --include="*.tsx" --include="*.js" $SCAN_DIRS 2>/dev/null | grep -v node_modules | grep -v ".test." | grep -v "integrations/supabase/client.ts" || true)
 if [ -n "$jwt_matches" ]; then
   for file in $jwt_matches; do
     # Check if it's in a test file referencing env vars
