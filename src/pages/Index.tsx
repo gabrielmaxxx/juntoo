@@ -273,6 +273,11 @@ const Index = () => {
                         }}
                       />
                     )}
+                    {activeTab === 'communities' && (
+                      <CommunitiesTab
+                        initialCommunityId={searchParams.get('communityId') || undefined}
+                      />
+                    )}
                   </Suspense>
                 </ErrorBoundary>
               </div>
