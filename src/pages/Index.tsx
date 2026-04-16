@@ -233,6 +233,7 @@ const Index = () => {
                       <HomePage 
                         onEventClick={handleEventClick}
                         currentUser={{ name: profile?.full_name || 'Usuário' }}
+                        onTabChange={setActiveTab}
                       />
                     )}
                     {activeTab === 'search' && (
