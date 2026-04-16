@@ -203,6 +203,7 @@ const Index = () => {
     messages: 'Mensagens',
     settings: 'Configurações',
     available: 'Disponíveis agora',
+    communities: 'Comunidades',
   };
 
   // Fully responsive mobile layout
