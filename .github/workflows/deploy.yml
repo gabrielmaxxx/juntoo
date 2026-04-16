@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      # --- Opção A: Deploy no Netlify ---
+      # - name: Deploy to Netlify
+      #   uses: nwtgck/actions-netlify@v3
+      #   with:
+      #     publish-dir: ./dist
+      #     production-deploy: true
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      # --- Opção B: Deploy no Vercel ---
+      # - name: Deploy to Vercel
+      #   uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+      #     vercel-args: '--prod'
+
+  smoke-test:
+    name: Smoke Test
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deploy propagation
+        run: sleep 30
+
+      - name: Health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.DEPLOY_URL || 'https://juntoo.lovable.app' }}")
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Smoke test falhou! Status: $STATUS"
+            exit 1
+          fi
+          echo "✅ Smoke test OK — Status: $STATUS"
+
+      - name: Notify success
+        if: success()
+        run: echo "🚀 Deploy realizado com sucesso!"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "🔴 Deploy falhou! Verifique os logs."
