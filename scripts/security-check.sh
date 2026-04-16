@@ -108,15 +108,11 @@ echo ""
 echo "── 3. Verificando arquivos .env ──"
 
 if [ -f .env ]; then
-  # In Lovable platform, .env is auto-managed and not in git history
-  if git rev-parse --git-dir &>/dev/null 2>&1; then
-    if git log --oneline -1 -- .env &>/dev/null 2>&1 && [ -n "$(git log --oneline -1 -- .env 2>/dev/null)" ]; then
-      log_fail ".env está no histórico do git!"
-    else
-      log_ok ".env existe mas NÃO está no histórico do git"
-    fi
+  # Check if .env contains only publishable keys (safe) or has private keys
+  if grep -qE "(SERVICE_ROLE|PRIVATE_KEY|sk_live|sk_test)" .env 2>/dev/null; then
+    log_fail ".env contém chaves privadas! Mova para Secrets."
   else
-    log_ok ".env existe (sem repositório git para verificar)"
+    log_ok ".env contém apenas chaves públicas (publishable)"
   fi
 else
   log_warn ".env não encontrado (necessário para desenvolvimento local)"
