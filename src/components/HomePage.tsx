@@ -33,6 +33,7 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
   const trendingEvents = homeData?.trending ?? [];
   const nearbyEvents = homeData?.nearby ?? [];
   const loadingNearby = loadingHome;
+  const { data: myCommunities = [] } = useMyCommunities();
 
   const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
