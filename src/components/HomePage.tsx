@@ -20,9 +20,10 @@ interface HomePageProps {
   currentUser?: {
     name: string;
   };
+  onTabChange?: (tab: string) => void;
 }
 
-export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
+export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePageProps) => {
   const { profile, user } = useAuth();
   const userName = currentUser?.name || 'Usuário';
 
