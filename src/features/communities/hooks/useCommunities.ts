@@ -113,12 +113,27 @@ export function useCommunityDetails(communityId: string | null) {
       if (!communityId) return [];
       const { data, error } = await supabase
         .from('community_members')
-        .select('*, profiles:user_id(full_name, avatar_url)')
+        .select('*')
         .eq('community_id', communityId)
         .eq('status', 'approved')
         .order('joined_at', { ascending: true });
       if (error) throw error;
-      return (data || []) as CommunityMember[];
+      
+      // Fetch profiles for members
+      const userIds = (data || []).map((m: any) => m.user_id);
+      let profiles: any[] = [];
+      if (userIds.length > 0) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', userIds);
+        profiles = profileData || [];
+      }
+      
+      return (data || []).map((m: any) => ({
+        ...m,
+        profiles: profiles.find((p: any) => p.user_id === m.user_id) || { full_name: 'Usuário', avatar_url: null },
+      })) as CommunityMember[];
     },
     enabled: !!communityId,
   });
