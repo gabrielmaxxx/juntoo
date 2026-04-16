@@ -119,15 +119,12 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
       {/* My Communities */}
       {myCommunities.length > 0 && (
         <section className="px-5" aria-label="Minhas Comunidades">
-          <SectionHeader
-            title="Comunidades"
-            subtitle="Seus grupos"
-            action={
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => onTabChange?.('communities')}>
-                Ver todas <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-              </Button>
-            }
-          />
+          <div className="flex items-center justify-between">
+            <SectionHeader title="Comunidades" subtitle="Seus grupos" />
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => onTabChange?.('communities')}>
+              Ver todas <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+            </Button>
+          </div>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide mt-3 -mx-5 px-5 pb-1">
             {myCommunities.slice(0, 5).map(c => (
               <button
