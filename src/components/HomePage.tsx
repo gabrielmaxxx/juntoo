@@ -111,7 +111,7 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
 
       {/* Spontaneous Mode */}
       <section className="px-5" aria-label="Modo Espontâneo">
-        <ImAvailableButton />
+        <ImAvailableButton onViewAvailable={() => onTabChange?.('available')} />
       </section>
 
       {/* Divider */}
