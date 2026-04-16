@@ -3,6 +3,7 @@ import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
 import { ImAvailableButton } from '@/features/availability';
+import { useMyCommunities } from '@/features/communities';
 import { Separator } from './ui/separator';
 import { SectionDivider } from './ui/section-divider';
 import { SectionHeader } from './ui/section-header';
