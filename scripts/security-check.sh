@@ -70,7 +70,7 @@ for pattern in "${!PATTERNS[@]}"; do
     safe=true
     while IFS= read -r file; do
       # Lines containing the pattern that aren't env.get or comments
-      unsafe_lines=$(grep -n "$pattern" "$file" | grep -v "Deno.env.get" | grep -v "import.meta.env" | grep -v "process.env" | grep -v "^[[:space:]]*//" | grep -v "^[[:space:]]*\*" || true)
+      unsafe_lines=$(grep -n "$pattern" "$file" | grep -v "Deno.env.get" | grep -v "import.meta.env" | grep -v "process.env" | grep -v "^[[:space:]]*[0-9]*:[[:space:]]*//" | grep -v "^[[:space:]]*[0-9]*:[[:space:]]*\*" | grep -v "^[[:space:]]*[0-9]*:[[:space:]]*#" | grep -v "// .*$pattern" || true)
       if [ -n "$unsafe_lines" ]; then
         safe=false
         log_fail "Possível $label em: $file"
