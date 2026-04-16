@@ -78,11 +78,11 @@ export const AvailableNow = ({ onBack, onCreateQuickEvent, onNavigateToMessages 
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <UserAvatar
-                    name={user.full_name}
-                    avatarUrl={user.avatar_url}
-                    size="md"
-                  />
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={user.avatar_url || undefined} alt={user.full_name} />
+                    <AvatarFallback>{user.full_name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
                   <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
                 </div>
                 <div className="flex-1 min-w-0">
