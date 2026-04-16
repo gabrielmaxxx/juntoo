@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, MessageSquare, Users, Zap, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { UserAvatar } from '@/components/UserAvatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAvailability, AvailableUser } from '../hooks/useAvailability';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
