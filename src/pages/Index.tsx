@@ -24,6 +24,7 @@ const ProfilePage = lazy(() => import('@/components/ProfilePage').then(m => ({ d
 const CreateEventPage = lazy(() => import('@/components/CreateEventPage').then(m => ({ default: m.CreateEventPage })));
 const MessagesPage = lazy(() => import('@/components/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const SettingsPage = lazy(() => import('@/components/settings').then(m => ({ default: m.SettingsPage })));
+const AvailableNow = lazy(() => import('@/features/availability/pages/AvailableNow').then(m => ({ default: m.AvailableNow })));
 
 const TabLoadingFallback = () => (
   <div className="p-4 space-y-4">
@@ -200,6 +201,7 @@ const Index = () => {
     create: 'Criar evento',
     messages: 'Mensagens',
     settings: 'Configurações',
+    available: 'Disponíveis agora',
   };
 
   // Fully responsive mobile layout
@@ -258,6 +260,15 @@ const Index = () => {
                     )}
                     {activeTab === 'settings' && (
                       <SettingsPage onBack={() => setActiveTab('home')} />
+                    )}
+                    {activeTab === 'available' && (
+                      <AvailableNow
+                        onBack={() => setActiveTab('home')}
+                        onCreateQuickEvent={() => setActiveTab('create')}
+                        onNavigateToMessages={(userId) => {
+                          setSearchParams({ tab: 'messages', userId });
+                        }}
+                      />
                     )}
                   </Suspense>
                 </ErrorBoundary>
