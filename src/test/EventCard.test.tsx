@@ -2,8 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { default as EventCardModule } from "@/components/EventCard";
-const EventCard = EventCardModule || (await import("@/components/EventCard")).EventCard;
+import { EventCard } from "@/components/EventCard";
 
 // Mock framer-motion to avoid animation issues in tests
 vi.mock("framer-motion", () => ({
