@@ -90,9 +90,9 @@ export const ImAvailableButton = ({ onViewAvailable }: ImAvailableButtonProps) =
         </div>
 
         {availableCount > 0 && (
-          <p className="text-xs text-primary mt-2 font-medium">
-            🎯 {availableCount} {availableCount === 1 ? 'pessoa disponível' : 'pessoas disponíveis'} perto de você!
-          </p>
+          <button onClick={onViewAvailable} className="text-xs text-primary mt-2 font-medium hover:underline text-left w-full">
+            🎯 {availableCount} {availableCount === 1 ? 'pessoa disponível' : 'pessoas disponíveis'} perto de você! →
+          </button>
         )}
       </motion.div>
     );
