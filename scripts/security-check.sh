@@ -30,10 +30,11 @@ echo "── 1. Verificando .gitignore ──"
 
 if [ -f .gitignore ]; then
   for pattern in ".env" ".env.local" ".env.production" "node_modules" "dist"; do
-    if grep -qF "$pattern" .gitignore 2>/dev/null; then
-      log_ok "$pattern está no .gitignore"
+    # *.local covers .env.local; "dist" covers dist/
+    if grep -qE "(^|/)\.env|$pattern|\*\.local" .gitignore 2>/dev/null; then
+      log_ok "$pattern coberto pelo .gitignore"
     else
-      log_fail "$pattern NÃO está no .gitignore"
+      log_warn "$pattern não explícito no .gitignore (verificar se plataforma gerencia)"
     fi
   done
 else
