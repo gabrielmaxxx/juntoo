@@ -122,6 +122,118 @@ export type Database = {
         }
         Relationships: []
       }
+      communities: {
+        Row: {
+          avatar_url: string | null
+          category: string
+          city: string | null
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          is_public: boolean
+          member_count: number
+          name: string
+          rules: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          category: string
+          city?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name: string
+          rules?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name?: string
+          rules?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["community_member_role"]
+          status: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["community_member_role"]
+          status?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["community_member_role"]
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_messages: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_messages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -800,6 +912,62 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_community_events: {
+        Row: {
+          category: string
+          community_id: string
+          created_at: string
+          day_of_week: number
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string
+          max_participants: number | null
+          recurrence: Database["public"]["Enums"]["community_recurrence"]
+          time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          community_id: string
+          created_at?: string
+          day_of_week: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location: string
+          max_participants?: number | null
+          recurrence?: Database["public"]["Enums"]["community_recurrence"]
+          time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          community_id?: string
+          created_at?: string
+          day_of_week?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          max_participants?: number | null
+          recurrence?: Database["public"]["Enums"]["community_recurrence"]
+          time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_community_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           category: Database["public"]["Enums"]["report_category"]
@@ -1321,6 +1489,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_community_admin: {
+        Args: { p_community_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_community_member: {
+        Args: { p_community_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_conversation_member: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -1341,6 +1517,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "super_admin"
+      community_member_role: "admin" | "member"
+      community_recurrence: "weekly" | "biweekly" | "monthly"
       report_category:
         | "harassment"
         | "hate_speech"
@@ -1481,6 +1659,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "super_admin"],
+      community_member_role: ["admin", "member"],
+      community_recurrence: ["weekly", "biweekly", "monthly"],
       report_category: [
         "harassment",
         "hate_speech",

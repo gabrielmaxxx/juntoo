@@ -66,3 +66,4 @@ Updated: now
 - [Audit Logging](mem://tecnico/sistema-de-logs-e-auditoria) — activity_logs capturing IPs/JSON metadata for logins, deletions, and reports
 - [Success Metrics](mem://visao-projeto/metricas-sucesso) — North Star event completion funnel tracked via get_platform_metrics RPC
 - [Spontaneous Mode](mem://funcionalidades/modo-espontaneo) — 2h availability with city+interest matching, pg_cron cleanup, realtime sync
+- [Communities System](mem://funcionalidades/sistema-comunidades) — Groups with roles, chat, recurring events, public/private, RLS with SECURITY DEFINER helpers
