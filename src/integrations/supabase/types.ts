@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      availability: {
+        Row: {
+          city: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          interests: string[]
+          is_active: boolean
+          location_lat: number | null
+          location_lng: number | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          location_lat?: number | null
+          location_lng?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_verifications: {
         Row: {
           cnpj: string
@@ -1212,11 +1248,28 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      cleanup_expired_availability: { Args: never; Returns: undefined }
       find_or_create_conversation: {
         Args: { other_user_id: string }
         Returns: string
       }
       generate_private_code: { Args: never; Returns: string }
+      get_available_users: {
+        Args: { p_city?: string; p_interests?: string[]; p_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          common_interests: string[]
+          created_at: string
+          expires_at: string
+          full_name: string
+          id: string
+          interests: string[]
+          location_lat: number
+          location_lng: number
+          user_id: string
+        }[]
+      }
       get_complete_schema: { Args: never; Returns: Json }
       get_friends_events: {
         Args: { p_limit?: number; p_user_id: string }

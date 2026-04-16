@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
+import { ImAvailableButton } from '@/features/availability';
 import { Separator } from './ui/separator';
 import { SectionDivider } from './ui/section-divider';
 import { SectionHeader } from './ui/section-header';
@@ -19,9 +20,10 @@ interface HomePageProps {
   currentUser?: {
     name: string;
   };
+  onTabChange?: (tab: string) => void;
 }
 
-export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
+export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePageProps) => {
   const { profile, user } = useAuth();
   const userName = currentUser?.name || 'Usuário';
 
@@ -105,6 +107,11 @@ export const HomePage = ({ onEventClick, currentUser }: HomePageProps) => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Spontaneous Mode */}
+      <section className="px-5" aria-label="Modo Espontâneo">
+        <ImAvailableButton onViewAvailable={() => onTabChange?.('available')} />
       </section>
 
       {/* Divider */}
