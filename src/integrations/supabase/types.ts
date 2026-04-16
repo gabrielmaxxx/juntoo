@@ -830,6 +830,27 @@ export type Database = {
           },
         ]
       }
+      user_achievements: {
+        Row: {
+          badge_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_consents: {
         Row: {
           accepted_privacy_version: string
@@ -1185,7 +1206,12 @@ export type Database = {
         Args: { p_moderator_id: string; p_verification_id: string }
         Returns: undefined
       }
+      calculate_reputation_score: { Args: { p_user_id: string }; Returns: Json }
       can_send_notification: { Args: { p_user_id: string }; Returns: boolean }
+      check_and_grant_achievements: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       find_or_create_conversation: {
         Args: { other_user_id: string }
         Returns: string

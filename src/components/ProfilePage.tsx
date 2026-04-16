@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { CATEGORIES } from '@/constants/categories';
 import { useProfileData } from '@/hooks/useProfileData';
 import { useUserReputation } from '@/hooks/useUserReputation';
+import { useReputationScore } from '@/hooks/useReputationScore';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { ReputationSection } from '@/components/reputation';
+import { ReputationSection, ReputationScore, AchievementBadges } from '@/components/reputation';
 import {
   ProfileHeader,
   ProfileEditDialog,
@@ -29,6 +30,7 @@ export const ProfilePage = () => {
   } = useProfileData();
 
   const { stats, reviews: reputationReviews, badges, loading: loadingReputation } = useUserReputation(profile?.user_id);
+  const { scoreData, achievements, loading: loadingScore } = useReputationScore(profile?.user_id);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
@@ -170,6 +172,8 @@ export const ProfilePage = () => {
           </TabsList>
 
           <TabsContent value="reputation" className="mt-0">
+            <ReputationScore scoreData={scoreData} loading={loadingScore} />
+            <AchievementBadges achievements={achievements} loading={loadingScore} />
             <ReputationSection stats={stats} reviews={reputationReviews} badges={badges} loading={loadingReputation} />
           </TabsContent>
 
