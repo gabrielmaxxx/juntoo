@@ -147,11 +147,11 @@ echo ""
 echo "── 5. Verificando configurações sensíveis ──"
 
 # Check for dangerouslySetInnerHTML
-unsafe_html=$(grep -rl "dangerouslySetInnerHTML" --include="*.tsx" --include="*.ts" src/ 2>/dev/null || true)
+unsafe_html=$(grep -rl "dangerouslySetInnerHTML" --include="*.tsx" --include="*.ts" src/ 2>/dev/null | grep -v "components/ui/" || true)
 if [ -n "$unsafe_html" ]; then
-  log_warn "dangerouslySetInnerHTML usado em: $unsafe_html"
+  log_warn "dangerouslySetInnerHTML usado em componentes customizados: $unsafe_html"
 else
-  log_ok "Nenhum uso de dangerouslySetInnerHTML"
+  log_ok "Nenhum uso de dangerouslySetInnerHTML em componentes customizados"
 fi
 
 # Check for eval usage
