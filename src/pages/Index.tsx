@@ -25,6 +25,7 @@ const CreateEventPage = lazy(() => import('@/components/CreateEventPage').then(m
 const MessagesPage = lazy(() => import('@/components/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const SettingsPage = lazy(() => import('@/components/settings').then(m => ({ default: m.SettingsPage })));
 const AvailableNow = lazy(() => import('@/features/availability/pages/AvailableNow').then(m => ({ default: m.AvailableNow })));
+const CommunitiesTab = lazy(() => import('@/features/communities/index').then(m => ({ default: m.CommunitiesTab })));
 
 const TabLoadingFallback = () => (
   <div className="p-4 space-y-4">
