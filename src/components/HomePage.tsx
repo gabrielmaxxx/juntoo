@@ -116,6 +116,44 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
         <ImAvailableButton onViewAvailable={() => onTabChange?.('available')} />
       </section>
 
+      {/* My Communities */}
+      {myCommunities.length > 0 && (
+        <section className="px-5" aria-label="Minhas Comunidades">
+          <SectionHeader
+            title="Comunidades"
+            subtitle="Seus grupos"
+            action={
+              <Button variant="ghost" size="sm" className="text-xs" onClick={() => onTabChange?.('communities')}>
+                Ver todas <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              </Button>
+            }
+          />
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide mt-3 -mx-5 px-5 pb-1">
+            {myCommunities.slice(0, 5).map(c => (
+              <button
+                key={c.id}
+                onClick={() => onTabChange?.(`communities`)}
+                className="flex flex-col items-center gap-1.5 shrink-0 w-16"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                  {c.name.charAt(0)}
+                </div>
+                <span className="text-[10px] text-muted-foreground truncate w-full text-center">{c.name}</span>
+              </button>
+            ))}
+            <button
+              onClick={() => onTabChange?.('communities')}
+              className="flex flex-col items-center gap-1.5 shrink-0 w-16"
+            >
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                <ChevronRight className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] text-muted-foreground">Mais</span>
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
 
