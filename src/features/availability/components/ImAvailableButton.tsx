@@ -7,7 +7,11 @@ import { useAvailability } from '../hooks/useAvailability';
 import { CATEGORIES } from '@/constants/categories';
 import { cn } from '@/lib/utils';
 
-export const ImAvailableButton = () => {
+interface ImAvailableButtonProps {
+  onViewAvailable?: () => void;
+}
+
+export const ImAvailableButton = ({ onViewAvailable }: ImAvailableButtonProps) => {
   const { profile } = useAuth();
   const {
     isAvailable,
