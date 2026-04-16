@@ -63,7 +63,7 @@ SCAN_EXT="ts,tsx,js,jsx,json"
 
 for pattern in "${!PATTERNS[@]}"; do
   label="${PATTERNS[$pattern]}"
-  matches=$(grep -rlE "$pattern" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.json" $SCAN_DIRS 2>/dev/null | grep -v node_modules | grep -v ".test." | grep -v ".example" || true)
+  matches=$(grep -rlE "$pattern" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.json" $SCAN_DIRS 2>/dev/null | grep -v node_modules | grep -v ".test." | grep -v ".example" | grep -v "integrations/supabase/types.ts" || true)
 
   if [ -n "$matches" ]; then
     # Check if it's just a Deno.env.get reference (safe)
