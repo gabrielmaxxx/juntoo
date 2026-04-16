@@ -4,14 +4,23 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EventCard } from "@/components/EventCard";
 
-// Mock framer-motion to avoid animation issues in tests
-vi.mock("framer-motion", () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-  },
-  AnimatePresence: ({ children }: any) => <>{children}</>,
-}));
+// Mock framer-motion
+vi.mock("framer-motion", () => {
+  const handler = {
+    get(_: any, tag: string) {
+      return ({ children, ...props }: any) => {
+        const { whileHover, whileTap, whileInView, initial, animate, exit, transition, variants, ...rest } = props;
+        const Tag = tag as any;
+        return <Tag {...rest}>{children}</Tag>;
+      };
+    },
+  };
+  return {
+    motion: new Proxy({}, handler),
+    AnimatePresence: ({ children }: any) => <>{children}</>,
+    useInView: () => true,
+  };
+});
 
 const mockEvent = {
   id: "test-123",
