@@ -260,12 +260,22 @@ export function useCommunityChat(communityId: string | null) {
       if (!communityId) return [];
       const { data, error } = await supabase
         .from('community_messages')
-        .select('*, profiles:user_id(full_name, avatar_url)')
+        .select('*')
         .eq('community_id', communityId)
         .order('created_at', { ascending: true })
         .limit(100);
       if (error) throw error;
-      return data || [];
+      
+      const userIds = [...new Set((data || []).map((m: any) => m.user_id))];
+      let profiles: any[] = [];
+      if (userIds.length > 0) {
+        const { data: p } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', userIds);
+        profiles = p || [];
+      }
+      return (data || []).map((m: any) => ({
+        ...m,
+        profiles: profiles.find((p: any) => p.user_id === m.user_id) || { full_name: 'Usuário', avatar_url: null },
+      }));
     },
     enabled: !!communityId,
   });
