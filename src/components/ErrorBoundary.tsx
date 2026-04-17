@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -34,6 +34,11 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
+  private handleGoHome = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.href = '/';
+  };
+
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -47,18 +52,19 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-8 h-8 text-destructive" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
-              Algo deu errado
+              Ops! Algo não saiu como esperado
             </h1>
             <p className="text-muted-foreground mb-6">
-              Ocorreu um erro inesperado. Por favor, tente novamente.
+              Tivemos um problema inesperado. Você pode tentar novamente ou voltar ao início.
             </p>
-            <div className="flex gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button variant="outline" onClick={this.handleRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Tentar novamente
               </Button>
-              <Button onClick={this.handleReload}>
-                Recarregar página
+              <Button onClick={this.handleGoHome}>
+                <Home className="w-4 h-4 mr-2" />
+                Voltar ao início
               </Button>
             </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
