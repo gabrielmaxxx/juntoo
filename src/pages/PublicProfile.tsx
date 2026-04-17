@@ -56,10 +56,11 @@ const PublicProfile = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <EmptyState
-          icon="🔍"
+          icon={<span className="text-4xl">🔍</span>}
           title="Perfil não encontrado"
           description="Este usuário não existe ou alterou seu nome de usuário."
-          action={<Button onClick={() => navigate('/')}>Ir para a home</Button>}
+          actionLabel="Ir para a home"
+          onAction={() => navigate('/')}
         />
       </div>
     );
@@ -179,8 +180,7 @@ const PublicProfile = () => {
 
               <h1 className="text-2xl font-bold mt-4 flex items-center justify-center gap-2">
                 {data.full_name}
-                {data.verified && <VerifiedBadge type="user" />}
-                {data.business_verified && <VerifiedBadge type="business" />}
+                <VerifiedBadge verified={data.verified} businessVerified={data.business_verified} />
               </h1>
 
               {data.username && (
