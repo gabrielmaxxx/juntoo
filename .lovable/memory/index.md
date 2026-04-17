@@ -48,6 +48,7 @@ Updated: now
 - [Event Coordination Chat](mem://funcionalidades/chat-eventos-coordenacao) — Pinned messages, automated welcomes, and post-event read-only mode
 - [Calendar Sharing](mem://funcionalidades/compartilhamento-calendario) — Web Share API hooks and .ics export compilation for external calendars
 - [User Profiles](mem://funcionalidades/perfil-e-identidade-usuario) — Bio limits, Trust Score, merit badges, and transparent active penalties
+- [Public Profiles & OG Image](mem://funcionalidades/perfis-publicos-og-image) — /u/:handle shareable pages with dynamic Satori-generated 1200x630 OG image edge function
 - [Social Friends](mem://funcionalidades/social-amigos) — Connection requests, database trigger COALESCE fallbacks, and suggestions
 - [Trust & Reputation System](mem://funcionalidades/sistema-reputacao-confianca) — Internal rep (0-100) vs Public Score (0-5), KYC bonuses, and badges
 - [Moderation System](mem://funcionalidades/sistema-moderacao-e-seguranca) — Strike system, auto-suspensions based on rep dips, and evidence bucket

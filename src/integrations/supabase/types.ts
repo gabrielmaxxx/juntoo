@@ -843,6 +843,7 @@ export type Database = {
           updated_at: string
           user_id: string
           user_number: number
+          username: string | null
           verification_level: number
           verified: boolean
         }
@@ -860,6 +861,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           user_number?: number
+          username?: string | null
           verification_level?: number
           verified?: boolean
         }
@@ -877,6 +879,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_number?: number
+          username?: string | null
           verification_level?: number
           verified?: boolean
         }
@@ -1478,6 +1481,11 @@ export type Database = {
       }
       get_moderation_stats: { Args: never; Returns: Json }
       get_platform_metrics: { Args: never; Returns: Json }
+      get_public_profile_by_id: { Args: { p_user_id: string }; Returns: Json }
+      get_public_profile_by_username: {
+        Args: { p_username: string }
+        Returns: Json
+      }
       get_reported_users: { Args: never; Returns: Json }
       get_unread_counts: { Args: { p_user_id: string }; Returns: Json }
       get_user_reputation: { Args: { target_user_id: string }; Returns: Json }

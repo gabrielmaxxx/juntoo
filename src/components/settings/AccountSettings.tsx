@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { UsernameSettings } from './UsernameSettings';
 
 interface AccountSettingsProps {
   onBack: () => void;
@@ -105,6 +106,9 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </CardContent>
         </Card>
+
+        {/* Public Username */}
+        <UsernameSettings />
 
         {/* Change Password */}
         <Card>
