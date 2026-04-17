@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { lazy, Suspense } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -15,6 +16,7 @@ import { queryClient } from "./lib/queryClient";
 
 // Lazy-loaded pages (not needed on initial render)
 const UserProfilePage = lazy(() => import("./pages/UserProfilePage"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const FriendSuggestionsPage = lazy(() => import("./components/FriendSuggestionsPage").then(m => ({ default: m.FriendSuggestionsPage })));
 const AuthPage = lazy(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
