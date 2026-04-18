@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
+import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar, Sparkles, Plus, Compass } from 'lucide-react';
 import { ImAvailableButton } from '@/features/availability';
 import { useMyCommunities } from '@/features/communities';
 import { Separator } from './ui/separator';
@@ -11,6 +11,7 @@ import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useFriendsEvents } from '@/hooks/useEvents';
 import { useHomeData } from '@/hooks/useHomeData';
+import { useFeaturedEvents } from '@/hooks/useFeaturedEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -34,8 +35,15 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
   const nearbyEvents = homeData?.nearby ?? [];
   const loadingNearby = loadingHome;
   const { data: myCommunities = [] } = useMyCommunities();
+  const { data: featuredEvents = [], isLoading: loadingFeatured } = useFeaturedEvents(5);
 
   const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
+
+  const hasAnyEvents =
+    featuredEvents.length > 0 ||
+    trendingEvents.length > 0 ||
+    nearbyEvents.length > 0 ||
+    friendsEvents.length > 0;
 
   // Show toast feedback when geolocation state changes
   const prevGeoState = useRef({ latitude, geoError, geoLoading });
