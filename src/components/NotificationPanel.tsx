@@ -172,16 +172,19 @@ export const NotificationPanel = ({ open, onOpenChange, onEventClick }: Notifica
 
         <ScrollArea className="flex-1 px-4 pb-4">
           {filteredNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-primary opacity-60" />
+            <div className="flex flex-col items-center justify-center h-72 text-center gap-3 px-6 animate-fade-in">
+              <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center relative">
+                <Bell className="w-9 h-9 text-primary" aria-hidden="true" />
+                <span className="absolute -top-2 -right-2 text-2xl animate-bounce" aria-hidden="true">🔔</span>
               </div>
               <div>
-                <p className="font-heading font-semibold text-foreground">Tudo em dia!</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="font-heading font-semibold text-foreground text-base">
+                  {filter === 'all' ? 'Nada por aqui ainda' : 'Tudo em dia nessa categoria'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-[260px] leading-relaxed">
                   {filter === 'all'
-                    ? 'Quando algo acontecer, você verá aqui.'
-                    : 'Nenhuma notificação nesta categoria.'}
+                    ? 'Quando alguém confirmar num evento seu ou criar algo do seu interesse, você vai ver aqui.'
+                    : 'Volte mais tarde para conferir novidades.'}
                 </p>
               </div>
             </div>
