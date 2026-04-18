@@ -162,14 +162,21 @@ export const EventCard = ({
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); haptic('light'); shareEvent(event); }}
+              className="p-1.5 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 focus-highlight"
+              aria-label="Compartilhar evento"
+            >
+              <Share2 className="w-4 h-4" aria-hidden="true" />
+            </button>
             {showPinButton && (
               <button
                 onClick={handlePinClick}
                 className={cn(
                   "p-1.5 rounded-full transition-all duration-200 focus-highlight",
-                  isPinned 
-                    ? "bg-primary/10 text-primary" 
+                  isPinned
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 aria-label={isPinned ? "Desafixar evento" : "Fixar evento"}
@@ -179,8 +186,8 @@ export const EventCard = ({
               </button>
             )}
             {event.creatorAvatar && (
-              <LazyImage 
-                src={event.creatorAvatar} 
+              <LazyImage
+                src={event.creatorAvatar}
                 alt={event.creatorName || 'Criador'}
                 className="w-6 h-6 rounded-full flex-shrink-0 ring-2 ring-background"
                 aspectRatio="square"
