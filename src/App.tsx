@@ -59,6 +59,7 @@ const App = () => (
                     <Route path="/friend-suggestions" element={<Suspense fallback={<PageFallback />}><FriendSuggestionsPage /></Suspense>} />
                     <Route path="/termos" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
                     <Route path="/events/join/:privateCode" element={<Index />} />
+                    <Route path="/eventos/:eventId" element={<Index />} />
 
                     {/* Admin Backoffice */}
                     <Route path="/admin" element={<Suspense fallback={<PageFallback />}><AdminLayout /></Suspense>}>

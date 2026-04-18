@@ -5,6 +5,8 @@ import { EVENT_LIST_COLUMNS } from '@/lib/eventColumns';
 
 const PAGE_SIZE = 10;
 
+export type EventSortBy = 'date_asc' | 'recent' | 'most_vacancies';
+
 interface FetchEventsParams {
   pageParam?: number;
   filters: {
@@ -14,17 +16,33 @@ interface FetchEventsParams {
     city: string;
     date: Date | undefined;
     priceRange: 'all' | 'free' | 'paid';
+    sortBy?: EventSortBy;
+    hasAvailability?: boolean;
+    today?: boolean;
   };
 }
 
 const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
+  const todayStr = new Date().toISOString().split('T')[0];
+
   let query = supabase
     .from('events_with_details')
     .select(EVENT_LIST_COLUMNS)
     .eq('is_private', false)
-    .gte('date', new Date().toISOString().split('T')[0])
-    .order('date', { ascending: true })
-    .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
+    .gte('date', todayStr);
+
+  // Sorting
+  const sortBy = filters.sortBy || 'date_asc';
+  if (sortBy === 'recent') {
+    query = query.order('created_at', { ascending: false });
+  } else if (sortBy === 'most_vacancies') {
+    // Approximate: events with explicit max + fewer participants come first
+    query = query.order('participants_count', { ascending: true });
+  } else {
+    query = query.order('date', { ascending: true }).order('time', { ascending: true });
+  }
+
+  query = query.range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
 
   // Server-side text search using ilike
   if (filters.text) {
@@ -36,15 +54,12 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     query = query.eq('category', filters.category);
   }
 
-  if (filters.state) {
-    query = query.eq('state', filters.state);
-  }
+  if (filters.state) query = query.eq('state', filters.state);
+  if (filters.city) query = query.ilike('city', `%${filters.city}%`);
 
-  if (filters.city) {
-    query = query.eq('city', filters.city);
-  }
-
-  if (filters.date) {
+  if (filters.today) {
+    query = query.eq('date', todayStr);
+  } else if (filters.date) {
     const dateStr = filters.date.toISOString().split('T')[0];
     query = query.eq('date', dateStr);
   }
@@ -56,10 +71,9 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
   }
 
   const { data, error } = await query;
-
   if (error) throw error;
 
-  const events: Event[] = (data || []).map(event => ({
+  let events: Event[] = (data || []).map((event: any) => ({
     id: event.id!,
     title: event.title || '',
     category: event.category || '',
@@ -78,7 +92,15 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     isRecurring: event.is_recurring || false,
     averageRating: event.average_rating || undefined,
     reviewCount: event.review_count || 0,
+    maxParticipants: event.max_participants || undefined,
   }));
+
+  // Client-side "with vacancies" filter (max_participants null = unlimited)
+  if (filters.hasAvailability) {
+    events = events.filter(
+      (e) => !e.maxParticipants || (e.participantsCount ?? 0) < e.maxParticipants
+    );
+  }
 
   return {
     events,
@@ -92,6 +114,6 @@ export const useInfiniteEvents = (filters: FetchEventsParams['filters']) => {
     queryFn: ({ pageParam }) => fetchEvents({ pageParam, filters }),
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };

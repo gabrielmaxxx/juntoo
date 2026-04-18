@@ -12,6 +12,8 @@ import { LazyImage } from './ui/lazy-image';
 import { useFriendsEvents } from '@/hooks/useEvents';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useFeaturedEvents } from '@/hooks/useFeaturedEvents';
+import { useUpcomingSoonEvents } from '@/hooks/useUpcomingSoonEvents';
+import { UpcomingSoonSection } from './UpcomingSoonSection';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -36,6 +38,10 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
   const loadingNearby = loadingHome;
   const { data: myCommunities = [] } = useMyCommunities();
   const { data: featuredEvents = [], isLoading: loadingFeatured } = useFeaturedEvents(5);
+
+  // Default city: geolocation > profile city
+  const activeCity = geoCity || profile?.city || null;
+  const { data: upcomingSoon = [] } = useUpcomingSoonEvents(activeCity, 6);
 
   const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
@@ -95,6 +101,28 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
           O que vamos fazer hoje?
         </p>
       </header>
+
+      {/* Active city banner */}
+      {activeCity && (
+        <div className="px-5 -mt-4">
+          <button
+            onClick={() => onTabChange?.('search')}
+            className="w-full bg-primary/10 hover:bg-primary/15 transition-colors rounded-xl px-3 py-2 flex items-center justify-between gap-2 text-left"
+            aria-label={`Exibindo atividades em ${activeCity}. Toque para mudar.`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPinned className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+              <span className="text-xs text-foreground truncate">
+                Exibindo atividades em <span className="font-semibold">{activeCity}</span>
+              </span>
+            </div>
+            <span className="text-xs text-primary font-medium flex-shrink-0">Mudar</span>
+          </button>
+        </div>
+      )}
+
+      {/* Upcoming Soon (next 48h) */}
+      <UpcomingSoonSection events={upcomingSoon} onEventClick={onEventClick} />
 
       {/* Daily Mission */}
       <section className="px-5" aria-label="Missão do Dia">
