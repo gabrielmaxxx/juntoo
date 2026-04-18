@@ -162,6 +162,54 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
 
+      {/* Featured (curated by Juntoo team) */}
+      {featuredEvents.length > 0 && (
+        <section aria-label="Atividades em destaque">
+          <div className="px-5 mb-4">
+            <SectionHeader
+              title="Em destaque"
+              subtitle="Selecionado pela equipe Juntoo"
+              icon={<Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />}
+            />
+          </div>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex gap-4 px-5 pb-2">
+              {featuredEvents.map((event) => (
+                <article
+                  key={event.id}
+                  className="flex-shrink-0 w-72 cursor-pointer group"
+                  onClick={() => onEventClick(event)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && onEventClick(event)}
+                  aria-label={`${event.title} em ${event.location}`}
+                >
+                  <div className="relative rounded-2xl overflow-hidden h-44 ring-2 ring-primary/30" style={{ boxShadow: 'var(--shadow-elevated)' }}>
+                    <LazyImage
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" aria-hidden="true" />
+                    <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-primary-foreground" />
+                      <span className="text-[10px] font-bold text-primary-foreground uppercase tracking-wide">Destaque</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-primary-foreground">
+                      <h3 className="font-bold text-base mb-0.5 line-clamp-1">{event.title}</h3>
+                      <p className="text-xs text-white/80 flex items-center gap-1">
+                        <MapPinned className="w-3 h-3" aria-hidden="true" />
+                        {event.location}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {homeError ? (
         <section className="px-5" aria-label="Erro ao carregar eventos em alta">
           <QueryErrorState message="Não foi possível carregar eventos em alta." onRetry={refetchHome} compact />
