@@ -489,6 +489,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_featured: boolean
           is_private: boolean | null
           is_recurring: boolean | null
           location: string
@@ -512,6 +513,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           is_private?: boolean | null
           is_recurring?: boolean | null
           location: string
@@ -535,6 +537,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           is_private?: boolean | null
           is_recurring?: boolean | null
           location?: string
