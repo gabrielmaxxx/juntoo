@@ -39,7 +39,7 @@ const TabLoadingFallback = () => (
 const Index = () => {
   const { user, profile, loading, isBanned, isSuspended, restrictions, signOut } = useAuthContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { privateCode } = useParams<{ privateCode: string }>();
+  const { privateCode, eventId: eventIdParam } = useParams<{ privateCode: string; eventId: string }>();
   const [showSplash, setShowSplash] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -53,17 +53,19 @@ const Index = () => {
 
   const activeTab = searchParams.get('tab') || 'home';
 
-  // Handle ?event=ID query param (from shared links)
+  // Handle ?event=ID query param OR /eventos/:eventId path (from shared links)
   useEffect(() => {
-    const eventId = searchParams.get('event');
+    const eventId = eventIdParam || searchParams.get('event');
     if (eventId && user) {
       handleEventClickById(eventId);
-      // Remove the param after processing
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('event');
-      setSearchParams(newParams, { replace: true });
+      // Remove the query param after processing (path stays as-is)
+      if (searchParams.get('event')) {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('event');
+        setSearchParams(newParams, { replace: true });
+      }
     }
-  }, [user, searchParams]);
+  }, [user, searchParams, eventIdParam]);
 
   const setActiveTab = (tab: string) => {
     if (tab === 'home') {
