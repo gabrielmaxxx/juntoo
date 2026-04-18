@@ -393,17 +393,24 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
           <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-fade-in">
             <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5 relative">
               <Search className="w-9 h-9 text-primary" aria-hidden="true" />
-              <span className="absolute -top-2 -right-2 text-2xl" aria-hidden="true">🔍</span>
+              <span className="absolute -top-2 -right-2 text-2xl animate-bounce" aria-hidden="true">🔍</span>
             </div>
-            <h2 className="text-lg font-bold text-foreground mb-2">Nenhum evento por aqui</h2>
+            <h2 className="text-lg font-bold text-foreground mb-2">Nenhuma atividade encontrada</h2>
             <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed mb-6">
               {filters.text
-                ? `Não encontramos eventos para "${filters.text}". Que tal tentar outra busca?`
-                : 'Tente ajustar os filtros ou explore outras categorias.'}
+                ? `Não achamos nada para "${filters.text}". Tente outros filtros ou seja o primeiro a criar esta atividade!`
+                : 'Tente outros filtros ou seja o primeiro a criar uma atividade na sua cidade!'}
             </p>
-            <Button variant="outline" onClick={clearFilters}>
-              Limpar filtros e ver tudo
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full max-w-[280px]">
+              {activeFiltersCount > 0 || filters.text ? (
+                <Button variant="outline" onClick={clearFilters} className="flex-1">
+                  Limpar filtros
+                </Button>
+              ) : null}
+              <Button onClick={() => window.dispatchEvent(new CustomEvent('open-create-event'))} className="flex-1">
+                Criar atividade
+              </Button>
+            </div>
           </div>
         ) : (
           <>
