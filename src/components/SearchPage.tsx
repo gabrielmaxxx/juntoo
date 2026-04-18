@@ -22,6 +22,7 @@ import { LazyImage } from '@/components/ui/lazy-image';
 
 interface SearchPageProps {
   onEventClick: (event: Event) => void;
+  onCreateEvent?: () => void;
 }
 
 interface SearchFilters {
@@ -35,7 +36,7 @@ interface SearchFilters {
 
 const SEARCH_CATEGORIES = ['Todos', ...CATEGORIES];
 
-export const SearchPage = ({ onEventClick }: SearchPageProps) => {
+export const SearchPage = ({ onEventClick, onCreateEvent }: SearchPageProps) => {
   const BRAZIL_STATES_AND_CITIES = useCities();
   const { user, profile } = useAuth();
   const { data: recommendedEvents = [], isLoading: loadingRecommended } = useRecommendedEvents(
@@ -407,7 +408,7 @@ export const SearchPage = ({ onEventClick }: SearchPageProps) => {
                   Limpar filtros
                 </Button>
               ) : null}
-              <Button onClick={() => window.dispatchEvent(new CustomEvent('open-create-event'))} className="flex-1">
+              <Button onClick={() => onCreateEvent?.()} className="flex-1">
                 Criar atividade
               </Button>
             </div>
