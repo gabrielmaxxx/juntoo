@@ -102,6 +102,28 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
         </p>
       </header>
 
+      {/* Active city banner */}
+      {activeCity && (
+        <div className="px-5 -mt-4">
+          <button
+            onClick={() => onTabChange?.('search')}
+            className="w-full bg-primary/10 hover:bg-primary/15 transition-colors rounded-xl px-3 py-2 flex items-center justify-between gap-2 text-left"
+            aria-label={`Exibindo atividades em ${activeCity}. Toque para mudar.`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPinned className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+              <span className="text-xs text-foreground truncate">
+                Exibindo atividades em <span className="font-semibold">{activeCity}</span>
+              </span>
+            </div>
+            <span className="text-xs text-primary font-medium flex-shrink-0">Mudar</span>
+          </button>
+        </div>
+      )}
+
+      {/* Upcoming Soon (next 48h) */}
+      <UpcomingSoonSection events={upcomingSoon} onEventClick={onEventClick} />
+
       {/* Daily Mission */}
       <section className="px-5" aria-label="Missão do Dia">
         <div className="juntoo-gradient rounded-2xl p-5 relative overflow-hidden animate-fade-in" style={{ boxShadow: 'var(--shadow-elevated)' }}>
