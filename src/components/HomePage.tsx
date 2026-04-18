@@ -12,6 +12,8 @@ import { LazyImage } from './ui/lazy-image';
 import { useFriendsEvents } from '@/hooks/useEvents';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useFeaturedEvents } from '@/hooks/useFeaturedEvents';
+import { useUpcomingSoonEvents } from '@/hooks/useUpcomingSoonEvents';
+import { UpcomingSoonSection } from './UpcomingSoonSection';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -36,6 +38,10 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
   const loadingNearby = loadingHome;
   const { data: myCommunities = [] } = useMyCommunities();
   const { data: featuredEvents = [], isLoading: loadingFeatured } = useFeaturedEvents(5);
+
+  // Default city: geolocation > profile city
+  const activeCity = geoCity || profile?.city || null;
+  const { data: upcomingSoon = [] } = useUpcomingSoonEvents(activeCity, 6);
 
   const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
 
