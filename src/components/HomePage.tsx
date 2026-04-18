@@ -405,6 +405,34 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
         </section>
       )}
 
+      {/* Global empty state — shown only when there's truly nothing */}
+      {!loading && !loadingFeatured && !hasAnyEvents && (
+        <section className="px-5" aria-label="Nenhuma atividade ainda">
+          <div className="bg-card rounded-3xl p-8 text-center animate-fade-in" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-5 relative">
+              <Sparkles className="w-9 h-9 text-primary" aria-hidden="true" />
+              <span className="absolute -top-2 -right-2 text-2xl animate-bounce" aria-hidden="true">✨</span>
+            </div>
+            <h2 className="text-lg font-bold text-foreground mb-2">
+              Seja o primeiro a criar uma atividade aqui!
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto leading-relaxed mb-6">
+              {geoCity ? `${geoCity} ainda está acordando no Juntoo.` : 'Sua cidade ainda está acordando no Juntoo.'} Que tal começar você?
+            </p>
+            <div className="flex flex-col gap-2 max-w-[260px] mx-auto">
+              <Button onClick={() => onTabChange?.('create')} className="w-full gap-2">
+                <Plus className="w-4 h-4" />
+                Criar uma atividade
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onTabChange?.('search')} className="w-full gap-2">
+                <Compass className="w-4 h-4" />
+                Explorar outras cidades
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
     </div>
   );
 };
