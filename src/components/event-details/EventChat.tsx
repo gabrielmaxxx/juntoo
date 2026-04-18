@@ -266,9 +266,10 @@ export const EventChat = ({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendWithRateLimit()}
-              placeholder={rateLimited ? "Aguarde um momento..." : "Digite sua mensagem..."}
+              placeholder={rateLimited ? "Aguarde um momento..." : messages.length === 0 ? "Manda um oi! 👋" : "Digite sua mensagem..."}
               className="flex-1"
               disabled={rateLimited}
+              autoFocus={messages.length === 0}
             />
             <Button 
               onClick={handleSendWithRateLimit} 
