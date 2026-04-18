@@ -239,7 +239,7 @@ const Index = () => {
                       />
                     )}
                     {activeTab === 'search' && (
-                      <SearchPage onEventClick={handleEventClick} />
+                      <SearchPage onEventClick={handleEventClick} onCreateEvent={() => setActiveTab('create')} />
                     )}
                     {activeTab === 'activities' && (
                       <ActivitiesPage 

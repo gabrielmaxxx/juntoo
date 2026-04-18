@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar } from 'lucide-react';
+import { Flame, ChevronRight, ShieldCheck, MapPinned, Calendar, Sparkles, Plus, Compass } from 'lucide-react';
 import { ImAvailableButton } from '@/features/availability';
 import { useMyCommunities } from '@/features/communities';
 import { Separator } from './ui/separator';
@@ -11,6 +11,7 @@ import { HomePageSkeleton } from './skeletons';
 import { LazyImage } from './ui/lazy-image';
 import { useFriendsEvents } from '@/hooks/useEvents';
 import { useHomeData } from '@/hooks/useHomeData';
+import { useFeaturedEvents } from '@/hooks/useFeaturedEvents';
 import { useGeolocation, formatDistance } from '@/hooks/useGeolocation';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -34,8 +35,15 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
   const nearbyEvents = homeData?.nearby ?? [];
   const loadingNearby = loadingHome;
   const { data: myCommunities = [] } = useMyCommunities();
+  const { data: featuredEvents = [], isLoading: loadingFeatured } = useFeaturedEvents(5);
 
   const { data: friendsEvents = [], isLoading: loadingFriends, isError: friendsError, refetch: refetchFriends } = useFriendsEvents(user?.id, 3);
+
+  const hasAnyEvents =
+    featuredEvents.length > 0 ||
+    trendingEvents.length > 0 ||
+    nearbyEvents.length > 0 ||
+    friendsEvents.length > 0;
 
   // Show toast feedback when geolocation state changes
   const prevGeoState = useRef({ latitude, geoError, geoLoading });
@@ -153,6 +161,54 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
 
       {/* Divider */}
       <div className="px-5"><Separator className="bg-border/60" /></div>
+
+      {/* Featured (curated by Juntoo team) */}
+      {featuredEvents.length > 0 && (
+        <section aria-label="Atividades em destaque">
+          <div className="px-5 mb-4">
+            <SectionHeader
+              title="Em destaque"
+              subtitle="Selecionado pela equipe Juntoo"
+              icon={<Sparkles className="w-5 h-5 text-primary" aria-hidden="true" />}
+            />
+          </div>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex gap-4 px-5 pb-2">
+              {featuredEvents.map((event) => (
+                <article
+                  key={event.id}
+                  className="flex-shrink-0 w-72 cursor-pointer group"
+                  onClick={() => onEventClick(event)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && onEventClick(event)}
+                  aria-label={`${event.title} em ${event.location}`}
+                >
+                  <div className="relative rounded-2xl overflow-hidden h-44 ring-2 ring-primary/30" style={{ boxShadow: 'var(--shadow-elevated)' }}>
+                    <LazyImage
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" aria-hidden="true" />
+                    <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-primary-foreground" />
+                      <span className="text-[10px] font-bold text-primary-foreground uppercase tracking-wide">Destaque</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-primary-foreground">
+                      <h3 className="font-bold text-base mb-0.5 line-clamp-1">{event.title}</h3>
+                      <p className="text-xs text-white/80 flex items-center gap-1">
+                        <MapPinned className="w-3 h-3" aria-hidden="true" />
+                        {event.location}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {homeError ? (
         <section className="px-5" aria-label="Erro ao carregar eventos em alta">
@@ -346,6 +402,34 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
               </p>
             </div>
           )}
+        </section>
+      )}
+
+      {/* Global empty state — shown only when there's truly nothing */}
+      {!loading && !loadingFeatured && !hasAnyEvents && (
+        <section className="px-5" aria-label="Nenhuma atividade ainda">
+          <div className="bg-card rounded-3xl p-8 text-center animate-fade-in" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-5 relative">
+              <Sparkles className="w-9 h-9 text-primary" aria-hidden="true" />
+              <span className="absolute -top-2 -right-2 text-2xl animate-bounce" aria-hidden="true">✨</span>
+            </div>
+            <h2 className="text-lg font-bold text-foreground mb-2">
+              Seja o primeiro a criar uma atividade aqui!
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto leading-relaxed mb-6">
+              {geoCity ? `${geoCity} ainda está acordando no Juntoo.` : 'Sua cidade ainda está acordando no Juntoo.'} Que tal começar você?
+            </p>
+            <div className="flex flex-col gap-2 max-w-[260px] mx-auto">
+              <Button onClick={() => onTabChange?.('create')} className="w-full gap-2">
+                <Plus className="w-4 h-4" />
+                Criar uma atividade
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onTabChange?.('search')} className="w-full gap-2">
+                <Compass className="w-4 h-4" />
+                Explorar outras cidades
+              </Button>
+            </div>
+          </div>
         </section>
       )}
 

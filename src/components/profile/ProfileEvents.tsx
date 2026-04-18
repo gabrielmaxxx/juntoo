@@ -1,7 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar, MapPin, CalendarDays } from 'lucide-react';
 import { Event } from '@/types';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface ProfileEventsProps {
   events: Event[];
@@ -10,6 +12,8 @@ interface ProfileEventsProps {
 }
 
 export const ProfileEvents = ({ events, loading, type }: ProfileEventsProps) => {
+  const [, setSearchParams] = useSearchParams();
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -20,9 +24,22 @@ export const ProfileEvents = ({ events, loading, type }: ProfileEventsProps) => 
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>{type === 'upcoming' ? 'Nenhum evento próximo' : 'Nenhum evento no histórico'}</p>
-      </div>
+      <EmptyState
+        icon={<CalendarDays className="w-9 h-9 text-primary" aria-hidden="true" />}
+        emoji="📅"
+        title={
+          type === 'upcoming'
+            ? 'Você ainda não participou de nenhuma atividade'
+            : 'Nenhum evento no histórico ainda'
+        }
+        description={
+          type === 'upcoming'
+            ? 'Explore atividades perto de você e comece sua história no Juntoo!'
+            : 'Quando você participar de eventos, eles aparecerão aqui como memórias.'
+        }
+        actionLabel="Explorar atividades"
+        onAction={() => setSearchParams({ tab: 'search' })}
+      />
     );
   }
 

@@ -155,9 +155,16 @@ export const EventChat = ({
 
       <ScrollArea className="flex-1 p-4">
         {messages.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">
-              Seja o primeiro a enviar uma mensagem!
+          <div className="flex flex-col items-center justify-center text-center py-12 px-6 animate-fade-in">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 relative">
+              <Send className="w-7 h-7 text-primary" aria-hidden="true" />
+              <span className="absolute -top-1 -right-1 text-xl animate-bounce" aria-hidden="true">🎉</span>
+            </div>
+            <p className="font-semibold text-foreground text-sm mb-1">
+              Você foi o primeiro a chegar!
+            </p>
+            <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">
+              Manda um oi para quebrar o gelo com quem chegar.
             </p>
           </div>
         ) : (
@@ -259,9 +266,10 @@ export const EventChat = ({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendWithRateLimit()}
-              placeholder={rateLimited ? "Aguarde um momento..." : "Digite sua mensagem..."}
+              placeholder={rateLimited ? "Aguarde um momento..." : messages.length === 0 ? "Manda um oi! 👋" : "Digite sua mensagem..."}
               className="flex-1"
               disabled={rateLimited}
+              autoFocus={messages.length === 0}
             />
             <Button 
               onClick={handleSendWithRateLimit} 
