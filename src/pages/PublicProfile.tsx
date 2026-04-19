@@ -1,11 +1,12 @@
 /**
  * Public Profile Page (sem autenticação obrigatória)
  *
- * Rota: /u/:handle  (handle = username OU userId UUID)
+ * Rotas: /u/:handle  e  /perfil/:handle  (handle = username OU userId UUID)
  *
- * Exibe foto, nome, cidade, bio, reputação, interesses, badges e
- * eventos públicos criados. Inclui meta tags Open Graph apontando para
- * a Edge Function `og-image` que renderiza um cartão dinâmico 1200x630.
+ * Exibe foto, nome, cidade, bio, reputação, interesses, badges, eventos
+ * públicos criados e últimos 3 eventos participados. Inclui meta tags
+ * Open Graph apontando para a Edge Function `og-image` que renderiza
+ * um cartão dinâmico 1200x630.
  */
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -17,10 +18,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
-import { MapPin, Calendar, UserPlus, MessageCircle, Lock, Download, Sparkles } from 'lucide-react';
+import {
+  MapPin,
+  Calendar,
+  UserPlus,
+  MessageCircle,
+  Lock,
+  Download,
+  Sparkles,
+  CheckCircle,
+  Star,
+  Trophy,
+} from 'lucide-react';
 import { usePublicProfile } from '@/features/profile/hooks/usePublicProfile';
 import { getReputationLevel, BADGE_DEFINITIONS } from '@/hooks/useReputationScore';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { ProfileMenu } from '@/components/profile/ProfileMenu';
+import { CommonInterestsBanner } from '@/components/profile/CommonInterestsBanner';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -30,6 +45,7 @@ const PublicProfile = () => {
   const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile: myProfile } = useAuthContext();
   const { data, isLoading } = usePublicProfile(handle);
 
   // OG image URL — public Edge Function
@@ -47,6 +63,7 @@ const PublicProfile = () => {
           <Skeleton className="h-8 w-48 mx-auto" />
           <Skeleton className="h-4 w-32 mx-auto" />
           <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
     );
@@ -90,16 +107,19 @@ const PublicProfile = () => {
   const level = getReputationLevel(data.reputation.score);
   const pageTitle = `${data.full_name} no Juntoo${data.city ? ` — ${data.city}` : ''}`;
   const pageDescription = `Conheça ${data.full_name}, ${level.name} com ${data.reputation.events_attended} evento${data.reputation.events_attended === 1 ? '' : 's'} realizado${data.reputation.events_attended === 1 ? '' : 's'} na plataforma Juntoo.`;
-  const canonicalUrl = `https://juntoo.lovable.app/u/${data.username || data.user_id}`;
+  const canonicalUrl = `https://juntoo.lovable.app/perfil/${data.username || data.user_id}`;
 
   const isOwnProfile = user?.id === data.user_id;
+  const memberSince = data.created_at
+    ? format(parseISO(data.created_at), "MMM 'de' yyyy", { locale: ptBR })
+    : null;
+  const isGoogleAccount = data.auth_provider === 'google';
 
   const handleFollow = () => {
     if (!user) {
       navigate('/auth');
       return;
     }
-    // Navigate to authenticated user profile page (request friendship there)
     navigate(`/user/${data.user_id}`);
   };
 
@@ -134,7 +154,7 @@ const PublicProfile = () => {
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={ogImageUrl} />
 
-        {/* JSON-LD structured data */}
+        {/* JSON-LD */}
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
@@ -155,14 +175,21 @@ const PublicProfile = () => {
             background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)',
           }}
         >
-          <div className="max-w-2xl mx-auto text-center">
-            <Link to="/" className="inline-block text-primary-foreground/90 font-bold text-2xl mb-6">
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <Link to="/" className="text-primary-foreground/90 font-bold text-2xl">
               Juntoo
             </Link>
+            {!isOwnProfile && user && (
+              <ProfileMenu
+                targetUserId={data.user_id}
+                targetName={data.full_name}
+                onBlocked={() => navigate('/')}
+              />
+            )}
           </div>
         </header>
 
-        <div className="max-w-2xl mx-auto px-4 -mt-16 pb-20 space-y-6">
+        <div className="max-w-2xl mx-auto px-4 -mt-16 pb-20 space-y-4">
           {/* Profile card */}
           <Card>
             <CardContent className="p-6 text-center">
@@ -178,7 +205,7 @@ const PublicProfile = () => {
                 </AvatarFallback>
               </Avatar>
 
-              <h1 className="text-2xl font-bold mt-4 flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-bold mt-4 flex items-center justify-center gap-2 flex-wrap">
                 {data.full_name}
                 <VerifiedBadge verified={data.verified} businessVerified={data.business_verified} />
               </h1>
@@ -187,26 +214,61 @@ const PublicProfile = () => {
                 <p className="text-sm text-muted-foreground">@{data.username}</p>
               )}
 
+              {/* Trust signals row */}
+              <div className="flex items-center justify-center gap-3 mt-2 flex-wrap text-xs text-muted-foreground">
+                {data.email_confirmed && (
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-500" />
+                    Email confirmado
+                  </span>
+                )}
+                {isGoogleAccount && (
+                  <span className="inline-flex items-center gap-1">
+                    <span
+                      aria-hidden="true"
+                      className="inline-block w-3.5 h-3.5 rounded-full bg-gradient-to-br from-[#4285F4] via-[#EA4335] to-[#FBBC05]"
+                    />
+                    Conta Google
+                  </span>
+                )}
+                {memberSince && (
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Membro desde {memberSince}
+                  </span>
+                )}
+              </div>
+
               {data.city && (
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-2">
                   <MapPin className="w-3.5 h-3.5" />
                   {data.city}
                 </p>
               )}
 
-              {/* Reputation badge */}
+              {/* Reputation badges */}
               <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
                 <Badge className={`${level.bg} ${level.color} border-0 text-sm`}>
                   ⭐ {level.name}
                 </Badge>
-                <Badge variant="outline">
-                  {data.reputation.events_attended} evento
-                  {data.reputation.events_attended === 1 ? '' : 's'}
+                <Badge variant="outline" className="gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {data.reputation.events_attended} participação
+                  {data.reputation.events_attended === 1 ? '' : 'ões'}
                 </Badge>
                 {data.reputation.events_created > 0 && (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="gap-1">
+                    <Trophy className="w-3 h-3" />
                     {data.reputation.events_created} criado
                     {data.reputation.events_created === 1 ? '' : 's'}
+                  </Badge>
+                )}
+                {data.reputation.positive_reviews > 0 && (
+                  <Badge variant="outline" className="gap-1">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    {data.reputation.positive_reviews} avaliaç
+                    {data.reputation.positive_reviews === 1 ? 'ão' : 'ões'} positiva
+                    {data.reputation.positive_reviews === 1 ? '' : 's'}
                   </Badge>
                 )}
               </div>
@@ -215,9 +277,9 @@ const PublicProfile = () => {
                 <p className="text-sm text-foreground mt-4 max-w-md mx-auto">{data.bio}</p>
               )}
 
-              {/* Action buttons (only when not own profile) */}
+              {/* Action buttons */}
               {!isOwnProfile && (
-                <div className="flex gap-2 justify-center mt-6">
+                <div className="flex gap-2 justify-center mt-6 flex-wrap">
                   <Button onClick={handleFollow} size="sm">
                     <UserPlus className="w-4 h-4 mr-2" />
                     Conectar
@@ -231,16 +293,28 @@ const PublicProfile = () => {
             </CardContent>
           </Card>
 
+          {/* Common interests banner (only when logged in) */}
+          {!isOwnProfile && user && (
+            <CommonInterestsBanner
+              myInterests={myProfile?.interests}
+              theirInterests={data.interests}
+              theirFirstName={data.full_name.split(' ')[0]}
+            />
+          )}
+
           {/* Interests */}
           {data.interests && data.interests.length > 0 && (
             <Card>
               <CardContent className="p-5">
                 <h2 className="font-semibold mb-3">Interesses</h2>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {data.interests.map((interest) => (
-                    <Badge key={interest} variant="secondary">
+                    <div
+                      key={interest}
+                      className="px-3 py-2 rounded-lg bg-secondary/60 text-sm text-secondary-foreground text-center font-medium"
+                    >
                       {interest}
-                    </Badge>
+                    </div>
                   ))}
                 </div>
               </CardContent>
@@ -260,11 +334,7 @@ const PublicProfile = () => {
                     const def = BADGE_DEFINITIONS.find((b) => b.id === ach.badge_id);
                     if (!def) return null;
                     return (
-                      <div
-                        key={ach.badge_id}
-                        className="text-center"
-                        title={def.description}
-                      >
+                      <div key={ach.badge_id} className="text-center" title={def.description}>
                         <div className="text-3xl">{def.icon}</div>
                         <div className="text-[10px] text-muted-foreground mt-1 line-clamp-1">
                           {def.name}
@@ -277,19 +347,62 @@ const PublicProfile = () => {
             </Card>
           )}
 
+          {/* Recent participated events — prova social de uso real do app */}
+          {data.recent_participated_events && data.recent_participated_events.length > 0 && (
+            <Card>
+              <CardContent className="p-5">
+                <h2 className="font-semibold mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  Participações recentes
+                </h2>
+                <div className="space-y-2">
+                  {data.recent_participated_events.map((event) => (
+                    <Link
+                      key={event.id}
+                      to={`/eventos/${event.id}`}
+                      className="flex gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      {event.image_url ? (
+                        <img
+                          src={event.image_url}
+                          alt={event.title}
+                          loading="lazy"
+                          className="w-14 h-14 rounded-md object-cover shrink-0"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center shrink-0">
+                          <Calendar className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(parseISO(event.date), "d 'de' MMM", { locale: ptBR })} · {event.time}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          📍 {event.location}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Public events created */}
           {data.public_events.length > 0 && (
             <Card>
               <CardContent className="p-5">
                 <h2 className="font-semibold mb-3 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
+                  <Trophy className="w-4 h-4 text-primary" />
                   Eventos criados
                 </h2>
                 <div className="space-y-2">
                   {data.public_events.map((event) => (
                     <Link
                       key={event.id}
-                      to={`/?event=${event.id}`}
+                      to={`/eventos/${event.id}`}
                       className="flex gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
                     >
                       {event.image_url && (
@@ -297,11 +410,11 @@ const PublicProfile = () => {
                           src={event.image_url}
                           alt={event.title}
                           loading="lazy"
-                          className="w-16 h-16 rounded-md object-cover shrink-0"
+                          className="w-14 h-14 rounded-md object-cover shrink-0"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{event.title}</p>
+                        <p className="font-medium text-sm truncate">{event.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {format(parseISO(event.date), "d 'de' MMM", { locale: ptBR })} · {event.time}
                         </p>
