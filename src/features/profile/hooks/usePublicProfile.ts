@@ -43,6 +43,9 @@ export interface PublicProfileData {
   };
   achievements: { badge_id: string; unlocked_at: string }[];
   public_events: PublicProfileEvent[];
+  recent_participated_events?: PublicProfileEvent[];
+  auth_provider?: string;
+  email_confirmed?: boolean;
   private?: boolean;
 }
 
