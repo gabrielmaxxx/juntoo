@@ -9,12 +9,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle } from 'lucide-react';
+import { ArrowLeft, UserPlus, UserMinus, UserCheck, MessageCircle, Calendar, Star } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/verified-badge';
-import { ReportButton } from '@/components/reports';
 import { ReputationSection, TrustScoreBadge, computeTrustScore5 } from '@/components/reputation';
 import { useUserReputation } from '@/hooks/useUserReputation';
 import { useConversations } from '@/hooks/useDirectMessages';
+import { ProfileMenu } from '@/components/profile/ProfileMenu';
+import { CommonInterestsBanner } from '@/components/profile/CommonInterestsBanner';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { format, parseISO as parseISODate } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { parseISO, addHours, isBefore } from 'date-fns';
 import type { Event } from '@/types';
@@ -28,6 +32,7 @@ interface Profile {
   verified?: boolean;
   business_verified?: boolean;
   bio?: string;
+  created_at?: string;
 }
 
 type FriendshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted';
@@ -36,6 +41,7 @@ export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile: myProfile } = useAuthContext();
   const { startConversation } = useConversations();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
@@ -267,19 +273,41 @@ export default function UserProfilePage() {
     }
   };
 
+  const memberSince = profile.created_at
+    ? format(parseISODate(profile.created_at), "MMM 'de' yyyy", { locale: ptBR })
+    : null;
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      
+
       <div className="container mx-auto px-4 py-8 pb-24 max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6 gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </Button>
+          {userId && (
+            <ProfileMenu
+              targetUserId={userId}
+              targetName={profile.full_name}
+              onBlocked={() => navigate('/?tab=home')}
+            />
+          )}
+        </div>
+
+        {/* Common interests banner */}
+        <div className="mb-4">
+          <CommonInterestsBanner
+            myInterests={myProfile?.interests}
+            theirInterests={profile.interests}
+            theirFirstName={profile.full_name.split(' ')[0]}
+          />
+        </div>
 
         <Card className="mb-8">
           <CardContent className="pt-6">
@@ -309,17 +337,32 @@ export default function UserProfilePage() {
                   </div>
                 )}
                 {profile.city && (
-                  <p className="text-muted-foreground mb-2">{profile.city}</p>
+                  <p className="text-muted-foreground mb-1 text-sm">{profile.city}</p>
+                )}
+                {memberSince && (
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center justify-center md:justify-start gap-1">
+                    <Calendar className="w-3 h-3" />
+                    Membro desde {memberSince}
+                  </p>
                 )}
 
-                {/* Stats */}
+                {/* Stats: rating + participações + criados */}
                 {stats && (
-                  <div className="flex gap-4 mb-3 justify-center md:justify-start text-sm text-muted-foreground">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3 justify-center md:justify-start text-sm text-muted-foreground">
+                    {stats.total_reviews > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                        <strong className="text-foreground">{stats.average_overall.toFixed(1)}</strong>
+                        <span>({stats.total_reviews})</span>
+                      </span>
+                    )}
                     <span><strong className="text-foreground">{stats.events_attended}</strong> participações</span>
-                    <span><strong className="text-foreground">{stats.total_reviews}</strong> avaliações</span>
+                    {events.filter(e => !isEventCompleted(e)).length + events.filter(isEventCompleted).length > 0 && (
+                      <span><strong className="text-foreground">{events.length}</strong> eventos públicos</span>
+                    )}
                   </div>
                 )}
-                
+
                 {profile.interests && profile.interests.length > 0 && (
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                     {profile.interests.map((interest) => (
@@ -342,19 +385,13 @@ export default function UserProfilePage() {
                     if (convId) {
                       navigate(`/?tab=messages&conv=${convId}&userId=${userId}`);
                     } else {
-                      toast.error('Erro ao iniciar conversa');
+                      toast.error('Não foi possível iniciar a conversa. Tente novamente.');
                     }
                   }}
                 >
                   <MessageCircle className="w-4 h-4" />
                   Enviar Mensagem
                 </Button>
-                <ReportButton
-                  reportedUserId={userId}
-                  contextLabel={`Denunciar perfil: ${profile.full_name}`}
-                  showLabel
-                  variant="outline"
-                />
               </div>
             </div>
           </CardContent>
