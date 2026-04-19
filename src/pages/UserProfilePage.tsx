@@ -32,6 +32,7 @@ interface Profile {
   verified?: boolean;
   business_verified?: boolean;
   bio?: string;
+  created_at?: string;
 }
 
 type FriendshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'accepted';
@@ -40,6 +41,7 @@ export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile: myProfile } = useAuthContext();
   const { startConversation } = useConversations();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
