@@ -222,7 +222,7 @@ export const AuthPage = () => {
       return;
     }
 
-    if (!acceptedTerms || !acceptedPrivacy) {
+    if (!acceptedTerms) {
       toast({
         title: "Consentimento necessário",
         description: "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.",

@@ -60,6 +60,7 @@ const App = () => (
                     <Route path="/user/:userId" element={<Suspense fallback={<PageFallback />}><UserProfilePage /></Suspense>} />
                     <Route path="/friend-suggestions" element={<Suspense fallback={<PageFallback />}><FriendSuggestionsPage /></Suspense>} />
                     <Route path="/termos" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
+                    <Route path="/privacidade" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
                     <Route path="/events/join/:privateCode" element={<Index />} />
                     <Route path="/eventos/:eventId" element={<Index />} />
 
