@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { AlertTriangle, Eye, Clock, CheckCircle, XCircle, Undo2 } from 'lucide-react';
+import { AlertTriangle, Eye, Clock, CheckCircle, XCircle, Undo2, Trash2 } from 'lucide-react';
 
 const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   created: { label: 'Aberta', variant: 'destructive' },
@@ -32,6 +32,7 @@ interface Report {
   reporter_user_id: string;
   reported_user_id: string | null;
   reported_event_id: string | null;
+  reported_message_id: string | null;
   category: string;
   description: string;
   evidence_image_url: string | null;
@@ -143,6 +144,21 @@ export default function AdminReports() {
     await updateStatus('resolved');
   };
 
+  const removeEvent = async () => {
+    if (!selected?.reported_event_id || !notes.trim()) { toast.error('Informe o motivo'); return; }
+    const { error } = await supabase.from('events').delete().eq('id', selected.reported_event_id);
+    if (error) { toast.error('Erro ao remover evento'); return; }
+    await logAction('delete_reported_event', 'event', selected.reported_event_id, notes);
+    toast.success('Evento removido');
+    await updateStatus('resolved');
+  };
+
+  const targetLabel = (r: Report) => {
+    if (r.reported_message_id) return 'Mensagem';
+    if (r.reported_event_id) return 'Evento';
+    return 'Usuário';
+  };
+
   const isResolved = selected?.status === 'resolved' || selected?.status === 'dismissed';
 
   return (
@@ -181,6 +197,7 @@ export default function AdminReports() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Prioridade</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Categoria</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
@@ -192,6 +209,7 @@ export default function AdminReports() {
                 {reports.map(r => (
                   <TableRow key={r.id}>
                     <TableCell>{r.is_urgent && <AlertTriangle className="w-4 h-4 text-destructive" />}</TableCell>
+                    <TableCell><Badge variant="outline">{targetLabel(r)}</Badge></TableCell>
                     <TableCell className="text-sm">{CATEGORY_LABELS[r.category] || r.category}</TableCell>
                     <TableCell className="text-sm max-w-[200px] truncate">{r.description}</TableCell>
                     <TableCell><Badge variant={STATUS_CONFIG[r.status]?.variant}>{STATUS_CONFIG[r.status]?.label || r.status}</Badge></TableCell>
@@ -212,6 +230,7 @@ export default function AdminReports() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div><span className="text-muted-foreground">Categoria:</span> {CATEGORY_LABELS[selected.category]}</div>
+                <div><span className="text-muted-foreground">Tipo:</span> {targetLabel(selected)}</div>
                 <div><span className="text-muted-foreground">Status:</span> <Badge variant={STATUS_CONFIG[selected.status]?.variant}>{STATUS_CONFIG[selected.status]?.label}</Badge></div>
                 <div><span className="text-muted-foreground">Denunciante:</span> {reporterProfile?.full_name || 'N/A'}</div>
                 <div><span className="text-muted-foreground">Denunciado:</span> {reportedProfile?.full_name || 'N/A'}</div>
@@ -251,6 +270,11 @@ export default function AdminReports() {
                         <Button size="sm" variant="destructive" onClick={suspendUser}>Suspender</Button>
                         <Button size="sm" variant="destructive" onClick={banUser}>Banir</Button>
                       </>
+                    )}
+                    {selected.reported_event_id && (
+                      <Button size="sm" variant="destructive" onClick={removeEvent}>
+                        <Trash2 className="w-3 h-3 mr-1" />Remover evento
+                      </Button>
                     )}
                   </div>
                 </>
