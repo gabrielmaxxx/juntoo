@@ -241,7 +241,10 @@ export const AuthPage = () => {
           data: {
             full_name: fullName,
             city: `${city}, ${selectedState}`,
-            interests: selectedInterests
+            interests: selectedInterests,
+            accepted_terms_version: '1.0',
+            accepted_privacy_version: '1.0',
+            accepted_at: new Date().toISOString(),
           }
         }
       });
