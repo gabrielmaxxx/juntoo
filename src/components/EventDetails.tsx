@@ -68,9 +68,12 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showOptIn, setShowOptIn] = useState(false);
   const { shouldShowOptIn } = useNotifications();
+  const safetyAckKey = authUser ? `juntoo-safety-ack-${authUser.id}` : null;
 
   const onParticipateClick = () => {
     if (isParticipating) {
+      handleParticipate();
+    } else if (safetyAckKey && localStorage.getItem(safetyAckKey) === 'true') {
       handleParticipate();
     } else {
       setShowSafetyModal(true);
@@ -79,6 +82,7 @@ export const EventDetails = ({ event, onBack }: EventDetailsProps) => {
 
   const onSafetyAccept = async () => {
     setShowSafetyModal(false);
+    if (safetyAckKey) localStorage.setItem(safetyAckKey, 'true');
     await handleParticipate();
     // After first successful join, show opt-in if applicable
     if (shouldShowOptIn) {
