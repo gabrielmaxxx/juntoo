@@ -732,8 +732,8 @@ export const AuthPage = () => {
 
       <Button 
         type="submit" 
-        className="w-full h-12 text-base font-semibold rounded-full bg-blue-600 hover:bg-blue-700" 
-        disabled={loading || !acceptedTerms || !acceptedPrivacy || !acceptedAge}
+        className="w-full h-12 text-base font-semibold rounded-full bg-primary hover:bg-primary/90" 
+        disabled={loading || !acceptedTerms || !acceptedAge}
       >
         {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>

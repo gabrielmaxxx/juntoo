@@ -51,6 +51,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <PWAPrompt />
+                <CookieStorageNotice />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
