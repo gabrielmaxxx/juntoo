@@ -16,7 +16,7 @@ interface PrivacyDataPageProps {
 }
 
 export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile } = useAuthContext();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();

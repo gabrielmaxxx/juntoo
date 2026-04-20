@@ -45,7 +45,8 @@ const LegalPage = () => {
         {/* Meta */}
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Termos de Uso e Política de Privacidade</h1>
-          <p className="text-sm text-muted-foreground">Versão 1.0 · Última atualização: 28 de março de 2026</p>
+          <p className="text-sm text-muted-foreground">Versão 1.0 · Última atualização: Março de 2026</p>
+          <p className="text-sm text-muted-foreground">Canal LGPD: <a href="mailto:privacidade@juntoo.com.br" className="font-medium text-primary underline">privacidade@juntoo.com.br</a></p>
         </div>
 
         <Separator />

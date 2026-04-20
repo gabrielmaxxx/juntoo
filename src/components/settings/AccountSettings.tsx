@@ -78,8 +78,15 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'EXCLUIR') return;
-    // In production this would call a server-side function to fully delete the account
-    toast({ title: 'Solicitação enviada', description: 'Sua solicitação de exclusão de conta foi registrada. Entraremos em contato em breve.' });
+
+    const { error } = await supabase.functions.invoke('delete-account', { body: {} });
+
+    if (error) {
+      toast({ title: 'Erro ao excluir conta', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Conta excluída', description: 'Sua conta foi excluída. Seus dados pessoais foram removidos.' });
     setShowDeleteDialog(false);
     await signOut();
   };
