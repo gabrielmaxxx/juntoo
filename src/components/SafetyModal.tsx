@@ -1,6 +1,8 @@
 import { Shield, MapPin, Users, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react';
 
 interface SafetyModalProps {
   open: boolean;
@@ -9,11 +11,12 @@ interface SafetyModalProps {
 }
 
 export const SafetyModal = ({ open, onAccept, onCancel }: SafetyModalProps) => {
+  const [acknowledged, setAcknowledged] = useState(false);
   const tips = [
-    { icon: MapPin, text: 'Prefira locais públicos e movimentados para encontros presenciais.' },
+    { icon: MapPin, text: 'Escolha locais públicos e movimentados para encontros presenciais.' },
     { icon: Users, text: 'Avise alguém de confiança sobre onde e com quem você estará.' },
-    { icon: Lock, text: 'Não compartilhe dados pessoais sensíveis (endereço, documentos, dados bancários).' },
-    { icon: Shield, text: 'Confie nos seus instintos — se algo parecer errado, saia da situação.' },
+    { icon: Shield, text: 'Confira o perfil do organizador antes de confirmar presença.' },
+    { icon: Lock, text: 'Não compartilhe endereço, documentos ou dados bancários.' },
   ];
 
   return (
@@ -38,8 +41,13 @@ export const SafetyModal = ({ open, onAccept, onCancel }: SafetyModalProps) => {
           ))}
         </div>
 
+        <label className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm font-medium text-foreground">
+          <Checkbox checked={acknowledged} onCheckedChange={(checked) => setAcknowledged(checked === true)} />
+          Entendi
+        </label>
+
         <DialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button onClick={onAccept} className="w-full">
+          <Button onClick={onAccept} className="w-full" disabled={!acknowledged}>
             Li e concordo
           </Button>
           <Button variant="outline" onClick={onCancel} className="w-full">
