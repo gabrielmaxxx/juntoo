@@ -16,7 +16,7 @@ interface PrivacyDataPageProps {
 }
 
 export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile } = useAuthContext();
   const { toast } = useToast();
   const { logActivity } = useActivityLog();
@@ -40,31 +40,32 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
     if (!user) return;
     setExporting(true);
     try {
-      const [profileRes, eventsRes, friendsRes, consentsRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('user_id', user.id).single(),
-        supabase.from('event_participants').select('event_id, joined_at').eq('user_id', user.id),
-        supabase.from('friendships').select('*').or(`user_id.eq.${user.id},friend_id.eq.${user.id}`),
-        supabase.from('user_consents' as any).select('*').eq('user_id', user.id),
+      const [profileRes, createdEventsRes, participatedEventsRes, reviewsGivenRes, consentsRes] = await Promise.all([
+        supabase.from('profiles').select('full_name, username, bio, city, interests, created_at, updated_at').eq('user_id', user.id).single(),
+        supabase.from('events').select('id, title, category, date, time, location, city, state, created_at').eq('created_by', user.id).order('date', { ascending: false }),
+        supabase.from('event_participants').select('joined_at, event_id, events(id, title, category, date, time, location, city, state)').eq('user_id', user.id),
+        supabase.from('user_reviews').select('id, event_id, reviewed_user_id, respect_rating, punctuality_rating, reliability_rating, communication_rating, safety_rating, overall_rating, comment, created_at').eq('reviewer_user_id', user.id),
+        supabase.from('user_consents' as any).select('accepted_terms_version, accepted_privacy_version, created_at').eq('user_id', user.id),
       ]);
 
       const exportData = {
         exportDate: new Date().toISOString(),
-        profile: profileRes.data,
-        email: user.email,
-        eventsParticipated: eventsRes.data,
-        friendships: friendsRes.data,
-        consents: (consentsRes as any).data,
+        perfil: profileRes.data,
+        interesses: profileRes.data?.interests || [],
+        eventosCriados: createdEventsRes.data || [],
+        eventosParticipados: participatedEventsRes.data || [],
+        avaliacoesDadas: reviewsGivenRes.data || [],
+        consentimentos: (consentsRes as any).data || [],
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `juntoo-dados-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `juntoo-meus-dados-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
 
-      // Log the request
       await supabase.from('user_data_requests' as any).insert({
         user_id: user.id,
         request_type: 'export',
@@ -72,7 +73,7 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
         completed_at: new Date().toISOString(),
       } as any);
 
-      logActivity('data_export', { type: 'full_export' });
+      logActivity('data_export', { type: 'lgpd_export' });
       toast({ title: 'Dados exportados', description: 'Seus dados foram baixados com sucesso.' });
     } catch {
       toast({ title: 'Erro ao exportar', description: 'Tente novamente.', variant: 'destructive' });
@@ -84,18 +85,20 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'EXCLUIR' || !user) return;
 
-    await supabase.from('user_data_requests' as any).insert({
-      user_id: user.id,
-      request_type: 'deletion',
-      status: 'pending',
-    } as any);
+    const { error } = await supabase.functions.invoke('delete-account', { body: {} });
 
-    logActivity('account_deletion_request');
+    if (error) {
+      toast({ title: 'Erro ao excluir conta', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    logActivity('account_deleted_anonymized');
     toast({
-      title: 'Solicitação enviada',
-      description: 'Sua solicitação de exclusão foi registrada. Seus dados serão removidos em até 30 dias conforme a LGPD.',
+      title: 'Conta excluída',
+      description: 'Sua conta foi excluída. Seus dados pessoais foram removidos.',
     });
     setShowDeleteDialog(false);
+    await signOut();
   };
 
   const statusLabels: Record<string, string> = {
@@ -169,12 +172,12 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
               Excluir Conta
             </CardTitle>
             <CardDescription>
-              Solicita a remoção dos seus dados pessoais. Dados necessários para compliance serão anonimizados e mantidos conforme a LGPD.
+              Remove seus dados pessoais imediatamente, mantendo apenas registros anonimizados necessários para integridade e segurança do sistema.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full">
-              Solicitar exclusão de conta
+              Excluir minha conta
             </Button>
           </CardContent>
         </Card>
@@ -193,7 +196,7 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
                 <div key={req.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2">
                     {req.status === 'completed' ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
                     ) : (
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     )}

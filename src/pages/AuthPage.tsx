@@ -45,7 +45,6 @@ export const AuthPage = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
   const { toast } = useToast();
 
@@ -223,7 +222,7 @@ export const AuthPage = () => {
       return;
     }
 
-    if (!acceptedTerms || !acceptedPrivacy) {
+    if (!acceptedTerms) {
       toast({
         title: "Consentimento necessário",
         description: "Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar sua conta.",
@@ -242,7 +241,10 @@ export const AuthPage = () => {
           data: {
             full_name: fullName,
             city: `${city}, ${selectedState}`,
-            interests: selectedInterests
+            interests: selectedInterests,
+            accepted_terms_version: '1.0',
+            accepted_privacy_version: '1.0',
+            accepted_at: new Date().toISOString(),
           }
         }
       });
@@ -691,30 +693,22 @@ export const AuthPage = () => {
             id="terms"
             checked={acceptedTerms}
             onCheckedChange={(v) => setAcceptedTerms(v === true)}
+            aria-required="true"
           />
           <label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
             Li e aceito os{' '}
             <a
-              href="/termos#termos"
+              href="/termos"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-medium underline hover:text-primary/80"
               onClick={(e) => e.stopPropagation()}
             >
               Termos de Uso
-            </a>
-          </label>
-        </div>
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="privacy"
-            checked={acceptedPrivacy}
-            onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
-          />
-          <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
-            Li e aceito a{' '}
+            </a>{' '}
+            e a{' '}
             <a
-              href="/termos#privacidade"
+              href="/privacidade"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-medium underline hover:text-primary/80"
@@ -741,8 +735,8 @@ export const AuthPage = () => {
 
       <Button 
         type="submit" 
-        className="w-full h-12 text-base font-semibold rounded-full bg-blue-600 hover:bg-blue-700" 
-        disabled={loading || !acceptedTerms || !acceptedPrivacy || !acceptedAge}
+        className="w-full h-12 text-base font-semibold rounded-full bg-primary hover:bg-primary/90" 
+        disabled={loading || !acceptedTerms || !acceptedAge}
       >
         {loading ? 'Cadastrando...' : 'Cadastrar'}
       </Button>

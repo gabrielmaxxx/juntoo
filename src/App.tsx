@@ -12,6 +12,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
+import { CookieStorageNotice } from "./components/CookieStorageNotice";
 import { queryClient } from "./lib/queryClient";
 
 // Lazy-loaded pages (not needed on initial render)
@@ -50,6 +51,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <PWAPrompt />
+                <CookieStorageNotice />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
@@ -59,6 +61,7 @@ const App = () => (
                     <Route path="/user/:userId" element={<Suspense fallback={<PageFallback />}><UserProfilePage /></Suspense>} />
                     <Route path="/friend-suggestions" element={<Suspense fallback={<PageFallback />}><FriendSuggestionsPage /></Suspense>} />
                     <Route path="/termos" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
+                    <Route path="/privacidade" element={<Suspense fallback={<PageFallback />}><LegalPage /></Suspense>} />
                     <Route path="/events/join/:privateCode" element={<Index />} />
                     <Route path="/eventos/:eventId" element={<Index />} />
 
