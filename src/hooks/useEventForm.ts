@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { eventFormSchema, EventFormData, defaultEventFormData } from '@/lib/validations/eventSchema';
+import { findForbiddenEventTerm } from '@/lib/contentModeration';
 
 interface UseEventFormResult {
   formData: EventFormData;
@@ -237,6 +238,17 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
           description: "Você precisa estar logado para criar eventos.",
           variant: "destructive"
         });
+        return;
+      }
+
+      const blockedTerm = findForbiddenEventTerm([formData.title, formData.description]);
+      if (blockedTerm) {
+        toast({
+          title: "Evento não publicado",
+          description: "O título ou descrição contém termos não permitidos para eventos no Juntoo.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
         return;
       }
 
