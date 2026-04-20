@@ -156,8 +156,8 @@ export const SettingsPage = ({ onBack }: SettingsPageProps) => {
           />
           <SettingsItem
             icon={<FileText className="w-5 h-5" />}
-            label="Privacidade e Dados"
-            description="LGPD, exportação e exclusão de dados"
+            label="Meus dados"
+            description="LGPD, baixar dados e excluir conta"
             onClick={() => setView('privacy-data')}
           />
           <SettingsItem

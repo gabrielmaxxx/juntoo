@@ -45,7 +45,6 @@ export const AuthPage = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
   const { toast } = useToast();
 

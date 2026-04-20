@@ -12,6 +12,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { RealtimeCacheProvider } from "./components/RealtimeCacheProvider";
+import { CookieStorageNotice } from "./components/CookieStorageNotice";
 import { queryClient } from "./lib/queryClient";
 
 // Lazy-loaded pages (not needed on initial render)
