@@ -343,7 +343,9 @@ export const useEventDetails = (event: Event) => {
       setNewMessage(messageText);
       toast({
         title: 'Erro',
-        description: 'Não foi possível enviar a mensagem',
+        description: error instanceof Error && error.message.includes('20 mensagens')
+          ? 'Contas novas podem enviar no máximo 20 mensagens por hora.'
+          : 'Não foi possível enviar a mensagem',
         variant: 'destructive'
       });
     }
