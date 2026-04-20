@@ -196,7 +196,7 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
                 <div key={req.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2">
                     {req.status === 'completed' ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
                     ) : (
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     )}

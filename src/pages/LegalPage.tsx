@@ -11,12 +11,12 @@ const LegalPage = () => {
   const privacyRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (location.hash === '#privacidade' && privacyRef.current) {
+    if ((location.pathname === '/privacidade' || location.hash === '#privacidade') && privacyRef.current) {
       privacyRef.current.scrollIntoView({ behavior: 'smooth' });
     } else {
       window.scrollTo(0, 0);
     }
-  }, [location.hash]);
+  }, [location.pathname, location.hash]);
 
   return (
     <div className="min-h-dvh bg-background">
@@ -190,7 +190,7 @@ const LegalPage = () => {
             <p>O usuário pode entrar em contato com o Juntoo através de:</p>
             <ul>
               <li>Canal de suporte integrado ao aplicativo (Configurações → Ajuda e Suporte);</li>
-              <li>E-mail: <strong>contato@juntoo.com.br</strong></li>
+              <li>E-mail de privacidade e direitos LGPD: <strong>privacidade@juntoo.com.br</strong></li>
             </ul>
             <p>O Juntoo compromete-se a responder solicitações em até 15 (quinze) dias úteis.</p>
           </Section>
@@ -259,7 +259,7 @@ const LegalPage = () => {
           </Section>
 
           <Section title="22. Direitos do Titular">
-            <p>O usuário poderá exercer seus direitos via e-mail de privacidade do Juntoo, incluindo:</p>
+            <p>O usuário poderá exercer seus direitos pelo e-mail <strong>privacidade@juntoo.com.br</strong>, incluindo:</p>
             <ul>
               <li>Acesso aos dados;</li>
               <li>Correção de dados incompletos;</li>
