@@ -690,30 +690,22 @@ export const AuthPage = () => {
             id="terms"
             checked={acceptedTerms}
             onCheckedChange={(v) => setAcceptedTerms(v === true)}
+            aria-required="true"
           />
           <label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
             Li e aceito os{' '}
             <a
-              href="/termos#termos"
+              href="/termos"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-medium underline hover:text-primary/80"
               onClick={(e) => e.stopPropagation()}
             >
               Termos de Uso
-            </a>
-          </label>
-        </div>
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="privacy"
-            checked={acceptedPrivacy}
-            onCheckedChange={(v) => setAcceptedPrivacy(v === true)}
-          />
-          <label htmlFor="privacy" className="text-sm leading-tight cursor-pointer">
-            Li e aceito a{' '}
+            </a>{' '}
+            e a{' '}
             <a
-              href="/termos#privacidade"
+              href="/privacidade"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-medium underline hover:text-primary/80"
