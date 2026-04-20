@@ -85,18 +85,20 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'EXCLUIR' || !user) return;
 
-    await supabase.from('user_data_requests' as any).insert({
-      user_id: user.id,
-      request_type: 'deletion',
-      status: 'pending',
-    } as any);
+    const { error } = await supabase.functions.invoke('delete-account', { body: {} });
 
-    logActivity('account_deletion_request');
+    if (error) {
+      toast({ title: 'Erro ao excluir conta', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    logActivity('account_deleted_anonymized');
     toast({
-      title: 'Solicitação enviada',
-      description: 'Sua solicitação de exclusão foi registrada. Seus dados serão removidos em até 30 dias conforme a LGPD.',
+      title: 'Conta excluída',
+      description: 'Sua conta foi excluída. Seus dados pessoais foram removidos.',
     });
     setShowDeleteDialog(false);
+    await signOut();
   };
 
   const statusLabels: Record<string, string> = {
