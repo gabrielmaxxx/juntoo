@@ -172,12 +172,12 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
               Excluir Conta
             </CardTitle>
             <CardDescription>
-              Solicita a remoção dos seus dados pessoais. Dados necessários para compliance serão anonimizados e mantidos conforme a LGPD.
+              Remove seus dados pessoais imediatamente, mantendo apenas registros anonimizados necessários para integridade e segurança do sistema.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="w-full">
-              Solicitar exclusão de conta
+              Excluir minha conta
             </Button>
           </CardContent>
         </Card>
