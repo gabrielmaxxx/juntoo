@@ -10,20 +10,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-const REPORT_CATEGORIES = [
-  { value: 'harassment', label: 'Assédio ou comportamento inadequado' },
-  { value: 'hate_speech', label: 'Discurso de ódio ou linguagem ofensiva' },
-  { value: 'sexual_content', label: 'Conteúdo sexual ou explícito' },
-  { value: 'spam', label: 'Spam ou mensagens indesejadas' },
-  { value: 'fraud', label: 'Fraude ou golpe' },
-  { value: 'fake_profile', label: 'Perfil falso' },
-  { value: 'suspicious_behavior', label: 'Comportamento suspeito' },
-  { value: 'dangerous_event', label: 'Evento perigoso' },
-  { value: 'misleading_event', label: 'Evento enganoso' },
-  { value: 'other', label: 'Outro' },
-] as const;
+const REPORT_CATEGORIES_BY_TARGET = {
+  event: [
+    { value: 'misleading_event', label: 'Evento inexistente' },
+    { value: 'sexual_content', label: 'Conteúdo inapropriado' },
+    { value: 'fraud', label: 'Evento fraudulento' },
+    { value: 'spam', label: 'Spam' },
+  ],
+  user: [
+    { value: 'fake_profile', label: 'Perfil falso' },
+    { value: 'harassment', label: 'Assédio' },
+    { value: 'suspicious_behavior', label: 'Comportamento inadequado' },
+    { value: 'spam', label: 'Spam' },
+  ],
+  message: [
+    { value: 'hate_speech', label: 'Conteúdo ofensivo' },
+    { value: 'spam', label: 'Spam' },
+    { value: 'harassment', label: 'Assédio' },
+  ],
+} as const;
 
-type ReportCategory = typeof REPORT_CATEGORIES[number]['value'];
+type ReportTarget = keyof typeof REPORT_CATEGORIES_BY_TARGET;
+type ReportCategory = 'harassment' | 'hate_speech' | 'sexual_content' | 'spam' | 'fraud' | 'fake_profile' | 'suspicious_behavior' | 'dangerous_event' | 'misleading_event' | 'other';
 
 interface ReportModalProps {
   open: boolean;
@@ -48,6 +56,9 @@ export const ReportModal = ({
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const targetType: ReportTarget = reportedMessageId ? 'message' : reportedEventId ? 'event' : 'user';
+  const reportCategories = REPORT_CATEGORIES_BY_TARGET[targetType];
 
   const resetForm = () => {
     setCategory('');
@@ -125,7 +136,7 @@ export const ReportModal = ({
             </div>
             <DialogTitle className="text-xl">Obrigado</DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              Sua denúncia foi enviada e será analisada pela nossa equipe de segurança. Tomaremos as medidas necessárias.
+              Recebemos sua denúncia. Vamos analisar em até 48 horas.
             </DialogDescription>
             <Button onClick={() => handleClose(false)} className="mt-2">
               Fechar
@@ -158,7 +169,7 @@ export const ReportModal = ({
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
-                {REPORT_CATEGORIES.map((cat) => (
+                {reportCategories.map((cat) => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>
