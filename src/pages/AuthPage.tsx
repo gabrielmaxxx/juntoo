@@ -68,6 +68,16 @@ export const AuthPage = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!acceptedTerms || !acceptedAge) {
+      toast({
+        title: "Aceite necessário",
+        description: !acceptedAge
+          ? "Você precisa confirmar que tem 18 anos ou mais para continuar."
+          : "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -663,6 +673,7 @@ export const AuthPage = () => {
             </span>
           )}
         </div>
+        <PasswordStrength password={password} />
       </div>
 
       <div className="space-y-2">
