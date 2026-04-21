@@ -73,7 +73,11 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
         completed_at: new Date().toISOString(),
       } as any);
 
-      logActivity('data_export', { type: 'lgpd_export' });
+      logActivity('data_export', {
+        type: 'lgpd_export',
+        lgpd_notification_to: 'privacidade@juntoo.com.br',
+        timestamp: new Date().toISOString(),
+      });
       toast({ title: 'Dados exportados', description: 'Seus dados foram baixados com sucesso.' });
     } catch {
       toast({ title: 'Erro ao exportar', description: 'Tente novamente.', variant: 'destructive' });

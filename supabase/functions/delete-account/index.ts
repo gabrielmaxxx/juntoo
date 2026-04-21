@@ -55,9 +55,17 @@ Deno.serve(async (req) => {
     admin.from('activity_logs').insert({
       user_id: user.id,
       action: 'account_deleted_anonymized',
-      metadata: { email_removed: true },
+      metadata: {
+        email_removed: true,
+        lgpd_notification_to: 'privacidade@juntoo.com.br',
+        request_type: 'deletion',
+        timestamp: new Date().toISOString(),
+      },
     }),
   ]);
+
+  // Log LGPD data subject request for human follow-up by DPO
+  console.log(`[LGPD-NOTIFICATION] privacidade@juntoo.com.br - Solicitação de EXCLUSÃO recebida. Usuário: ${user.id} | E-mail original: ${user.email} | Data: ${new Date().toISOString()}`);
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id, false);
 
