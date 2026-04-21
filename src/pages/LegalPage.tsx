@@ -58,7 +58,8 @@ const LegalPage = () => {
           </h2>
 
           <Section title="1. Identificação e Qualificação">
-            <p>Este instrumento regula o uso da plataforma digital Juntoo, operada por [RAZÃO SOCIAL DA EMPRESA], pessoa jurídica de direito privado, inscrita no CNPJ sob nº [●], com sede em [●], doravante denominada "Juntoo".</p>
+            <p>Este instrumento regula o uso da plataforma digital Juntoo, operada por <strong>Juntoo Tecnologia Ltda.</strong> (em fase de constituição), tendo como responsável legal o fundador do projeto, com sede em <strong>Valença, Estado do Rio de Janeiro, Brasil</strong>, doravante denominada "Juntoo".</p>
+            <p>Enquanto a constituição da pessoa jurídica não for concluída, o projeto é mantido sob responsabilidade pessoal do fundador, sendo o canal oficial de contato o e-mail <a href="mailto:privacidade@juntoo.com.br" className="text-primary underline">privacidade@juntoo.com.br</a>.</p>
             <p>O Juntoo atua como:</p>
             <ul>
               <li>Provedor de Aplicação de Internet (Lei nº 12.965/2014);</li>
