@@ -58,7 +58,8 @@ const LegalPage = () => {
           </h2>
 
           <Section title="1. Identificação e Qualificação">
-            <p>Este instrumento regula o uso da plataforma digital Juntoo, operada por [RAZÃO SOCIAL DA EMPRESA], pessoa jurídica de direito privado, inscrita no CNPJ sob nº [●], com sede em [●], doravante denominada "Juntoo".</p>
+            <p>Este instrumento regula o uso da plataforma digital Juntoo, operada por <strong>Juntoo Tecnologia Ltda.</strong> (em fase de constituição), tendo como responsável legal o fundador do projeto, com sede em <strong>Valença, Estado do Rio de Janeiro, Brasil</strong>, doravante denominada "Juntoo".</p>
+            <p>Enquanto a constituição da pessoa jurídica não for concluída, o projeto é mantido sob responsabilidade pessoal do fundador, sendo o canal oficial de contato o e-mail <a href="mailto:privacidade@juntoo.com.br" className="text-primary underline">privacidade@juntoo.com.br</a>.</p>
             <p>O Juntoo atua como:</p>
             <ul>
               <li>Provedor de Aplicação de Internet (Lei nº 12.965/2014);</li>
@@ -234,6 +235,7 @@ const LegalPage = () => {
               <li>Parceiros estratégicos;</li>
               <li>Autoridades legais.</li>
             </ul>
+            <p>Os dados dos usuários são processados e armazenados pela <strong>Supabase Inc.</strong> (operadora de dados), empresa americana com sede nos Estados Unidos, que possui certificações SOC 2 Type 2 e conformidade com GDPR. Essa relação constitui transferência internacional de dados, realizada com base nas garantias previstas nos Arts. 33 e 34 da LGPD. O Supabase não comercializa dados dos usuários do Juntoo.</p>
           </Section>
 
           <Section title="19. Transferência Internacional">
@@ -259,7 +261,7 @@ const LegalPage = () => {
           </Section>
 
           <Section title="22. Direitos do Titular">
-            <p>O usuário poderá exercer seus direitos pelo e-mail <strong>privacidade@juntoo.com.br</strong>, incluindo:</p>
+            <p>O usuário poderá exercer seus direitos pelo e-mail <a href="mailto:privacidade@juntoo.com.br" className="text-primary underline font-medium">privacidade@juntoo.com.br</a>, incluindo:</p>
             <ul>
               <li>Acesso aos dados;</li>
               <li>Correção de dados incompletos;</li>
@@ -267,6 +269,11 @@ const LegalPage = () => {
               <li>Eliminação;</li>
               <li>Revogação de consentimento.</li>
             </ul>
+            <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-sm text-foreground"><strong>Encarregado de Dados (DPO):</strong> Fundador responsável pelo projeto Juntoo</p>
+              <p className="text-sm text-foreground">Canal de contato oficial: <a href="mailto:privacidade@juntoo.com.br" className="text-primary underline font-medium">privacidade@juntoo.com.br</a></p>
+              <p className="text-xs text-muted-foreground mt-1">Conforme exigido pelo Art. 41 da LGPD.</p>
+            </div>
           </Section>
 
           <Section title="23. Incidentes de Segurança">
@@ -282,7 +289,7 @@ const LegalPage = () => {
           </Section>
 
           <Section title="26. Legislação e Foro">
-            <p>Regido pelas leis do Brasil. Foro da comarca de [●] para questões não submetidas à arbitragem.</p>
+            <p>Regido pelas leis do Brasil. Foro da comarca de <strong>Valença, Estado do Rio de Janeiro</strong>, para questões não submetidas à arbitragem.</p>
           </Section>
         </section>
 

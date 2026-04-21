@@ -441,16 +441,20 @@ export const HomePage = ({ onEventClick, currentUser, onTabChange }: HomePagePro
               <Sparkles className="w-9 h-9 text-primary" aria-hidden="true" />
               <span className="absolute -top-2 -right-2 text-2xl animate-bounce" aria-hidden="true">✨</span>
             </div>
-            <h2 className="text-lg font-bold text-foreground mb-2">
+            <h2 className="text-xl font-bold text-foreground mb-2">
               Seja o primeiro a criar uma atividade aqui!
             </h2>
-            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto leading-relaxed mb-6">
-              {geoCity ? `${geoCity} ainda está acordando no Juntoo.` : 'Sua cidade ainda está acordando no Juntoo.'} Que tal começar você?
+            <p className="text-sm text-muted-foreground max-w-[300px] mx-auto leading-relaxed mb-3">
+              O Juntoo está chegando em Valença e região. Seja um dos primeiros a criar uma atividade e ajude a construir essa comunidade! 🚀
             </p>
-            <div className="flex flex-col gap-2 max-w-[260px] mx-auto">
-              <Button onClick={() => onTabChange?.('create')} className="w-full gap-2">
-                <Plus className="w-4 h-4" />
-                Criar uma atividade
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 mb-5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+              <span className="text-xs font-semibold text-primary">Seja o 1º criador de eventos na sua cidade</span>
+            </div>
+            <div className="flex flex-col gap-3 max-w-[280px] mx-auto">
+              <Button onClick={() => onTabChange?.('create')} variant="hero" size="lg" className="w-full gap-2">
+                <Plus className="w-5 h-5" />
+                Criar primeira atividade
               </Button>
               <Button variant="ghost" size="sm" onClick={() => onTabChange?.('search')} className="w-full gap-2">
                 <Compass className="w-4 h-4" />

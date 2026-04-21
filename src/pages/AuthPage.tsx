@@ -20,6 +20,45 @@ const Logo = () => (
   </div>
 );
 
+const PasswordStrength = ({ password }: { password: string }) => {
+  const checks = [
+    { label: '8+ caracteres', valid: password.length >= 8 },
+    { label: 'Letra maiúscula', valid: /[A-Z]/.test(password) },
+    { label: 'Número', valid: /[0-9]/.test(password) },
+    { label: 'Caractere especial', valid: /[^A-Za-z0-9]/.test(password) },
+  ];
+  const score = checks.filter((c) => c.valid).length;
+  const colorFor = (idx: number) => {
+    if (idx >= score) return 'bg-muted';
+    if (score <= 1) return 'bg-destructive';
+    if (score === 2) return 'bg-orange-500';
+    if (score === 3) return 'bg-yellow-500';
+    return 'bg-green-600';
+  };
+
+  if (!password) return null;
+
+  return (
+    <div className="space-y-2 pt-1" aria-live="polite">
+      <div className="flex gap-1.5" role="progressbar" aria-valuemin={0} aria-valuemax={4} aria-valuenow={score} aria-label="Força da senha">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${colorFor(i)}`} />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {checks.map((c) => (
+          <span
+            key={c.label}
+            className={`text-xs font-medium ${c.valid ? 'text-green-600' : 'text-muted-foreground'}`}
+          >
+            {c.valid ? '✓' : '○'} {c.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const AuthPage = () => {
   const [view, setView] = useState<AuthView>('login');
   // Lazy-load city data only when signup form is shown
@@ -68,6 +107,16 @@ export const AuthPage = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!acceptedTerms || !acceptedAge) {
+      toast({
+        title: "Aceite necessário",
+        description: !acceptedAge
+          ? "Você precisa confirmar que tem 18 anos ou mais para continuar."
+          : "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.",
+        variant: "destructive"
+      });
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -663,6 +712,7 @@ export const AuthPage = () => {
             </span>
           )}
         </div>
+        <PasswordStrength password={password} />
       </div>
 
       <div className="space-y-2">

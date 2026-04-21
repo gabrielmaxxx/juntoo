@@ -184,12 +184,18 @@ export const StepFirstEvent = ({ onComplete, onEventClick }: StepFirstEventProps
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 space-y-3">
-          <p className="text-sm text-muted-foreground font-body">
-            Ainda não há eventos na sua região. Que tal criar o primeiro?
-          </p>
-          <Button variant="outline" onClick={handleFinish}>
-            <Plus className="w-4 h-4 mr-2" /> Criar uma atividade
+        <div className="text-center py-6 space-y-4 px-2">
+          <div className="text-5xl" aria-hidden="true">🌱</div>
+          <div className="space-y-2">
+            <h3 className="text-base font-heading font-bold text-foreground">
+              Você está chegando antes de todo mundo!
+            </h3>
+            <p className="text-sm text-muted-foreground font-body max-w-[300px] mx-auto leading-relaxed">
+              O Juntoo está começando em Valença e região. Crie o primeiro evento e mostre o caminho para a comunidade.
+            </p>
+          </div>
+          <Button variant="hero" onClick={handleFinish} className="gap-2">
+            <Plus className="w-4 h-4" /> Criar primeira atividade
           </Button>
         </div>
       )}
