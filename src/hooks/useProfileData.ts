@@ -167,8 +167,8 @@ export const useProfileData = () => {
       if (authError || !authUser) throw new Error('Usuário não autenticado');
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${authUser.id}-avatar.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `avatar.${fileExt}`;
+      const filePath = `${authUser.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;

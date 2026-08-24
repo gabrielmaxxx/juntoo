@@ -102,8 +102,8 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
       }
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `event-covers/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/event-covers/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
