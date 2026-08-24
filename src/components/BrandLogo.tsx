@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import juntooLogo from '@/assets/juntoo-logo.png';
+import juntooIcon from '@/assets/juntoo-icon-cyan.svg';
 import { cn } from '@/lib/utils';
 
 interface BrandLogoProps {
@@ -14,12 +14,6 @@ const sizeMap = {
   sm: 'h-10 w-10 rounded-2xl',
   md: 'h-14 w-14 rounded-[1.35rem]',
   lg: 'h-24 w-24 rounded-[2rem]',
-} as const;
-
-const imageScaleMap = {
-  sm: 'scale-[1.26]',
-  md: 'scale-[1.24]',
-  lg: 'scale-[1.18]',
 } as const;
 
 export const BrandLogo = ({
@@ -37,11 +31,11 @@ export const BrandLogo = ({
       className={cn('flex items-center gap-3 cursor-pointer', className)}
       aria-label="Ir para o início"
     >
-      <div className={cn('overflow-hidden bg-primary/10 shadow-sm', sizeMap[size])}>
+      <div className={cn('overflow-hidden shadow-sm', sizeMap[size])}>
         <img
-          src={juntooLogo}
+          src={juntooIcon}
           alt="Logo do Juntoo"
-          className={cn('h-full w-full object-cover object-center', imageScaleMap[size], imageClassName)}
+          className={cn('h-full w-full object-cover object-center', imageClassName)}
           loading="eager"
         />
       </div>

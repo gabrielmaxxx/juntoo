@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import splashIcon from '@/assets/splash-icon.png';
+import splashIcon from '@/assets/juntoo-symbol-white.svg';
 import logoText from '@/assets/logo-text-white.png';
 
 interface SplashScreenProps {
