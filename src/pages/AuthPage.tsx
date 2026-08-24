@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
