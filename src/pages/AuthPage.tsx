@@ -878,8 +878,8 @@ export const AuthPage = () => {
           <DialogFooter className="gap-2 sm:gap-2">
             <Button
               type="button"
-              variant="outline"
-              className="rounded-full"
+              variant="ghost"
+              className="rounded-full text-muted-foreground"
               onClick={() => setShowGoogleConsent(false)}
             >
               Cancelar
