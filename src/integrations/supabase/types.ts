@@ -1522,6 +1522,7 @@ export type Database = {
         Args: { p_moderator_id: string; p_penalty_id: string }
         Returns: undefined
       }
+      safe_uuid: { Args: { p_text: string }; Returns: string }
       user_wants_notification:
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
         | { Args: { p_type: string; p_user_id: string }; Returns: boolean }
