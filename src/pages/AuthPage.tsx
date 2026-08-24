@@ -818,6 +818,83 @@ export const AuthPage = () => {
           {view === 'reset-password' && renderResetPassword()}
         </CardContent>
       </Card>
+
+      <Dialog open={showGoogleConsent} onOpenChange={setShowGoogleConsent}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Antes de continuar</DialogTitle>
+            <DialogDescription>
+              Confirme os itens abaixo para entrar com o Google.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-1">
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="google-age"
+                checked={acceptedAge}
+                onCheckedChange={(v) => setAcceptedAge(v === true)}
+                aria-required="true"
+              />
+              <label htmlFor="google-age" className="text-sm leading-tight cursor-pointer">
+                Declaro ter <strong>18 anos ou mais</strong> e assumo total responsabilidade por minhas interações na plataforma, incluindo encontros presenciais.
+              </label>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="google-terms"
+                checked={acceptedTerms}
+                onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                aria-required="true"
+              />
+              <label htmlFor="google-terms" className="text-sm leading-tight cursor-pointer">
+                Li e aceito os{' '}
+                <a
+                  href="/termos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-medium underline hover:text-primary/80"
+                >
+                  Termos de Uso
+                </a>{' '}
+                e a{' '}
+                <a
+                  href="/privacidade"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-medium underline hover:text-primary/80"
+                >
+                  Política de Privacidade
+                </a>
+              </label>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Ao continuar, você concorda com o tratamento dos seus dados conforme a LGPD (Lei nº 13.709/2018).
+            </p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setShowGoogleConsent(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="rounded-full"
+              disabled={!acceptedTerms || !acceptedAge || loading}
+              onClick={startGoogleOAuth}
+            >
+              Continuar com Google
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
