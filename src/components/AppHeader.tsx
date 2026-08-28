@@ -41,9 +41,15 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
       >
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center cursor-pointer focus-highlight"
+          className="flex items-center gap-2 cursor-pointer focus-highlight"
           aria-label="Ir para o início"
         >
+          <img 
+            src={logoSymbolWhite} 
+            alt="" 
+            aria-hidden="true"
+            className="h-6 w-6 object-contain"
+          />
           <img 
             src={logoTextWhite} 
             alt="Juntoo" 
