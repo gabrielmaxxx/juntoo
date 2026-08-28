@@ -16,7 +16,7 @@
     "security:check": "bash scripts/security-check.sh",
     "generate-types": "supabase gen types typescript --project-id hspfyakugditkxrvngrc > src/integrations/supabase/types.ts",
     "db:types": "npm run generate-types",
-    "generate:assets": "capacitor-assets generate --assetConfig resources/assets.config.json"
+    "generate:assets": "npx @capacitor/assets generate"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
