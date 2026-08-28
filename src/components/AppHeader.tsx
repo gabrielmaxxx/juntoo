@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { lazy, Suspense, useState } from 'react';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import logoTextWhite from '@/assets/logo-text-white.png';
+import logoSymbolWhite from '@/assets/juntoo-symbol-white.svg';
 import { useNavigate } from 'react-router-dom';
 
 const NotificationPanel = lazy(() => import('./NotificationPanel').then(m => ({ default: m.NotificationPanel })));
