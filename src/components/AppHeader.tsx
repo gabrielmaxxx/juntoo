@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { lazy, Suspense, useState } from 'react';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import logoTextWhite from '@/assets/logo-text-white.png';
+import logoSymbolWhite from '@/assets/juntoo-symbol-white.svg';
 import { useNavigate } from 'react-router-dom';
 
 const NotificationPanel = lazy(() => import('./NotificationPanel').then(m => ({ default: m.NotificationPanel })));
@@ -40,9 +41,15 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
       >
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center cursor-pointer focus-highlight"
+          className="flex items-center gap-2 cursor-pointer focus-highlight"
           aria-label="Ir para o início"
         >
+          <img 
+            src={logoSymbolWhite} 
+            alt="" 
+            aria-hidden="true"
+            className="h-6 w-6 object-contain"
+          />
           <img 
             src={logoTextWhite} 
             alt="Juntoo" 
