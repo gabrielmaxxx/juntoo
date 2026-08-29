@@ -44,16 +44,16 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
           className="flex items-center gap-2 cursor-pointer focus-highlight"
           aria-label="Ir para o início"
         >
-          <img 
+<img 
             src={logoSymbolWhite} 
             alt="" 
             aria-hidden="true"
-            className="h-6 w-6 object-contain"
+            className="h-8 w-8 object-contain"
           />
           <img 
             src={logoTextWhite} 
             alt="Juntoo" 
-            className="h-6 w-auto object-contain"
+            className="h-7 w-auto object-contain"
           />
         </button>
         
