@@ -48,7 +48,7 @@ export const AppHeader = ({ onEventClick, onMessagesClick, onSettingsClick }: Ap
             src={logoSymbolWhite} 
             alt="" 
             aria-hidden="true"
-            className="h-8 w-8 object-contain"
+            className="h-9 w-9 object-contain"
           />
           <img 
             src={logoTextWhite} 
