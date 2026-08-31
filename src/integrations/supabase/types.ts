@@ -1346,6 +1346,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trust_scores_backup_2026_08: {
+        Row: {
+          score: number
+          snapshotted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score: number
+          snapshotted_at?: string
+          updated_at: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          snapshotted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_verifications: {
         Row: {
           created_at: string

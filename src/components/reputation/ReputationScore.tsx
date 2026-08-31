@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, Star, Users, MessageSquare, Award } from 'lucide-react';
+import { Trophy, TrendingUp, Star, Users, MessageSquare, Award, UserX, CalendarX, Flag, SlidersHorizontal } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,13 @@ const BREAKDOWN_ITEMS = [
   { key: 'events_created' as const, label: 'Evento criado', points: 15, icon: TrendingUp },
   { key: 'achievements' as const, label: 'Badge conquistada', points: 25, icon: Award },
 ];
+
+const PENALTY_ITEMS = [
+  { key: 'no_shows' as const, label: 'Faltou após confirmar presença', points: 15, icon: UserX },
+  { key: 'late_cancellations' as const, label: 'Cancelou evento com menos de 24h', points: 30, icon: CalendarX },
+  { key: 'confirmed_reports' as const, label: 'Denúncia confirmada pela moderação', points: 50, icon: Flag },
+];
+
 
 export const ReputationScore = ({ scoreData, loading }: ReputationScoreProps) => {
   if (loading) {
