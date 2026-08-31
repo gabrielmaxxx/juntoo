@@ -1,6 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * FÓRMULA OFICIAL ÚNICA DE REPUTAÇÃO (0–1000)
+ * Calculada exclusivamente por `calculate_reputation_score()` no banco.
+ *
+ * Positivos: +10 evento participado, +15 evento criado, +2 avaliação feita,
+ *            +5 avaliação positiva recebida, +25 conquista.
+ * Penalidades automáticas: -15 não comparecimento, -30 cancelamento com <24h,
+ *            -50 denúncia comprovada pela moderação.
+ * Override manual de moderador (excepcional) entra como ajuste, sempre com autor e motivo
+ * registrados em `user_trust_score_overrides`.
+ *
+ * `user_trust_scores` (0–100) é derivada automaticamente deste score (score / 10).
+ */
 export interface ReputationScoreData {
   score: number;
   events_attended: number;
@@ -8,7 +21,14 @@ export interface ReputationScoreData {
   reviews_given: number;
   positive_reviews: number;
   achievements: number;
+  no_shows: number;
+  late_cancellations: number;
+  confirmed_reports: number;
+  manual_adjustment: number;
+  positive_points: number;
+  penalty_points: number;
 }
+
 
 export interface Achievement {
   id: string;
