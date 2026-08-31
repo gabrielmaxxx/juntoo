@@ -1,6 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * BADGES QUALITATIVOS — SISTEMA DE EXIBIÇÃO COMPLEMENTAR
+ *
+ * Os badges abaixo (Participativo, Bem Avaliado, Confiável, Pessoa Segura, Veterano)
+ * são uma camada puramente VISUAL/QUALITATIVA. Eles NÃO influenciam e NÃO competem
+ * com o score numérico oficial de reputação.
+ *
+ * O score oficial (0–1000) é calculado unicamente pela função
+ * `calculate_reputation_score()` no banco — ver `useReputationScore.ts`.
+ * A tabela `user_trust_scores` (0–100) é derivada automaticamente dele.
+ *
+ * Ou seja: os badges resumem o comportamento em rótulos legíveis; o score mede.
+ */
+
+
 export interface ReputationStats {
   average_overall: number;
   average_respect: number;
