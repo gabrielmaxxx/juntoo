@@ -397,6 +397,7 @@ export type Database = {
       }
       event_participants: {
         Row: {
+          attendance_status: string
           event_id: string
           id: string
           joined_at: string
@@ -404,6 +405,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attendance_status?: string
           event_id: string
           id?: string
           joined_at?: string
@@ -411,6 +413,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attendance_status?: string
           event_id?: string
           id?: string
           joined_at?: string
@@ -481,6 +484,8 @@ export type Database = {
       }
       events: {
         Row: {
+          cancelled_at: string | null
+          cancelled_by: string | null
           category: string
           city: string | null
           created_at: string
@@ -505,6 +510,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           category: string
           city?: string | null
           created_at?: string
@@ -529,6 +536,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           category?: string
           city?: string | null
           created_at?: string
@@ -1292,6 +1301,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trust_score_overrides: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          moderator_id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          moderator_id: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          moderator_id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_trust_scores: {
         Row: {
           score: number
@@ -1518,6 +1554,10 @@ export type Database = {
       }
       is_profile_public: { Args: { target_user_id: string }; Returns: boolean }
       is_service_role: { Args: never; Returns: boolean }
+      refresh_user_trust_score: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       revoke_penalty: {
         Args: { p_moderator_id: string; p_penalty_id: string }
         Returns: undefined
