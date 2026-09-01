@@ -195,6 +195,39 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
         </CardContent>
       </Card>
 
+      {/* Manual score overrides */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Ajustes Manuais de Score ({overrides.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <p className="text-xs text-muted-foreground mb-2">
+            O score é calculado automaticamente. Ajustes manuais são excepcionais e sempre registrados com autor e motivo.
+          </p>
+          {overrides.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum ajuste manual.</p>
+          ) : (
+            <div className="space-y-2">
+              {overrides.map(o => (
+                <div key={o.id} className="border-b border-border pb-2 last:border-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant={o.delta < 0 ? 'destructive' : 'outline'} className="text-xs">
+                      {o.delta > 0 ? `+${o.delta}` : o.delta} pts
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(o.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-foreground mt-1">{o.reason}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
+
       {/* Reports */}
       <Card>
         <CardHeader className="pb-2">
