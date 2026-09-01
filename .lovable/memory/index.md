@@ -35,6 +35,7 @@ Updated: now
 - [Security Validation](mem://tecnico/seguranca-validacao-e-hardening) — Password complexity rules, HIBP check, private_code masking
 - [WCAG Accessibility](mem://tecnico/acessibilidade-wcag) — AA compliance, semantic roles, and live regions
 - [Standard Categories](mem://regras-negocio/categorias-padronizadas) — Centralized event categories enforced via src/constants/categories.ts
+- [Reputação consolidada](mem://regras-negocio/reputacao-consolidada) — Fórmula oficial única 0-1000, penalidades automáticas, trust score derivado, overrides auditados
 - [Private Events](mem://regras-negocio/eventos-privados) — Hidden from public listings, joinable via /events/join/:privateCode link
 - [Visibility & Participation](mem://regras-negocio/visibilidade-e-participacao) — Hard capacity limits, 3h grace period for expiration, mandatory geodata
 - [Persistent Privacy](mem://regras-negocio/privacidade-persistente) — Visibility/location preferences in privacy_preferences and enforced by RLS
