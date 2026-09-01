@@ -39,6 +39,7 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
   const [reputation, setReputation] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [penalties, setPenalties] = useState<any[]>([]);
+  const [overrides, setOverrides] = useState<any[]>([]);
   const [eventCount, setEventCount] = useState(0);
   const [participationCount, setParticipationCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,7 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [profileRes, trustRes, repRes, reportsRes, penaltiesRes, eventsRes, participationsRes] = await Promise.all([
+    const [profileRes, trustRes, repRes, reportsRes, penaltiesRes, eventsRes, participationsRes, overridesRes] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).single(),
       supabase.from('user_trust_scores').select('score').eq('user_id', userId).single(),
       supabase.rpc('get_user_reputation', { target_user_id: userId }),
@@ -55,16 +56,19 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
       supabase.from('user_penalties').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('events').select('id', { count: 'exact', head: true }).eq('created_by', userId),
       supabase.from('event_participants').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('user_trust_score_overrides').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ]);
     setProfile(profileRes.data);
     setTrustScore(trustRes.data?.score ?? 100);
     setReputation(repRes.data);
     setReports(reportsRes.data || []);
     setPenalties(penaltiesRes.data || []);
+    setOverrides(overridesRes.data || []);
     setEventCount(eventsRes.count || 0);
     setParticipationCount(participationsRes.count || 0);
     setLoading(false);
   };
+
 
   useEffect(() => { fetchAll(); }, [userId]);
 
@@ -194,6 +198,39 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Manual score overrides */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Ajustes Manuais de Score ({overrides.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <p className="text-xs text-muted-foreground mb-2">
+            O score é calculado automaticamente. Ajustes manuais são excepcionais e sempre registrados com autor e motivo.
+          </p>
+          {overrides.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum ajuste manual.</p>
+          ) : (
+            <div className="space-y-2">
+              {overrides.map(o => (
+                <div key={o.id} className="border-b border-border pb-2 last:border-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant={o.delta < 0 ? 'destructive' : 'outline'} className="text-xs">
+                      {o.delta > 0 ? `+${o.delta}` : o.delta} pts
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(o.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-foreground mt-1">{o.reason}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
 
       {/* Reports */}
       <Card>

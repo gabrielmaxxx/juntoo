@@ -94,6 +94,48 @@ export const ReputationScore = ({ scoreData, loading }: ReputationScoreProps) =>
           );
         })}
       </div>
+
+      {/* Penalties */}
+      <div className="space-y-2">
+        <h4 className="text-sm font-semibold text-foreground">Como você perde pontos</h4>
+        {PENALTY_ITEMS.map(item => {
+          const count = scoreData[item.key] ?? 0;
+          const Icon = item.icon;
+          return (
+            <div key={item.key} className="flex items-center gap-3 p-2 rounded-lg hover:bg-destructive/5 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Icon className="w-4 h-4 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-foreground">{item.label}</p>
+                <p className="text-[10px] text-muted-foreground">−{item.points} pts cada</p>
+              </div>
+              <div className="text-right">
+                <span className={cn('text-sm font-semibold', count > 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                  {count > 0 ? `−${count * item.points}` : 0}
+                </span>
+                <p className="text-[10px] text-muted-foreground">{count}x</p>
+              </div>
+            </div>
+          );
+        })}
+
+        {!!scoreData.manual_adjustment && (
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/40">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+              <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-foreground">Ajuste manual da moderação</p>
+              <p className="text-[10px] text-muted-foreground">Revisão excepcional registrada</p>
+            </div>
+            <span className={cn('text-sm font-semibold', scoreData.manual_adjustment < 0 ? 'text-destructive' : 'text-foreground')}>
+              {scoreData.manual_adjustment > 0 ? `+${scoreData.manual_adjustment}` : scoreData.manual_adjustment}
+            </span>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };
