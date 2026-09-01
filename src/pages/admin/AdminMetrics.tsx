@@ -157,7 +157,11 @@ export default function AdminMetrics() {
         <p className="text-sm text-muted-foreground">Dados em tempo real do Juntoo</p>
       </div>
 
+      {/* GATILHO DE DENSIDADE */}
+      <DensityTrigger />
+
       {/* NORTH STAR */}
+
       <Section title="North Star — Eventos Realizados" icon={Target} color="text-primary">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <MetricCard
