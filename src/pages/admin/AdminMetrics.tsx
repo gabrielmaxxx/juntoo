@@ -7,6 +7,8 @@ import {
   TrendingUp, TrendingDown, Star, AlertTriangle, Calendar,
   UserCheck, Clock, ArrowUpRight, Activity, Heart,
 } from 'lucide-react';
+import { DensityTrigger } from './DensityTrigger';
+
 
 interface Metrics {
   north_star: {
