@@ -39,6 +39,7 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
   const [reputation, setReputation] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [penalties, setPenalties] = useState<any[]>([]);
+  const [overrides, setOverrides] = useState<any[]>([]);
   const [eventCount, setEventCount] = useState(0);
   const [participationCount, setParticipationCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,7 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [profileRes, trustRes, repRes, reportsRes, penaltiesRes, eventsRes, participationsRes] = await Promise.all([
+    const [profileRes, trustRes, repRes, reportsRes, penaltiesRes, eventsRes, participationsRes, overridesRes] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).single(),
       supabase.from('user_trust_scores').select('score').eq('user_id', userId).single(),
       supabase.rpc('get_user_reputation', { target_user_id: userId }),
@@ -55,16 +56,19 @@ export const UserModerationProfile = ({ userId, onBack }: Props) => {
       supabase.from('user_penalties').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       supabase.from('events').select('id', { count: 'exact', head: true }).eq('created_by', userId),
       supabase.from('event_participants').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('user_trust_score_overrides').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ]);
     setProfile(profileRes.data);
     setTrustScore(trustRes.data?.score ?? 100);
     setReputation(repRes.data);
     setReports(reportsRes.data || []);
     setPenalties(penaltiesRes.data || []);
+    setOverrides(overridesRes.data || []);
     setEventCount(eventsRes.count || 0);
     setParticipationCount(participationsRes.count || 0);
     setLoading(false);
   };
+
 
   useEffect(() => { fetchAll(); }, [userId]);
 
