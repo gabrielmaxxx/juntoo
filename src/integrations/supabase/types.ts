@@ -719,6 +719,65 @@ export type Database = {
         }
         Relationships: []
       }
+      partnership_leads: {
+        Row: {
+          business_verification_id: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          establishment_name: string
+          id: string
+          last_interaction_at: string
+          modality: Database["public"]["Enums"]["partnership_modality"]
+          monthly_value: number | null
+          notes: string | null
+          status: Database["public"]["Enums"]["partnership_status"]
+          updated_at: string
+        }
+        Insert: {
+          business_verification_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          establishment_name: string
+          id?: string
+          last_interaction_at?: string
+          modality?: Database["public"]["Enums"]["partnership_modality"]
+          monthly_value?: number | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["partnership_status"]
+          updated_at?: string
+        }
+        Update: {
+          business_verification_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          establishment_name?: string
+          id?: string
+          last_interaction_at?: string
+          modality?: Database["public"]["Enums"]["partnership_modality"]
+          monthly_value?: number | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["partnership_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_leads_business_verification_id_fkey"
+            columns: ["business_verification_id"]
+            isOneToOne: false
+            referencedRelation: "business_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pinned_events: {
         Row: {
           created_at: string
@@ -1592,6 +1651,17 @@ export type Database = {
       app_role: "admin" | "moderator" | "user" | "super_admin"
       community_member_role: "admin" | "member"
       community_recurrence: "weekly" | "biweekly" | "monthly"
+      partnership_modality:
+        | "troca_de_valor"
+        | "destaque_simples"
+        | "comissao_evento"
+        | "assinatura_empresarial"
+      partnership_status:
+        | "prospeccao"
+        | "conversa_aberta"
+        | "teste_agendado"
+        | "parceria_ativa"
+        | "encerrada"
       report_category:
         | "harassment"
         | "hate_speech"
@@ -1619,12 +1689,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1648,11 +1718,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1673,11 +1743,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1698,11 +1768,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1715,11 +1785,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1734,6 +1804,19 @@ export const Constants = {
       app_role: ["admin", "moderator", "user", "super_admin"],
       community_member_role: ["admin", "member"],
       community_recurrence: ["weekly", "biweekly", "monthly"],
+      partnership_modality: [
+        "troca_de_valor",
+        "destaque_simples",
+        "comissao_evento",
+        "assinatura_empresarial",
+      ],
+      partnership_status: [
+        "prospeccao",
+        "conversa_aberta",
+        "teste_agendado",
+        "parceria_ativa",
+        "encerrada",
+      ],
       report_category: [
         "harassment",
         "hate_speech",
