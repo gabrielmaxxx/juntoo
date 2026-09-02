@@ -33,6 +33,7 @@ const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
 const AdminLogs = lazy(() => import("./pages/admin/AdminLogs"));
 const AdminPenalties = lazy(() => import("./pages/admin/AdminPenalties"));
 const AdminActivityLogs = lazy(() => import("./pages/admin/AdminActivityLogs"));
+const AdminPartnerships = lazy(() => import("./pages/admin/AdminPartnerships"));
 
 const PageFallback = () => (
   <div className="flex items-center justify-center h-screen bg-background">
