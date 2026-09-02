@@ -75,6 +75,7 @@ const App = () => (
                       <Route path="events" element={<Suspense fallback={<PageFallback />}><AdminEvents /></Suspense>} />
                       <Route path="verifications" element={<Suspense fallback={<PageFallback />}><AdminVerifications /></Suspense>} />
                       <Route path="penalties" element={<Suspense fallback={<PageFallback />}><AdminPenalties /></Suspense>} />
+                      <Route path="partnerships" element={<Suspense fallback={<PageFallback />}><AdminPartnerships /></Suspense>} />
                       <Route path="metrics" element={<Suspense fallback={<PageFallback />}><AdminMetrics /></Suspense>} />
                       <Route path="logs" element={<Suspense fallback={<PageFallback />}><AdminLogs /></Suspense>} />
                       <Route path="activity-logs" element={<Suspense fallback={<PageFallback />}><AdminActivityLogs /></Suspense>} />
