@@ -87,9 +87,9 @@ export const usePublicEvents = () => {
 
       if (error) throw error;
 
-      return (data as EventWithDetails[])
-        .filter(isEventUpcoming)
-        .map(transformEvent);
+      return promoteSponsored(
+        (data as EventWithDetails[]).filter(isEventUpcoming).map(transformEvent)
+      );
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -170,7 +170,7 @@ export const useRecommendedEvents = (userId: string | undefined, interests: stri
         );
       });
 
-      return recommended.slice(0, limit).map(transformEvent);
+      return promoteSponsored(recommended.slice(0, limit).map(transformEvent));
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -195,10 +195,9 @@ export const useNearbyEvents = (city: string | null, limit = 10) => {
 
       if (error) throw error;
 
-      return (data as EventWithDetails[])
-        .filter(isEventUpcoming)
-        .slice(0, limit)
-        .map(transformEvent);
+      return promoteSponsored(
+        (data as EventWithDetails[]).filter(isEventUpcoming).slice(0, limit).map(transformEvent)
+      );
     },
     enabled: !!city,
     staleTime: 5 * 60 * 1000,
