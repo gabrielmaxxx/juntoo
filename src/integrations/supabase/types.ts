@@ -497,6 +497,7 @@ export type Database = {
           is_featured: boolean
           is_private: boolean | null
           is_recurring: boolean | null
+          is_sponsored: boolean
           location: string
           max_participants: number | null
           parent_event_id: string | null
@@ -504,6 +505,8 @@ export type Database = {
           private_code: string | null
           recurrence_end_date: string | null
           recurrence_type: string | null
+          sponsor_expires_at: string | null
+          sponsor_tier: string | null
           state: string | null
           time: string
           title: string
@@ -523,6 +526,7 @@ export type Database = {
           is_featured?: boolean
           is_private?: boolean | null
           is_recurring?: boolean | null
+          is_sponsored?: boolean
           location: string
           max_participants?: number | null
           parent_event_id?: string | null
@@ -530,6 +534,8 @@ export type Database = {
           private_code?: string | null
           recurrence_end_date?: string | null
           recurrence_type?: string | null
+          sponsor_expires_at?: string | null
+          sponsor_tier?: string | null
           state?: string | null
           time: string
           title: string
@@ -549,6 +555,7 @@ export type Database = {
           is_featured?: boolean
           is_private?: boolean | null
           is_recurring?: boolean | null
+          is_sponsored?: boolean
           location?: string
           max_participants?: number | null
           parent_event_id?: string | null
@@ -556,6 +563,8 @@ export type Database = {
           private_code?: string | null
           recurrence_end_date?: string | null
           recurrence_type?: string | null
+          sponsor_expires_at?: string | null
+          sponsor_tier?: string | null
           state?: string | null
           time?: string
           title?: string
@@ -1108,6 +1117,63 @@ export type Database = {
           },
         ]
       }
+      sponsored_events_log: {
+        Row: {
+          action: string
+          amount_charged: number | null
+          created_at: string
+          created_by: string | null
+          event_id: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          sponsor_tier: string
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          action?: string
+          amount_charged?: number | null
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          sponsor_tier: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          amount_charged?: number | null
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          sponsor_tier?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_events_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_events_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           badge_id: string
@@ -1477,8 +1543,10 @@ export type Database = {
           description: string | null
           id: string | null
           image_url: string | null
+          is_featured: boolean | null
           is_private: boolean | null
           is_recurring: boolean | null
+          is_sponsored: boolean | null
           location: string | null
           max_participants: number | null
           parent_event_id: string | null
@@ -1488,6 +1556,8 @@ export type Database = {
           recurrence_end_date: string | null
           recurrence_type: string | null
           review_count: number | null
+          sponsor_expires_at: string | null
+          sponsor_tier: string | null
           state: string | null
           time: string | null
           title: string | null
@@ -1575,8 +1645,10 @@ export type Database = {
           description: string | null
           id: string | null
           image_url: string | null
+          is_featured: boolean | null
           is_private: boolean | null
           is_recurring: boolean | null
+          is_sponsored: boolean | null
           location: string | null
           max_participants: number | null
           parent_event_id: string | null
@@ -1586,6 +1658,8 @@ export type Database = {
           recurrence_end_date: string | null
           recurrence_type: string | null
           review_count: number | null
+          sponsor_expires_at: string | null
+          sponsor_tier: string | null
           state: string | null
           time: string | null
           title: string | null
