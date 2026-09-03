@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import {
   LayoutDashboard, FileText, Users, Calendar, BadgeCheck,
-  BarChart3, ScrollText, LogOut, Shield, Menu, X, Gavel, Activity, Handshake,
+  BarChart3, ScrollText, LogOut, Shield, Menu, X, Gavel, Activity, Handshake, Megaphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ const navItems = [
   { to: '/admin/verifications', label: 'Verificações', icon: BadgeCheck },
   { to: '/admin/penalties', label: 'Punições', icon: Gavel },
   { to: '/admin/partnerships', label: 'Parcerias', icon: Handshake },
+  { to: '/admin/sponsorships', label: 'Patrocínios', icon: Megaphone },
   { to: '/admin/metrics', label: 'Métricas', icon: BarChart3 },
   { to: '/admin/logs', label: 'Logs Admin', icon: ScrollText },
   { to: '/admin/activity-logs', label: 'Atividades', icon: Activity },

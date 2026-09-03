@@ -7,6 +7,7 @@ import { haptic } from '@/lib/haptics';
 import { shareEvent } from '@/lib/share';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { SponsoredBadge } from '@/components/SponsoredBadge';
 
 interface EventCardProps {
   event: Event;
@@ -93,6 +94,7 @@ export const EventCard = ({
             )}
           </div>
         </div>
+        {event.isSponsored && <SponsoredBadge className="absolute top-3 left-3" />}
         {event.isTrending && (
           <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs px-2.5 py-1 rounded-full font-semibold" aria-label="Evento em alta">
             🔥 Em Alta
@@ -136,6 +138,7 @@ export const EventCard = ({
             aspectRatio="square"
           />
           <div className="flex-1 min-w-0">
+            {event.isSponsored && <SponsoredBadge className="mb-1" />}
             <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-snug">{event.title}</h3>
             <div className="flex items-center gap-3 mt-1.5">
               <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -230,6 +233,9 @@ export const EventCard = ({
           <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs px-2.5 py-1 rounded-full font-semibold">
             🔥 Em Alta
           </div>
+        )}
+        {event.isSponsored && (
+          <SponsoredBadge className={cn('absolute', event.distance ? 'top-11 left-3' : 'top-3 left-3')} />
         )}
         <div className="absolute bottom-3 left-3">
           <span className="text-xs bg-white/90 backdrop-blur-sm text-foreground px-2.5 py-1 rounded-full font-medium">
