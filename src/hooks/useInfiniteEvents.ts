@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
-import { EVENT_LIST_COLUMNS } from '@/lib/eventColumns';
+import { EVENT_LIST_COLUMNS, promoteSponsored } from '@/lib/eventColumns';
 
 const PAGE_SIZE = 10;
 
@@ -93,6 +93,8 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
     averageRating: event.average_rating || undefined,
     reviewCount: event.review_count || 0,
     maxParticipants: event.max_participants || undefined,
+    isSponsored: event.is_sponsored ?? false,
+    sponsorTier: event.sponsor_tier ?? null,
   }));
 
   // Client-side "with vacancies" filter (max_participants null = unlimited)
@@ -101,6 +103,10 @@ const fetchEvents = async ({ pageParam = 0, filters }: FetchEventsParams) => {
       (e) => !e.maxParticipants || (e.participantsCount ?? 0) < e.maxParticipants
     );
   }
+
+  // Sponsored events get visual prominence at the top of the page,
+  // without changing the relevance-based selection above.
+  events = promoteSponsored(events);
 
   return {
     events,

@@ -13,6 +13,8 @@ export interface Event {
   imageUrl: string;
   isTrending?: boolean;
   isFeatured?: boolean;
+  isSponsored?: boolean;
+  sponsorTier?: 'basico' | 'segmentado' | 'cpm' | null;
   participantsCount: number;
   createdBy?: string;
   creatorAvatar?: string;

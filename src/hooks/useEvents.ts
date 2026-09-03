@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/types';
 import { queryKeys } from '@/lib/queryKeys';
-import { EVENT_LIST_COLUMNS } from '@/lib/eventColumns';
+import { EVENT_LIST_COLUMNS, promoteSponsored } from '@/lib/eventColumns';
 
 interface EventWithDetails {
   id: string;
@@ -31,6 +31,9 @@ interface EventWithDetails {
   participants_count: number;
   average_rating: number;
   review_count: number;
+  is_sponsored?: boolean | null;
+  sponsor_tier?: string | null;
+  sponsor_expires_at?: string | null;
 }
 
 const isEventUpcoming = (event: { date: string; time: string; is_recurring: boolean | null; recurrence_end_date: string | null }) => {
@@ -65,6 +68,8 @@ const transformEvent = (event: EventWithDetails): Event => ({
   isRecurring: event.is_recurring || false,
   averageRating: event.average_rating,
   reviewCount: event.review_count,
+  isSponsored: event.is_sponsored ?? false,
+  sponsorTier: (event.sponsor_tier as Event['sponsorTier']) ?? null,
 });
 
 export const usePublicEvents = () => {
