@@ -318,6 +318,8 @@ export const AuthPage = () => {
             full_name: fullName,
             city: `${city}, ${selectedState}`,
             interests: selectedInterests,
+            birth_date: birthDate || null,
+
             accepted_terms_version: '1.0',
             accepted_privacy_version: '1.0',
             accepted_at: new Date().toISOString(),
@@ -334,7 +336,9 @@ export const AuthPage = () => {
             user_id: data.user.id,
             full_name: fullName,
             city: `${city}, ${selectedState}`,
-            interests: selectedInterests
+            interests: selectedInterests,
+            ...(birthDate ? { birth_date: birthDate } : {}),
+
           });
 
         if (profileError) {
