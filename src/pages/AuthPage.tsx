@@ -12,6 +12,8 @@ import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { isUnderage, isValidBirthDate, UNDERAGE_MESSAGE } from '@/lib/age';
+
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
@@ -86,6 +88,8 @@ export const AuthPage = () => {
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
+  const [birthDate, setBirthDate] = useState('');
+
   const [showGoogleConsent, setShowGoogleConsent] = useState(false);
   const { toast } = useToast();
 
