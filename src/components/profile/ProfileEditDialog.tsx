@@ -10,6 +10,8 @@ import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
 import { useCities } from '@/hooks/useCities';
 import { CATEGORIES } from '@/constants/categories';
 import { profileSchema } from '@/lib/validations/commonSchemas';
+import { isValidBirthDate } from '@/lib/age';
+
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -37,6 +39,9 @@ export const ProfileEditDialog = ({
   setEditedName,
   editedBio,
   setEditedBio,
+  editedBirthDate,
+  setEditedBirthDate,
+
   selectedState,
   setSelectedState,
   selectedCity,
@@ -74,8 +79,14 @@ export const ProfileEditDialog = ({
       return;
     }
 
+    if (editedBirthDate && !isValidBirthDate(editedBirthDate)) {
+      setErrors(prev => ({ ...prev, birth_date: 'Confira a data de nascimento informada' }));
+      return;
+    }
+
     setErrors({});
     onSave();
+
   };
 
   return (
