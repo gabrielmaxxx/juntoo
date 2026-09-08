@@ -631,6 +631,24 @@ export const AuthPage = () => {
           required
         />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="birthDate" className="text-base font-semibold">
+          Data de nascimento <span className="text-sm font-normal text-muted-foreground">(opcional)</span>
+        </Label>
+        <Input
+          id="birthDate"
+          type="date"
+          max={new Date().toISOString().split('T')[0]}
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
+          className="h-12"
+        />
+        <p className="text-xs text-muted-foreground">
+          O Juntoo é apenas para maiores de 18 anos. Sua data de nascimento não aparece no seu perfil.
+        </p>
+      </div>
+
       
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-base font-semibold">Email</Label>
