@@ -287,6 +287,26 @@ export const AuthPage = () => {
       return;
     }
 
+    if (birthDate) {
+      if (!isValidBirthDate(birthDate)) {
+        toast({
+          title: "Data inválida",
+          description: "Confira a data de nascimento informada.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (isUnderage(birthDate)) {
+        toast({
+          title: "Idade mínima: 18 anos",
+          description: UNDERAGE_MESSAGE,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
