@@ -18,6 +18,8 @@ interface ProfileEditDialogProps {
   setEditedName: (name: string) => void;
   editedBio: string;
   setEditedBio: (bio: string) => void;
+  editedBirthDate: string;
+  setEditedBirthDate: (date: string) => void;
   selectedState: string;
   setSelectedState: (state: string) => void;
   selectedCity: string;
@@ -26,6 +28,7 @@ interface ProfileEditDialogProps {
   toggleInterest: (interest: string) => void;
   onSave: () => void;
 }
+
 
 export const ProfileEditDialog = ({
   open,
