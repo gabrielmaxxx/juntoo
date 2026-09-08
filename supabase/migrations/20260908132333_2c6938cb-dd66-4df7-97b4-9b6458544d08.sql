@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.enforce_minimum_age() FROM PUBLIC, anon, authenticated;
