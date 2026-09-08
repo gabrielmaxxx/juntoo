@@ -86,7 +86,7 @@ export const ProfilePage = () => {
   };
 
   const onSaveProfile = async () => {
-    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests, editedBio);
+    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests, editedBio, editedBirthDate);
     if (success) {
       setIsEditingProfile(false);
     }
@@ -157,6 +157,9 @@ export const ProfilePage = () => {
         setEditedName={setEditedName}
         editedBio={editedBio}
         setEditedBio={setEditedBio}
+        editedBirthDate={editedBirthDate}
+        setEditedBirthDate={setEditedBirthDate}
+
         selectedState={selectedState}
         setSelectedState={setSelectedState}
         selectedCity={selectedCity}
