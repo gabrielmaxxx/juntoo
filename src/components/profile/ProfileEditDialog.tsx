@@ -10,6 +10,8 @@ import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
 import { useCities } from '@/hooks/useCities';
 import { CATEGORIES } from '@/constants/categories';
 import { profileSchema } from '@/lib/validations/commonSchemas';
+import { isValidBirthDate } from '@/lib/age';
+
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -18,6 +20,8 @@ interface ProfileEditDialogProps {
   setEditedName: (name: string) => void;
   editedBio: string;
   setEditedBio: (bio: string) => void;
+  editedBirthDate: string;
+  setEditedBirthDate: (date: string) => void;
   selectedState: string;
   setSelectedState: (state: string) => void;
   selectedCity: string;
@@ -27,6 +31,7 @@ interface ProfileEditDialogProps {
   onSave: () => void;
 }
 
+
 export const ProfileEditDialog = ({
   open,
   onOpenChange,
@@ -34,6 +39,9 @@ export const ProfileEditDialog = ({
   setEditedName,
   editedBio,
   setEditedBio,
+  editedBirthDate,
+  setEditedBirthDate,
+
   selectedState,
   setSelectedState,
   selectedCity,
@@ -71,8 +79,14 @@ export const ProfileEditDialog = ({
       return;
     }
 
+    if (editedBirthDate && !isValidBirthDate(editedBirthDate)) {
+      setErrors(prev => ({ ...prev, birth_date: 'Confira a data de nascimento informada' }));
+      return;
+    }
+
     setErrors({});
     onSave();
+
   };
 
   return (
@@ -126,6 +140,29 @@ export const ProfileEditDialog = ({
               </span>
             </div>
           </div>
+
+          <div>
+            <Label htmlFor="birth_date">Data de nascimento <span className="text-xs font-normal text-muted-foreground">(opcional)</span></Label>
+            <Input
+              id="birth_date"
+              type="date"
+              max={new Date().toISOString().split('T')[0]}
+              value={editedBirthDate}
+              onChange={(e) => {
+                setEditedBirthDate(e.target.value);
+                if (errors.birth_date) setErrors(prev => ({ ...prev, birth_date: '' }));
+              }}
+              aria-invalid={!!errors.birth_date}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Não aparece no seu perfil. O Juntoo é apenas para maiores de 18 anos.
+            </p>
+            {errors.birth_date && (
+              <p className="text-sm text-destructive mt-1" role="alert">{errors.birth_date}</p>
+            )}
+          </div>
+          
+
           
           <div>
             <Label htmlFor="state">Estado</Label>

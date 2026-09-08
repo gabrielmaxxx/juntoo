@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { parseISO, addHours, isBefore } from 'date-fns';
+import { isUnderage } from '@/lib/age';
+
 
 interface Friend {
   user_id: string;
@@ -187,7 +189,14 @@ export const useProfileData = () => {
     }
   };
 
-  const handleSaveProfile = async (editedName: string, selectedCity: string, selectedState: string, selectedInterests: string[], bio?: string) => {
+  const handleSaveProfile = async (
+    editedName: string,
+    selectedCity: string,
+    selectedState: string,
+    selectedInterests: string[],
+    bio?: string,
+    birthDate?: string
+  ) => {
     try {
       const location = selectedCity && selectedState ? `${selectedCity}, ${selectedState}` : profile?.city || null;
       const updates: Record<string, any> = {
@@ -196,7 +205,22 @@ export const useProfileData = () => {
         interests: selectedInterests.length > 0 ? selectedInterests : null,
       };
       if (bio !== undefined) updates.bio = bio;
+      if (birthDate !== undefined) updates.birth_date = birthDate || null;
       await updateProfile(updates);
+
+      // Regra de idade mínima: a suspensão é aplicada no banco; aqui apenas
+      // comunicamos de forma reservada ao próprio usuário.
+      if (birthDate && isUnderage(birthDate)) {
+        await refreshProfile?.();
+        toast({
+          title: 'Conta em análise',
+          description:
+            'A data de nascimento informada indica idade inferior a 18 anos. Sua conta foi suspensa e será revisada pela nossa equipe. Você receberá um retorno em caráter reservado.',
+          variant: 'destructive',
+        });
+        return true;
+      }
+
       toast({ title: "Perfil atualizado!", description: "Suas informações foram salvas com sucesso." });
       return true;
     } catch (error) {
@@ -205,6 +229,7 @@ export const useProfileData = () => {
       return false;
     }
   };
+
 
   return {
     user,

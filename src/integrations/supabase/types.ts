@@ -913,6 +913,7 @@ export type Database = {
           account_type: string
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           business_verified: boolean
           city: string | null
           created_at: string
@@ -920,6 +921,8 @@ export type Database = {
           id: string
           interests: string[] | null
           onboarding_completed: boolean
+          suspended_at: string | null
+          suspended_reason: string | null
           updated_at: string
           user_id: string
           user_number: number
@@ -931,6 +934,7 @@ export type Database = {
           account_type?: string
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_verified?: boolean
           city?: string | null
           created_at?: string
@@ -938,6 +942,8 @@ export type Database = {
           id?: string
           interests?: string[] | null
           onboarding_completed?: boolean
+          suspended_at?: string | null
+          suspended_reason?: string | null
           updated_at?: string
           user_id: string
           user_number?: number
@@ -949,6 +955,7 @@ export type Database = {
           account_type?: string
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_verified?: boolean
           city?: string | null
           created_at?: string
@@ -956,6 +963,8 @@ export type Database = {
           id?: string
           interests?: string[] | null
           onboarding_completed?: boolean
+          suspended_at?: string | null
+          suspended_reason?: string | null
           updated_at?: string
           user_id?: string
           user_number?: number

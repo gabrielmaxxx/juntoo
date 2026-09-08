@@ -35,6 +35,8 @@ export const ProfilePage = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(profile?.full_name || '');
   const [editedBio, setEditedBio] = useState(profile?.bio || '');
+  const [editedBirthDate, setEditedBirthDate] = useState((profile as any)?.birth_date || '');
+
   const [activeTab, setActiveTab] = useState('reputation');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedState, setSelectedState] = useState('');
@@ -51,6 +53,8 @@ export const ProfilePage = () => {
     }
     setEditedName(profile?.full_name || '');
     setEditedBio(profile?.bio || '');
+    setEditedBirthDate((profile as any)?.birth_date || '');
+
     
     if (profile?.interests && Array.isArray(profile.interests)) {
       const cleanInterests = profile.interests.filter((interest: string) => {
@@ -82,7 +86,7 @@ export const ProfilePage = () => {
   };
 
   const onSaveProfile = async () => {
-    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests, editedBio);
+    const success = await handleSaveProfile(editedName, selectedCity, selectedState, selectedInterests, editedBio, editedBirthDate);
     if (success) {
       setIsEditingProfile(false);
     }
@@ -153,6 +157,9 @@ export const ProfilePage = () => {
         setEditedName={setEditedName}
         editedBio={editedBio}
         setEditedBio={setEditedBio}
+        editedBirthDate={editedBirthDate}
+        setEditedBirthDate={setEditedBirthDate}
+
         selectedState={selectedState}
         setSelectedState={setSelectedState}
         selectedCity={selectedCity}

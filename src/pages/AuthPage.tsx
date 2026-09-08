@@ -12,6 +12,8 @@ import { CATEGORIES } from '@/constants/categories';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { isUnderage, isValidBirthDate, UNDERAGE_MESSAGE } from '@/lib/age';
+
 
 type AuthView = 'login' | 'signup' | 'forgot-password' | 'reset-password';
 
@@ -86,6 +88,8 @@ export const AuthPage = () => {
   const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
+  const [birthDate, setBirthDate] = useState('');
+
   const [showGoogleConsent, setShowGoogleConsent] = useState(false);
   const { toast } = useToast();
 
@@ -283,6 +287,26 @@ export const AuthPage = () => {
       return;
     }
 
+    if (birthDate) {
+      if (!isValidBirthDate(birthDate)) {
+        toast({
+          title: "Data inválida",
+          description: "Confira a data de nascimento informada.",
+          variant: "destructive"
+        });
+        return;
+      }
+      if (isUnderage(birthDate)) {
+        toast({
+          title: "Idade mínima: 18 anos",
+          description: UNDERAGE_MESSAGE,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -294,6 +318,8 @@ export const AuthPage = () => {
             full_name: fullName,
             city: `${city}, ${selectedState}`,
             interests: selectedInterests,
+            birth_date: birthDate || null,
+
             accepted_terms_version: '1.0',
             accepted_privacy_version: '1.0',
             accepted_at: new Date().toISOString(),
@@ -310,7 +336,9 @@ export const AuthPage = () => {
             user_id: data.user.id,
             full_name: fullName,
             city: `${city}, ${selectedState}`,
-            interests: selectedInterests
+            interests: selectedInterests,
+            ...(birthDate ? { birth_date: birthDate } : {}),
+
           });
 
         if (profileError) {
@@ -631,6 +659,24 @@ export const AuthPage = () => {
           required
         />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="birthDate" className="text-base font-semibold">
+          Data de nascimento <span className="text-sm font-normal text-muted-foreground">(opcional)</span>
+        </Label>
+        <Input
+          id="birthDate"
+          type="date"
+          max={new Date().toISOString().split('T')[0]}
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
+          className="h-12"
+        />
+        <p className="text-xs text-muted-foreground">
+          O Juntoo é apenas para maiores de 18 anos. Sua data de nascimento não aparece no seu perfil.
+        </p>
+      </div>
+
       
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-base font-semibold">Email</Label>
