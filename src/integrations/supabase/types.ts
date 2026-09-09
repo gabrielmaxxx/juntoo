@@ -614,6 +614,308 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_dispute_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          dispute_id: string
+          id: string
+          is_internal: boolean
+          message: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          dispute_id: string
+          id?: string
+          is_internal?: boolean
+          message: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          dispute_id?: string
+          id?: string
+          is_internal?: boolean
+          message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_dispute_messages_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_disputes: {
+        Row: {
+          buyer_id: string
+          category: string
+          created_at: string
+          decision: string | null
+          decision_notes: string | null
+          description: string
+          evidence_urls: string[]
+          id: string
+          moderator_id: string | null
+          opened_by: string
+          order_id: string
+          organizer_id: string
+          resolved_at: string | null
+          respond_by: string
+          status: Database["public"]["Enums"]["marketplace_dispute_status"]
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          category: string
+          created_at?: string
+          decision?: string | null
+          decision_notes?: string | null
+          description: string
+          evidence_urls?: string[]
+          id?: string
+          moderator_id?: string | null
+          opened_by: string
+          order_id: string
+          organizer_id: string
+          resolved_at?: string | null
+          respond_by?: string
+          status?: Database["public"]["Enums"]["marketplace_dispute_status"]
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          category?: string
+          created_at?: string
+          decision?: string | null
+          decision_notes?: string | null
+          description?: string
+          evidence_urls?: string[]
+          id?: string
+          moderator_id?: string | null
+          opened_by?: string
+          order_id?: string
+          organizer_id?: string
+          resolved_at?: string | null
+          respond_by?: string
+          status?: Database["public"]["Enums"]["marketplace_dispute_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_orders: {
+        Row: {
+          buyer_id: string
+          cancelled_at: string | null
+          commission_cents: number
+          commission_percent: number
+          created_at: string
+          currency: string
+          gateway: Database["public"]["Enums"]["marketplace_gateway"]
+          gateway_charge_id: string | null
+          id: string
+          organizer_id: string
+          organizer_net_cents: number
+          paid_at: string | null
+          payment_method: string | null
+          product_id: string
+          quantity: number
+          status: Database["public"]["Enums"]["marketplace_order_status"]
+          total_cents: number
+          unit_price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          cancelled_at?: string | null
+          commission_cents?: number
+          commission_percent?: number
+          created_at?: string
+          currency?: string
+          gateway?: Database["public"]["Enums"]["marketplace_gateway"]
+          gateway_charge_id?: string | null
+          id?: string
+          organizer_id: string
+          organizer_net_cents?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          product_id: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["marketplace_order_status"]
+          total_cents: number
+          unit_price_cents: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          cancelled_at?: string | null
+          commission_cents?: number
+          commission_percent?: number
+          created_at?: string
+          currency?: string
+          gateway?: Database["public"]["Enums"]["marketplace_gateway"]
+          gateway_charge_id?: string | null
+          id?: string
+          organizer_id?: string
+          organizer_net_cents?: number
+          paid_at?: string | null
+          payment_method?: string | null
+          product_id?: string
+          quantity?: number
+          status?: Database["public"]["Enums"]["marketplace_order_status"]
+          total_cents?: number
+          unit_price_cents?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_products: {
+        Row: {
+          commission_percent: number
+          created_at: string
+          currency: string
+          description: string | null
+          event_id: string | null
+          id: string
+          image_url: string | null
+          organizer_id: string
+          price_cents: number
+          product_type: Database["public"]["Enums"]["marketplace_product_type"]
+          status: Database["public"]["Enums"]["marketplace_product_status"]
+          stock: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          commission_percent?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          image_url?: string | null
+          organizer_id: string
+          price_cents: number
+          product_type?: Database["public"]["Enums"]["marketplace_product_type"]
+          status?: Database["public"]["Enums"]["marketplace_product_status"]
+          stock?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          commission_percent?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          image_url?: string | null
+          organizer_id?: string
+          price_cents?: number
+          product_type?: Database["public"]["Enums"]["marketplace_product_type"]
+          status?: Database["public"]["Enums"]["marketplace_product_status"]
+          stock?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_products_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_products_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          order_id: string
+          policy_reference: string
+          processed_at: string | null
+          reason: string
+          refund_kind: Database["public"]["Enums"]["marketplace_refund_kind"]
+          requested_by: string
+          respond_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: Database["public"]["Enums"]["marketplace_refund_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          order_id: string
+          policy_reference?: string
+          processed_at?: string | null
+          reason: string
+          refund_kind?: Database["public"]["Enums"]["marketplace_refund_kind"]
+          requested_by: string
+          respond_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["marketplace_refund_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          policy_reference?: string
+          processed_at?: string | null
+          reason?: string
+          refund_kind?: Database["public"]["Enums"]["marketplace_refund_kind"]
+          requested_by?: string
+          respond_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: Database["public"]["Enums"]["marketplace_refund_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_refunds_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_logs: {
         Row: {
           action: string
@@ -1734,6 +2036,32 @@ export type Database = {
       app_role: "admin" | "moderator" | "user" | "super_admin"
       community_member_role: "admin" | "member"
       community_recurrence: "weekly" | "biweekly" | "monthly"
+      marketplace_dispute_status:
+        | "aberta"
+        | "em_analise"
+        | "resolvida_comprador"
+        | "resolvida_organizador"
+        | "encerrada"
+      marketplace_gateway: "nao_definido" | "mercado_pago" | "stripe"
+      marketplace_order_status:
+        | "aguardando_pagamento"
+        | "pago"
+        | "cancelado"
+        | "reembolsado"
+        | "parcialmente_reembolsado"
+        | "falhou"
+      marketplace_product_status:
+        | "rascunho"
+        | "publicado"
+        | "pausado"
+        | "arquivado"
+      marketplace_product_type: "produto" | "experiencia" | "ingresso"
+      marketplace_refund_kind: "integral" | "parcial"
+      marketplace_refund_status:
+        | "solicitado"
+        | "aprovado"
+        | "recusado"
+        | "processado"
       partnership_modality:
         | "troca_de_valor"
         | "destaque_simples"
@@ -1887,6 +2215,36 @@ export const Constants = {
       app_role: ["admin", "moderator", "user", "super_admin"],
       community_member_role: ["admin", "member"],
       community_recurrence: ["weekly", "biweekly", "monthly"],
+      marketplace_dispute_status: [
+        "aberta",
+        "em_analise",
+        "resolvida_comprador",
+        "resolvida_organizador",
+        "encerrada",
+      ],
+      marketplace_gateway: ["nao_definido", "mercado_pago", "stripe"],
+      marketplace_order_status: [
+        "aguardando_pagamento",
+        "pago",
+        "cancelado",
+        "reembolsado",
+        "parcialmente_reembolsado",
+        "falhou",
+      ],
+      marketplace_product_status: [
+        "rascunho",
+        "publicado",
+        "pausado",
+        "arquivado",
+      ],
+      marketplace_product_type: ["produto", "experiencia", "ingresso"],
+      marketplace_refund_kind: ["integral", "parcial"],
+      marketplace_refund_status: [
+        "solicitado",
+        "aprovado",
+        "recusado",
+        "processado",
+      ],
       partnership_modality: [
         "troca_de_valor",
         "destaque_simples",
