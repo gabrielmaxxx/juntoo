@@ -4,6 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Lock, Users, Calendar, MapPin, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatEventDate } from '@/lib/dateUtils';
+import { getFriendlyError } from '@/lib/errorMessages';
+
 
 interface Event {
   id: string;
@@ -223,7 +226,7 @@ export const JoinPrivateEvent = ({ privateCode, onBack }: JoinPrivateEventProps)
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="w-4 h-4 text-primary" />
-                  <span>{new Date(event.date).toLocaleDateString('pt-BR')}</span>
+                  <span>{formatEventDate(event.date)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-primary" />

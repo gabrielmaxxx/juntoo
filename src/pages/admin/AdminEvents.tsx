@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@/lib/dateUtils';
 import { ptBR } from 'date-fns/locale';
 import { Search, Eye, Trash2, AlertTriangle } from 'lucide-react';
 
@@ -122,7 +123,7 @@ export default function AdminEvents() {
                   <TableRow key={e.id}>
                     <TableCell className="font-medium max-w-[200px] truncate">{e.title}</TableCell>
                     <TableCell className="text-sm">{e.creator_name || '—'}</TableCell>
-                    <TableCell className="text-xs">{e.date ? format(new Date(e.date), 'dd/MM/yy', { locale: ptBR }) : '—'}</TableCell>
+                    <TableCell className="text-xs">{e.date ? format(parseLocalDate(e.date), 'dd/MM/yy', { locale: ptBR }) : '—'}</TableCell>
                     <TableCell className="text-sm max-w-[150px] truncate">{e.location}</TableCell>
                     <TableCell>{e.participants_count || 0}</TableCell>
                     <TableCell><Badge variant="outline">{e.is_private ? 'Privado' : 'Público'}</Badge></TableCell>
@@ -146,7 +147,7 @@ export default function AdminEvents() {
                 <div><span className="text-muted-foreground">Organizador:</span> {selected.creator_name}</div>
                 <div><span className="text-muted-foreground">Participantes:</span> {selected.participants_count || 0}</div>
                 <div><span className="text-muted-foreground">Denúncias:</span> {reportsCount}</div>
-                <div><span className="text-muted-foreground">Data:</span> {selected.date ? format(new Date(selected.date), 'dd/MM/yyyy', { locale: ptBR }) : '—'}</div>
+                <div><span className="text-muted-foreground">Data:</span> {selected.date ? format(parseLocalDate(selected.date), 'dd/MM/yyyy', { locale: ptBR }) : '—'}</div>
               </div>
               <Textarea placeholder="Motivo da ação..." value={reason} onChange={e => setReason(e.target.value)} />
               <div className="flex flex-wrap gap-2">

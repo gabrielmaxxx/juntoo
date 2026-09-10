@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { queryKeys } from '@/lib/queryKeys';
+import { isBeforeToday } from '@/lib/dateUtils';
+
 
 export interface CreatorStats {
   totalEvents: number;
@@ -47,8 +49,9 @@ export const useCreatorStats = (userId: string | undefined) => {
         ? eventsWithRating.reduce((sum, e) => sum + (e.average_rating || 0), 0) / eventsWithRating.length
         : 0;
 
-      const upcomingEvents = events?.filter(e => new Date(e.date) >= today).length || 0;
-      const pastEvents = events?.filter(e => new Date(e.date) < today).length || 0;
+      const upcomingEvents = events?.filter(e => !isBeforeToday(e.date)).length || 0;
+      const pastEvents = events?.filter(e => isBeforeToday(e.date)).length || 0;
+
 
       // Events by category
       const categoryMap = new Map<string, number>();

@@ -4,6 +4,8 @@ import { Calendar, MapPin, CalendarDays } from 'lucide-react';
 import { Event } from '@/types';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { formatEventDate } from '@/lib/dateUtils';
+
 
 interface ProfileEventsProps {
   events: Event[];
@@ -58,7 +60,7 @@ export const ProfileEvents = ({ events, loading, type }: ProfileEventsProps) => 
                 <h3 className="font-semibold text-foreground">{event.title}</h3>
                 <p className="text-sm text-muted-foreground flex items-center">
                   <Calendar className="w-3 h-3 mr-1" />
-                  {new Date(event.date).toLocaleDateString('pt-BR')} às {event.time}
+                  {formatEventDate(event.date)} às {event.time}
                 </p>
                 <p className="text-sm text-muted-foreground flex items-center">
                   <MapPin className="w-3 h-3 mr-1" />

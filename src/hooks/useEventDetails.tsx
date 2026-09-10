@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { haptic } from '@/lib/haptics';
+import { getFriendlyError } from '@/lib/errorMessages';
+
 
 interface Participant {
   user_id: string;
@@ -480,10 +482,11 @@ export const useEventDetails = (event: Event) => {
     } catch (error) {
       console.error('Error with participation:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível processar sua solicitação. Tente novamente.",
+        title: "Não foi possível concluir",
+        description: getFriendlyError(error, 'event_join'),
         variant: "destructive"
       });
+
     } finally {
       setLoading(false);
     }

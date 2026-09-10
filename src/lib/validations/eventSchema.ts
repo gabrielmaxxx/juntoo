@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { CATEGORIES } from '@/constants/categories';
+import { isBeforeToday } from '@/lib/dateUtils';
+
 
 // Schema de validação para criação de eventos
 export const eventFormSchema = z.object({
@@ -37,17 +39,13 @@ export const eventFormSchema = z.object({
   date: z
     .string()
     .min(1, 'Selecione uma data')
-    .refine((val) => {
-      const date = new Date(val);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return date >= today;
-    }, 'A data não pode ser no passado'),
+    .refine((val) => !isBeforeToday(val), 'A data não pode ser no passado'),
   
   time: z
     .string()
     .min(1, 'Selecione um horário')
     .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido'),
+
   
   price: z
     .string()
@@ -79,7 +77,16 @@ export const eventFormSchema = z.object({
     .or(z.literal('')),
   
   imageUrl: z.string().optional().or(z.literal(''))
-});
+}).refine(
+  (data) => {
+    if (!data.date || !data.time) return true;
+    const target = new Date(`${data.date}T${data.time}:00`).getTime();
+    // tolerância de 5 minutos para evitar rejeição por diferença de relógio
+    return target > Date.now() - 5 * 60 * 1000;
+  },
+  { message: 'O horário escolhido já passou. Escolha um horário futuro.', path: ['time'] }
+);
+
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
 

@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useEventStats } from '@/hooks/useEventStats';
+import { isPastDateTime, parseLocalDate } from '@/lib/dateUtils';
+
 import {
   ChartContainer,
   ChartTooltip,
@@ -86,8 +88,10 @@ export const EventDashboard = ({ eventId, onBack }: EventDashboardProps) => {
     ? Math.round((stats.participantsCount / stats.event.max_participants) * 100)
     : null;
 
-  const eventDate = stats?.event.date ? new Date(stats.event.date) : null;
-  const isPastEvent = eventDate ? eventDate < new Date() : false;
+  const isPastEvent = stats?.event.date
+    ? isPastDateTime(stats.event.date, (stats.event as { time?: string }).time ?? '23:59')
+    : false;
+
 
   return (
     <div className="min-h-full bg-background pb-20">
@@ -137,7 +141,7 @@ export const EventDashboard = ({ eventId, onBack }: EventDashboardProps) => {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" aria-hidden="true" />
                     <span>
-                      {format(new Date(stats.event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {format(parseLocalDate(stats.event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       {' às '}{stats.event.time.slice(0, 5)}
                     </span>
                   </div>

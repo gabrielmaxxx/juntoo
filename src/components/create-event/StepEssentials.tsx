@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CATEGORIES } from '@/constants/categories';
 import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
 import { useCities } from '@/hooks/useCities';
+import { todayLocalISO } from '@/lib/dateUtils';
+
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { useTitleSuggestions } from '@/hooks/useTitleSuggestions';
 
@@ -131,10 +133,12 @@ export const StepEssentials = ({ formData, errors, onInputChange }: StepEssentia
             id="date"
             type="date"
             value={formData.date}
+            min={todayLocalISO()}
             onChange={(e) => onInputChange('date', e.target.value)}
             className={errors.date ? 'border-destructive' : ''}
             required
           />
+
           {errors.date && <p className="text-xs text-destructive">{friendlyError('date')}</p>}
         </div>
         <div className="space-y-1.5">

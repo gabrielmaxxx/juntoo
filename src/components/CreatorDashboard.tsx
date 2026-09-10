@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCreatorStats } from '@/hooks/useCreatorStats';
+import { isBeforeToday, parseLocalDate } from '@/lib/dateUtils';
+
 import { useUserCreatedEvents } from '@/hooks/useUserEvents';
 import {
   ChartContainer,
@@ -83,12 +85,8 @@ export const CreatorDashboard = ({ onBack, onEventDashboardClick }: CreatorDashb
   };
 
   // Helper function to check if event is past
-  const isEventPast = (date: string): boolean => {
-    const eventDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return eventDate < today;
-  };
+  const isEventPast = (date: string): boolean => isBeforeToday(date);
+
 
   return (
     <div className="min-h-full bg-background pb-20">
@@ -171,7 +169,7 @@ export const CreatorDashboard = ({ onBack, onEventDashboardClick }: CreatorDashb
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{event.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(event.date), "dd 'de' MMM", { locale: ptBR })} • {event.participantsCount ?? 0} participantes
+                        {format(parseLocalDate(event.date), "dd 'de' MMM", { locale: ptBR })} • {event.participantsCount ?? 0} participantes
                       </p>
                     </div>
                     {isEventPast(event.date) ? (
