@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { parseLocalDate } from '@/lib/dateUtils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Sparkles, Search, XCircle, DollarSign, Megaphone } from 'lucide-react';
@@ -305,7 +306,7 @@ export default function AdminSponsorships() {
                   {results.map((e) => (
                     <TableRow key={e.id}>
                       <TableCell className="font-medium">{e.title}</TableCell>
-                      <TableCell>{format(new Date(e.date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                      <TableCell>{format(parseLocalDate(e.date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
                       <TableCell>{e.city || '—'}</TableCell>
                       <TableCell className="text-right">
                         <Button size="sm" onClick={() => openActivate(e)}>

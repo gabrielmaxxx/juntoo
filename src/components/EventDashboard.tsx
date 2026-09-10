@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useEventStats } from '@/hooks/useEventStats';
+import { isPastDateTime, parseLocalDate } from '@/lib/dateUtils';
+
 import {
   ChartContainer,
   ChartTooltip,

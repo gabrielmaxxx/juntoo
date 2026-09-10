@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useCreatorStats } from '@/hooks/useCreatorStats';
+import { isBeforeToday, parseLocalDate } from '@/lib/dateUtils';
+
 import { useUserCreatedEvents } from '@/hooks/useUserEvents';
 import {
   ChartContainer,

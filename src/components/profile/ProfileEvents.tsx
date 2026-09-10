@@ -4,6 +4,8 @@ import { Calendar, MapPin, CalendarDays } from 'lucide-react';
 import { Event } from '@/types';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { formatEventDate } from '@/lib/dateUtils';
+
 
 interface ProfileEventsProps {
   events: Event[];

@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CATEGORIES } from '@/constants/categories';
 import { BRAZIL_STATES } from '@/data/brazilStatesAndCities';
 import { useCities } from '@/hooks/useCities';
+import { todayLocalISO } from '@/lib/dateUtils';
+
 import { EventFormData } from '@/lib/validations/eventSchema';
 import { useTitleSuggestions } from '@/hooks/useTitleSuggestions';
 
