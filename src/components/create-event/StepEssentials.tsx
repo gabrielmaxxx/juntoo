@@ -131,10 +131,12 @@ export const StepEssentials = ({ formData, errors, onInputChange }: StepEssentia
             id="date"
             type="date"
             value={formData.date}
+            min={todayLocalISO()}
             onChange={(e) => onInputChange('date', e.target.value)}
             className={errors.date ? 'border-destructive' : ''}
             required
           />
+
           {errors.date && <p className="text-xs text-destructive">{friendlyError('date')}</p>}
         </div>
         <div className="space-y-1.5">

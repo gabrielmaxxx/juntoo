@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { haptic } from '@/lib/haptics';
+import { getFriendlyError } from '@/lib/errorMessages';
+
 
 interface Participant {
   user_id: string;

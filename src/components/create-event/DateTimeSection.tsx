@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EventFormData } from '@/lib/validations/eventSchema';
+import { todayLocalISO } from '@/lib/dateUtils';
+
 
 interface DateTimeSectionProps {
   formData: EventFormData;
@@ -29,10 +31,12 @@ export const DateTimeSection = ({ formData, errors, onInputChange }: DateTimeSec
               id="date"
               type="date"
               value={formData.date}
+              min={todayLocalISO()}
               onChange={(e) => onInputChange('date', e.target.value)}
               className={errors.date ? 'border-destructive' : ''}
               required
             />
+
             {errors.date && (
               <p className="text-sm text-destructive">{errors.date}</p>
             )}
