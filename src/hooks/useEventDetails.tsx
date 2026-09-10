@@ -480,10 +480,11 @@ export const useEventDetails = (event: Event) => {
     } catch (error) {
       console.error('Error with participation:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível processar sua solicitação. Tente novamente.",
+        title: "Não foi possível concluir",
+        description: getFriendlyError(error, 'event_join'),
         variant: "destructive"
       });
+
     } finally {
       setLoading(false);
     }

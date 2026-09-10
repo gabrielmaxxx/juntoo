@@ -59,6 +59,21 @@ export function getFriendlyError(
   const raw = (err.message || String(error) || "").toLowerCase();
   const code = (err.code || "").toLowerCase();
 
+  // Regras de negócio sinalizadas pelo banco de dados
+  if (raw.includes("new_user_event_limit")) {
+    return "Contas criadas nas últimas 24 horas podem publicar até 2 eventos por dia. Tente novamente amanhã.";
+  }
+  if (raw.includes("new_user_message_limit")) {
+    return "Contas novas podem enviar até 20 mensagens por hora. Tente novamente mais tarde.";
+  }
+  if (raw.includes("event_full") || raw.includes("event is full")) {
+    return "Este evento já atingiu o número máximo de participantes.";
+  }
+  if (raw.includes("idade_nao_confirmada") || raw.includes("18 anos")) {
+    return "É necessário ter 18 anos ou mais para usar o Juntoo.";
+  }
+
+
   // Network / offline
   if (
     err.name === "NetworkError" ||

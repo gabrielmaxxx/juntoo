@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { eventFormSchema, EventFormData, defaultEventFormData } from '@/lib/validations/eventSchema';
 import { findForbiddenEventTerm } from '@/lib/contentModeration';
+import { getFriendlyError } from '@/lib/errorMessages';
+import { parseLocalDate, toLocalISODate } from '@/lib/dateUtils';
+
 
 interface UseEventFormResult {
   formData: EventFormData;
@@ -169,11 +172,12 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
 
   const generateRecurringEvents = (parentEvent: any, formData: EventFormData) => {
     const events = [];
-    const startDate = new Date(formData.date);
-    const endDate = formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate) : null;
+    const startDate = parseLocalDate(formData.date);
+    const endDate = formData.recurrenceEndDate ? parseLocalDate(formData.recurrenceEndDate) : null;
     
     const maxOccurrences = 52;
     let currentDate = new Date(startDate);
+
     let occurrenceCount = 0;
 
     while (occurrenceCount < maxOccurrences) {
@@ -202,7 +206,7 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
         state: parentEvent.state,
         city: parentEvent.city,
         location: parentEvent.location,
-        date: currentDate.toISOString().split('T')[0],
+        date: toLocalISODate(currentDate),
         time: parentEvent.time,
         price: parentEvent.price,
         max_participants: parentEvent.max_participants,
@@ -347,9 +351,10 @@ export const useEventForm = (onSuccess: () => void): UseEventFormResult => {
       console.error('Erro ao criar evento:', error);
       toast({
         title: "Erro ao criar evento",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
+        description: getFriendlyError(error, 'event_create'),
         variant: "destructive"
       });
+
     } finally {
       setIsSubmitting(false);
     }
