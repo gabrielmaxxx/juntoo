@@ -24,10 +24,10 @@ export const createEventSchema = z.object({
   city: z.string().min(2, 'Cidade é obrigatória'),
   location: sanitized(3, 200),
   date: z.string().min(1).refine((val) => {
-    const d = new Date(val);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return d >= today;
+    // Compara apenas a data (YYYY-MM-DD) no fuso de Brasília, evitando
+    // rejeitar eventos de hoje por causa da diferença UTC.
+    const todayBR = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    return val.slice(0, 10) >= todayBR;
   }, 'Data não pode ser no passado'),
   time: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido'),
   price: z.union([z.string(), z.number()]).optional().transform((val) => {

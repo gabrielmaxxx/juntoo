@@ -149,7 +149,7 @@ export const JoinPrivateEvent = ({ privateCode, onBack }: JoinPrivateEventProps)
       console.error('Erro ao participar do evento:', error);
       toast({
         title: "Erro na inscrição",
-        description: "Não foi possível se inscrever no evento. Tente novamente.",
+        description: getFriendlyError(error, "event_join"),
         variant: "destructive"
       });
     } finally {
