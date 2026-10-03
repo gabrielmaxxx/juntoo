@@ -83,7 +83,25 @@ serve(async (req) => {
     
     const expiredSubscriptions: string[] = [];
 
+    // Apenas provedores oficiais de Web Push (evita requisições a endereços arbitrários)
+    const ALLOWED_PUSH_HOSTS = [
+      /(^|\.)fcm\.googleapis\.com$/, /(^|\.)android\.googleapis\.com$/,
+      /(^|\.)push\.apple\.com$/, /(^|\.)push\.services\.mozilla\.com$/,
+      /(^|\.)notify\.windows\.com$/,
+    ];
+    const isAllowedEndpoint = (endpoint: string) => {
+      try {
+        const u = new URL(endpoint);
+        return u.protocol === 'https:' && ALLOWED_PUSH_HOSTS.some((re) => re.test(u.hostname));
+      } catch { return false; }
+    };
+
     for (const sub of subscriptions) {
+      if (!isAllowedEndpoint(sub.endpoint)) {
+        console.warn(`Ignorando endpoint de push não permitido: ${sub.id}`);
+        expiredSubscriptions.push(sub.id);
+        continue;
+      }
       try {
         // Send empty push to trigger SW — the SW can fetch notification details from the API
         const response = await fetch(sub.endpoint, {
