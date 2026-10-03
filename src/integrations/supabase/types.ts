@@ -2017,8 +2017,12 @@ export type Database = {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
+      is_privileged_write: { Args: never; Returns: boolean }
       is_profile_public: { Args: { target_user_id: string }; Returns: boolean }
       is_service_role: { Args: never; Returns: boolean }
+      is_staff: { Args: { _uid: string }; Returns: boolean }
+      is_user_blocked: { Args: { _uid: string }; Returns: boolean }
+      join_private_event: { Args: { p_code: string }; Returns: string }
       refresh_user_trust_score: {
         Args: { p_user_id: string }
         Returns: undefined
