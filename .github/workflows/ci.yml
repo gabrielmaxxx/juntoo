@@ -38,7 +38,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: npm audit (high/critical)
-        run: bunx npm-audit-resolver || npx audit-ci --high || true
+        run: npx --yes audit-ci --high
       - name: Credential scan
         run: bash scripts/security-check.sh
 

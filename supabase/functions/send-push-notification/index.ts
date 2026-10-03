@@ -34,15 +34,9 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const isServiceRole = token === supabaseServiceKey;
 
+    // Envio de push é exclusivo do servidor (gatilhos/funções internas)
     if (!isServiceRole) {
-      // Validate user token
-      const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: authHeader } }
-      });
-      const { data: claims, error: claimsError } = await userClient.auth.getUser(token);
-      if (claimsError || !claims?.user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
-      }
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: corsHeaders });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

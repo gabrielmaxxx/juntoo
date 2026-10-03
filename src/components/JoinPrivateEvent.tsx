@@ -119,12 +119,8 @@ export const JoinPrivateEvent = ({ privateCode, onBack }: JoinPrivateEventProps)
         return;
       }
 
-      const { error } = await supabase
-        .from('event_participants')
-        .insert({
-          event_id: event.id,
-          user_id: user.id
-        });
+      // Entrada em evento privado validada no servidor pelo código de convite
+      const { error } = await supabase.rpc('join_private_event' as never, { p_code: privateCode } as never);
 
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
