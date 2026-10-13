@@ -115,7 +115,9 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  var url = event.notification.data?.url || '/';
+  var rawUrl = event.notification.data?.url || '/';
+  var url = '/';
+  try { var parsed = new URL(rawUrl, self.location.origin); if (parsed.origin === self.location.origin) url = parsed.pathname + parsed.search + parsed.hash; } catch (e) {}
   
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {

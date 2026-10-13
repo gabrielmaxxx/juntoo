@@ -30,6 +30,18 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // Cota diária por usuário (fuso de São Paulo)
+    const DAILY_LIMIT = 10;
+    const admin = createClient(supabaseUrl, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const spNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const dayStart = new Date(Date.UTC(spNow.getUTCFullYear(), spNow.getUTCMonth(), spNow.getUTCDate(), 3)).toISOString();
+    const { count: usedToday } = await admin.from('activity_logs').select('id', { count: 'exact', head: true })
+      .eq('user_id', userData.user.id).eq('action', 'ai_image_generated').gte('created_at', dayStart);
+    if ((usedToday ?? 0) >= DAILY_LIMIT) {
+      return new Response(JSON.stringify({ error: `Você atingiu o limite de ${DAILY_LIMIT} imagens geradas por dia. Tente amanhã ou envie sua própria foto.` }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    await admin.from('activity_logs').insert({ user_id: userData.user.id, action: 'ai_image_generated' });
+
     const { category } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     

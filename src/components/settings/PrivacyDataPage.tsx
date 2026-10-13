@@ -40,13 +40,33 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
     if (!user) return;
     setExporting(true);
     try {
-      const [profileRes, createdEventsRes, participatedEventsRes, reviewsGivenRes, consentsRes] = await Promise.all([
+      const db = supabase as any;
+      const [profileRes, createdEventsRes, participatedEventsRes, reviewsGivenRes, consentsRes, ...extraRes] = await Promise.all([
         supabase.from('profiles').select('full_name, username, bio, city, interests, created_at, updated_at').eq('user_id', user.id).single(),
         supabase.from('events').select('id, title, category, date, time, location, city, state, created_at').eq('created_by', user.id).order('date', { ascending: false }),
         supabase.from('event_participants').select('joined_at, event_id, events(id, title, category, date, time, location, city, state)').eq('user_id', user.id),
         supabase.from('user_reviews').select('id, event_id, reviewed_user_id, respect_rating, punctuality_rating, reliability_rating, communication_rating, safety_rating, overall_rating, comment, created_at').eq('reviewer_user_id', user.id),
         supabase.from('user_consents' as any).select('accepted_terms_version, accepted_privacy_version, created_at').eq('user_id', user.id),
+        db.from('user_reviews').select('event_id, respect_rating, punctuality_rating, reliability_rating, communication_rating, safety_rating, overall_rating, comment, created_at').eq('reviewed_user_id', user.id),
+        db.from('event_reviews').select('event_id, rating, comment, created_at').eq('user_id', user.id),
+        db.from('event_messages').select('event_id, message, created_at').eq('user_id', user.id),
+        db.from('direct_messages').select('conversation_id, content, created_at').eq('sender_id', user.id),
+        db.from('community_messages').select('community_id, message, created_at').eq('user_id', user.id),
+        db.from('community_members').select('community_id, role, status, joined_at').eq('user_id', user.id),
+        db.from('friendships').select('user_id, friend_id, status, created_at').or(`user_id.eq.${user.id},friend_id.eq.${user.id}`),
+        db.from('notifications').select('type, title, message, read, created_at').eq('user_id', user.id),
+        db.from('notification_preferences').select('*').eq('user_id', user.id),
+        db.from('privacy_preferences').select('*').eq('user_id', user.id),
+        db.from('reports').select('category, description, status, created_at').eq('reporter_user_id', user.id),
+        db.from('user_achievements').select('badge_id, unlocked_at').eq('user_id', user.id),
+        db.from('pinned_events').select('event_id, created_at').eq('user_id', user.id),
+        db.from('availability').select('interests, city, expires_at, created_at').eq('user_id', user.id),
+        db.from('user_verifications').select('status, created_at, reviewed_at').eq('user_id', user.id),
+        db.from('user_data_requests').select('request_type, status, created_at, completed_at').eq('user_id', user.id),
+        db.from('marketplace_orders').select('product_id, quantity, total_cents, currency, status, created_at').eq('buyer_id', user.id),
       ]);
+      const extraKeys = ['avaliacoesRecebidas','avaliacoesDeEventos','mensagensEmEventos','mensagensDiretasEnviadas','mensagensEmComunidades','comunidades','amizades','notificacoes','preferenciasDeNotificacao','preferenciasDePrivacidade','denunciasFeitas','conquistas','eventosSalvos','disponibilidade','verificacoes','pedidosLGPD','pedidosMarketplace'];
+      const extras = Object.fromEntries(extraKeys.map((k, i) => [k, extraRes[i]?.data || []]));
 
       const exportData = {
         exportDate: new Date().toISOString(),
@@ -56,6 +76,7 @@ export const PrivacyDataPage = ({ onBack }: PrivacyDataPageProps) => {
         eventosParticipados: participatedEventsRes.data || [],
         avaliacoesDadas: reviewsGivenRes.data || [],
         consentimentos: (consentsRes as any).data || [],
+        ...extras,
       };
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });

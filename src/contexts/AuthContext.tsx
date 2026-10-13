@@ -172,6 +172,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error signing out:', error);
     }
     queryClient.clear();
+    // Remove dados locais da conta (rascunhos, caches offline)
+    try {
+      Object.keys(localStorage)
+        .filter((k) => /draft|rascunho|home-data|onboarding|juntoo-cache/i.test(k))
+        .forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+      indexedDB.databases?.().then((dbs) => dbs.forEach((d) => d.name && indexedDB.deleteDatabase(d.name)));
+      if ('caches' in window) caches.keys().then((keys) => keys.filter((k) => /api|data/i.test(k)).forEach((k) => caches.delete(k)));
+    } catch {}
   };
 
   const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
