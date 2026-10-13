@@ -22,9 +22,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Only allow service_role key or anon key (for cron)
+    // Apenas chave de serviço ou segredo de agendamento (x-cron-secret)
     const token = authHeader.replace('Bearer ', '');
-    if (token !== supabaseServiceKey && token !== supabaseAnonKey) {
+    const cronSecret = Deno.env.get('CRON_SECRET');
+    const hasCronSecret = !!cronSecret && req.headers.get('x-cron-secret') === cronSecret;
+    if (token !== supabaseServiceKey && !hasCronSecret) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
 
